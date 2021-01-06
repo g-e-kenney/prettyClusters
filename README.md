@@ -26,6 +26,36 @@ I haven't encountered anything that quite handles all of those things, so...
 ### External requirements
 Beyond the (many) R packages used, `analyzeNeighbors` uses local installs of [mafft](https://cytoscape.org/) and [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) in its analysis of hypothetical proteins. It's highly likely I'll be adding steps that use [hmmer](http://hmmer.org) as well. Installation instructions are going to be system-specific, but if using Windows, these tools are currently only set up to deal with installations handled via the Windows Subsystem for Linux.  It is anticipated that these tools will often be paired with use of the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).  Those are online, but [Cytoscape](https://cytoscape.org/) is used for visualizing the sequence-similarity networks generated there. 
 
+### Getting started
+This package is nowhere near ready for legit repositories, so you are stuck with the development version.  Probably easiest to install via:
+```
+devtools::install_github("g-e-kenney/prettyClusters")
+```
+A sample session:
+```
+# load the package (a zillion other should autoload)
+# core packages include data.table, dplyr, gggenes, ggplot2, ggraph, pheatmap, pvclust, scales, seqinr, stringr, tibble, tidygraph, tidyr, and utils
+# palette-focused packages include fishualize, ghibli, lisa, nord, rtist, scico, viridis, and wesanderson
+library(prettyClusters)
+
+# run the initial neighbor generation 
+generateNeighborsOut <- generateNeighbors(imgGenes = "imgGeneMetadata.txt", neighborNumber = 10, includeGene = TRUE, geneName = "genE") 
+
+# after the neighbor list has been uploaded to the IMG database and the neighbor metadata files have been downloaded
+prepNeighborsOut <- prepNeighbors(imgGenes = generateNeighborsOut$gene_oid, imgNeighbors = "imgNeighborMetadata.txt", geneSeqs = "imgGeneSeqs.fa", neighborSeqs = "imgNeighborSeqs.fa", neighborsContext = generateNeighborsOut$neighborsContext, geneName = "genE", neighborNumber = 10, sysTerm = "wsl", efiRepnodes = FALSE, neighborThreshold = 0.025, hypoAnalysis = TRUE, clustMethod = "tidygraph", numThreads = 7, alphaVal = 0.95, bootStrap = 10, pidCutoff = 35, trimShortClusters = TRUE)
+
+# after generating an EFI-EST SSN and looking at the repnode options
+repnodeTrimOut <- repnodeTrim(imgGenes = "imgGenesTrimmed.txt", imgNeighbors = "imgNeighborsTrimmed.txt", imgGeneSeqs = "imgGeneSeqs.fa", imgNeighborSeqs = "imgNeighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiMetadataFull.csv", efiFinalMetadata = "efiMetadataRepnodes95.csv")
+
+# passing on the trimmed data for neighborhood-based cluster analysis
+analyzeNeighborsOut <- analyzeNeighbors(imgGenes =  repnodeTrimOut$repGenesTrimmed, imgNeighbors = repnodeTrimOut$repNeighborsTrimmed, efiRepnodes = TRUE, neighborThreshold = 0.025, geneName = "genE", autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10)	
+
+# generating 
+prettyClusterDiagrams(imgGenes = neighborClustersOut$imgGenesTrimmed, imgNeighbors = neighborClustersOut$imgNeighborsTrimmed, geneFormat = "geneFormat.txt", geneName = "genE", efiRepnodes = TRUE, neighborNumber = 10, annotateGenes = TRUE, standAlone = FALSE, markClusters = TRUE, autoColor = TRUE, colorType = "fishualize", paletteInput = "Scarus_hoefleri", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE)
+```
+Illustrating the output of some of the components:
+![](https://github.com/g-e-kenney/prettyClusters/raw/master/20210106_pretty-cluster-general-01.png | width=600)
+
 ### `generateNeighbors`
 This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.
 #### Use of `generateNeighbors`
