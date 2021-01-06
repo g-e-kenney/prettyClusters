@@ -50,11 +50,12 @@ repnodeTrimOut <- repnodeTrim(imgGenes = "imgGenesTrimmed.txt", imgNeighbors = "
 # passing on the trimmed data for neighborhood-based cluster analysis
 analyzeNeighborsOut <- analyzeNeighbors(imgGenes =  repnodeTrimOut$repGenesTrimmed, imgNeighbors = repnodeTrimOut$repNeighborsTrimmed, efiRepnodes = TRUE, neighborThreshold = 0.025, geneName = "genE", autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10)	
 
-# generating 
+# generating the actual diagrams
 prettyClusterDiagrams(imgGenes = neighborClustersOut$imgGenesTrimmed, imgNeighbors = neighborClustersOut$imgNeighborsTrimmed, geneFormat = "geneFormat.txt", geneName = "genE", efiRepnodes = TRUE, neighborNumber = 10, annotateGenes = TRUE, standAlone = FALSE, markClusters = TRUE, autoColor = TRUE, colorType = "fishualize", paletteInput = "Scarus_hoefleri", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE)
 ```
-Illustrating the output of some of the components:
+Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
 <img src="https://github.com/g-e-kenney/prettyClusters/raw/master/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
+Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 
 ### `generateNeighbors`
 This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.
