@@ -14,7 +14,7 @@
 neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) {
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborMatrix_",geneName,sep="")
-  finalCSV <- paste(fileName,"_neighborMatrix.csv",sep="")
+  finalCSV <- paste(fileName,".csv",sep="")
   allFalse <- list()
   familyNum <- length(familyList)
   for (i in 1:familyNum) {
