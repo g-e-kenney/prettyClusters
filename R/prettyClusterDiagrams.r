@@ -650,7 +650,9 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   modheight <- length(uniqueBGCs)/2
   if (exists(x="showScaffolds") && showScaffolds==TRUE) {
     modwidth <- modheight/2
-  } else {
+  } else if (length(uniqueBGCs)/2 <=50) {
+    modwidth <- modheight  
+  } else {  
     modwidth <- modheight/3
   }
   ## exports a .pdf and a .png version
