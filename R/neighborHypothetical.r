@@ -198,8 +198,13 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   ## On the other, this avoids, like, FeS or heme motifs binding a tiny region really well.  
   ## Bitscore is OK for the relative calls, but not great for single matches with crappy length.
   ## anyway arbitrarily using 2/3s the seq length as a rule-out point
-  yetTidierBlast$seqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
-  tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(length>=.65*seqLength)  
+  ## and pegging it to the larger protein to prevent 30 aa peptides from nevertheless matching 3000 aa NRPS monsters
+  yetTidierBlast$qseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
+  yetTidierBlast$sseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$sseqid)]))
+  for (i in 1:length(yetTidierBlast$qseqLength)) {
+    yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
+  }
+  tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(length>=.65*maxSeqLength)   
     ## keeping only names and percent id now that we are done with length and bitscore, then reshaping it
   tidyMinBlast <- as.data.frame(tidyMonoBlast[,c(1:3)])
   tidyBlastMatrix <- tidyMinBlast %>% tidyr::spread(sseqid, pident)

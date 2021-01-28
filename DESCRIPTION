@@ -27,6 +27,7 @@ Depends:
 	pvclust,
 	rtist,
 	scales,
+	scico,
 	seqinr,
 	stringr,
 	tibble,

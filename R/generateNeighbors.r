@@ -1,20 +1,22 @@
 #' Standalone Function to Generate Lists of Neighboring Genes from IMG gene_oids
 #'
 #' This function uses IMG metadatasets to generate relatively attractive gene cluster/genomic neighborhood diagrams that are scaled and that generate vector graphics
-#' @param imgGenes What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
+#' @param imgGenes What is the file with the metadata for your gene family of interest? Filename as string ("filename.txt")
+#' @param imgGeneSeqs What is the file with sequences of your gene family of interest? Filename as string ("filename.fa")
 #' @param neighborNumber How many neighbors do you want to look at on each side of the gene? Integer.
 #' @param includeGene Do you want your genes of interest in the diagrams? T/F value, defaults to TRUE.
 #' @param geneName What is the name of your gene? Gene name as string ("genE")
 #' @return Lists of neighboring genes to upload to your IMG Gene Cart
 #' @export
 #' @examples
-#' generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", neighborNumber=10, geneName="genE")
+#' generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", imgGeneSeqs="geneSeqs.fa", neighborNumber=10, geneName="genE")
 #'
-generateNeighbors <- function(imgGenes = imgGenes, neighborNumber = neighborNumber, includeGene = TRUE, geneName = geneName) {
+generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, neighborNumber = neighborNumber, includeGene = TRUE, geneName = geneName) {
                                         # boring setup
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     fileName <- paste(fileDate,"_generateNeighbors_",geneName,sep="")
     fileNameContext <- paste(fileName, "_context.txt", sep="")
+    fileNameSeqs <- paste(fileName,".fa",sep="")
     neighbors <- list()
     gene_oid <- list()
     source_gene_oid <- list()
@@ -22,6 +24,10 @@ generateNeighbors <- function(imgGenes = imgGenes, neighborNumber = neighborNumb
     ## input is a standard IMG file for your genes of interest
     ## can be generated via blast or families or whatever
     inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE)
+    imgGeneSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
+    ## let's quickly just save that fasta file with simplified headers for EFI use
+    write.fasta(imgGeneSeqs, names=names(imgGeneSeqs),file.out=fileNameSeqs)
+    ## and onwards
     geneList <- inputGenes$gene_oid
     scaffList <- inputGenes$Scaffold.ID
     geneNum <- length(geneList)

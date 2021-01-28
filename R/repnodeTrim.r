@@ -39,8 +39,8 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   } else {
     imgNeighborsTemp <- imgNeighbors
   }
-  imgNeighborSeqs <- seqinr::read.fasta(file=imgNeighborSeqs, seqtyp="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
-  imgGeneSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtyp="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
+  imgNeighborSeqs <- seqinr::read.fasta(file=imgNeighborSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
+  imgGeneSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
   efiFullNodes <- read.csv(efiFullMetadata, header=TRUE, stringsAsFactors=FALSE)
   efiFinalNodes <- read.csv(efiFinalMetadata, header=TRUE, stringsAsFactors=FALSE)
   ## starting to reformat
@@ -49,6 +49,7 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   efiFinalNodes <- efiFinalNodes %>% dplyr::rename(gene_oid=Description)
   efiFinalNodes <- efiFinalNodes %>% dplyr::rename(efi_oid=name)
   efiFullNodes$gene_oid <- as.character(efiFullNodes$gene_oid)
+  efiFullNodes$gene_oid <- gsub(" .*$", "", efiFullNodes$gene_oid)
   imgGenesTemp$gene_oid <- as.character(imgGenesTemp$gene_oid)
   imgNeighborsTemp$gene_oid <- as.character(imgNeighborsTemp$gene_oid)
   imgNeighborsTemp$source_gene_oid <- as.character(imgNeighborsTemp$source_gene_oid)
@@ -58,11 +59,22 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   repnodeList <- efiFinalNodes$shared.name
   efiGenesData <- efiGenesData %>% dplyr::mutate(isRepnode = ifelse(efi_oid %in% repnodeList,TRUE,FALSE))
   for (i in 1:length(efiGenesData$gene_oid)) {
-    if (is.na(efiGenesData$efi_oid[i])) {
+    if (is.na(efiGenesData$efi_oid[i])==TRUE) {
+      efiGenesData$repnodeIs[i] <- ""
+      efiGenesData$efi_oid[i] <- ""
       next
     } else {
-      efiGenesData$repnodeIs[i] <- efiFinalNodes$shared.name[grep(efiGenesData$gene_oid[i],efiFinalNodes$gene_oid)]
-      next
+      if (any(grepl(efiGenesData$gene_oid[i],efiFinalNodes$gene_oid))!=TRUE) {
+        ## i've seen this occasionally
+        ## possibly related to lists of sequence names in a repnode that are too long
+        ## which is one reason i put in a trim-the-header bit in generateNeighbors and in here
+        efiGenesData$repnodeIs[i] <- ""
+        print("Gene present in full network but lacks repnode.")
+        next
+      } else {
+        efiGenesData$repnodeIs[i] <- efiFinalNodes$shared.name[grep(efiGenesData$gene_oid[i],efiFinalNodes$gene_oid)]
+        next    
+      }
     }
   }
   repGenesTrimmed <- efiGenesData %>% dplyr::filter(isRepnode == TRUE)
