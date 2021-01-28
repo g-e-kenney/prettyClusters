@@ -26,9 +26,15 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
   hypoFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Hypofam, "hypo")==TRUE)
   hypoFams <- hypoFams$Hypofam
   allFams <- append(allFams, hypoFams)
+  ## to implement: IMG fams
+  ## using the stupid XML traces since the IDs are number-only
+  ##imgFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$IMG.Term, "br")==TRUE)
+  ##imgFams <- imgFams$IMG.Term
+  ##allFams <- append(allFams, imgFams)
   uniquePfam <- unique(pfamFams)
   uniqueTigrfam <- unique(tigrFams)
   uniqueHypofam <- unique(hypoFams)
+  ##uniqueIMGfam <- unique(imgFams)
   uniqueFams <- list()
   ## finding unique pfams and dealing with the punctuation
   for (i in 1:length(uniquePfam)) {
@@ -44,8 +50,18 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
   }
   ## finding unique hypofams, if any
   for (i in 1:length(uniqueHypofam)) {
-    uniqueFams <- append(uniqueFams, uniqueHypofam[i])
+    ## no weirdo punctuation here!
+    tempSplit <- unlist(strsplit(uniqueHypofam[i],"[[:space:]]+"))
+    tempSplit <- tempSplit[stringr::str_detect(tempSplit, "hypo") ]
+    uniqueFams <- append(uniqueFams, tempSplit)
   }
+  ## finding unique IMGfams, if any
+  ##for (i in 1:length(uniqueIMGfam)) {
+    ## haven't seen multi-annotations for this yet, but....
+    ##tempSplit <- unlist(strsplit(uniqueIMGfam[i],"[[:punct:][:space:]]+"))
+    ##tempSplit <- tempSplit[stringr::str_detect(tempSplit, "[[:digit:]][[:digit:]][[:digit:]][[:digit:]]") ]
+    ##uniqueFams <- append(uniqueFams, tempSplit)
+  ##}
   uniqueFams <- unlist(unique(uniqueFams))
   uniqueFamNum <- length(uniqueFams)
   tempFamList <- list(fams=unlist(uniqueFams), abund=sprintf("",1:uniqueFamNum))

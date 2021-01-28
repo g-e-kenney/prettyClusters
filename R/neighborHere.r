@@ -29,6 +29,9 @@ neighborHere <- function(imgNeighborsTrimmed = imgNeighborsTrimmed, familyList =
       pfam <- grepl(familyList[i], imgNeighborsTrimmed$Pfam[j])
       tigrfam <- grepl(familyList[i], imgNeighborsTrimmed$Tigrfam[j])
       hypofam <- grepl(familyList[i], imgNeighborsTrimmed$Hypofam[j])
+      ## need to alter how this step works to include img terms
+      ## since they have no prefix, they could have a false hit in a pfam/tigrfam
+      ##imgfam <- grepl(familyList[i], imgNeighborsTrimmed$IMG.Term[j])
       if (any(c(pfam,tigrfam,hypofam))==TRUE) {
         tempFam[j] <- 1
       } else {

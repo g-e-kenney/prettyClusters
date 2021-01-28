@@ -69,7 +69,7 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     ## particularly given the 20k gene cart limit
     ## (splits into a bunch of files that can be uploaded separately)
     if(neighborLength < 20000)  {
-        fileNameOut <- paste(fileName, ".txt", sep="")
+        fileNameOut <- paste(fileName, "_neighbors.txt", sep="")
         colnames(neighbors) <- "gene_oid"
         write.table(neighbors, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
     } else {
@@ -79,7 +79,7 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
             neighborsEnd <- 20000*i
             neighborsPart <- neighbors[neighborsStart:neighborsEnd]
             colnames(neighborsPart) <- "gene_oid"
-            fileNameOut <- paste(fileName, "_",i,".txt", sep="")
+            fileNameOut <- paste(fileName, "_neighbors_",i,".txt", sep="")
             write.table(neighbors, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
         }
     }
