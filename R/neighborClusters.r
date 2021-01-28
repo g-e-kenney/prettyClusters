@@ -9,12 +9,13 @@
 #' @param clustMethod String specifying what tool (tidygraph, pvclust) will be used to identify clusters
 #' @param alphaVal Alpha value cutoff for pvclust (Num, 0-1)
 #' @param coreGeneName Name of gene of interest as string, without any suffix.
+#' @param tgCutoff Number (0-1) representing edge similarity to keep for tidygraph. Default 0.65.
 #' @return List with matrix object and updated metadata, with misc. files output along the way
 #' @export
 #' @examples
-#' neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName)
+#' neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
 #'
-neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName) { 
+neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff) { 
   ## make alignments for all family members?
   ## calulate abundance of all families
   ## (input .fasta list for all, extract and mafft-align) 
@@ -118,7 +119,7 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
       ## dealing with the identical-neighborhood issue, do not want 0-weighted edges
       eucDistPairs$eucDist <- eucDistPairs$eucDist + 1
       ## using something handwavily similar to the gene stuff - let's toss the worst 33% of edges
-      eucCutoff <- max(eucDistPairs$eucDist)*.65
+      eucCutoff <- max(eucDistPairs$eucDist)*tgCutoff
       eucPairsTrimmed <- eucDistPairs %>% dplyr::filter(eucDist <= eucCutoff)
       write.table(eucPairsTrimmed, networkFile, row.names=FALSE,sep="\t", quote=FALSE) 
       ## zomg network
@@ -241,7 +242,7 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
   cairo_pdf(file=finalpdfname, width=picWidth, height=picHeight)
     prettyHeatmap
   dev.off()
-  cairo_ps(file=finalpsname)
+  cairo_ps(file=finalpsname,  width=picWidth, height=picHeight)
     prettyHeatmap
   dev.off()
 #  png(file=finalpngname, width=picWidth, height=picHeight, units="in")

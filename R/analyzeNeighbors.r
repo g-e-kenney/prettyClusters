@@ -10,12 +10,13 @@
 #' @param clustMethod What method should be used to identify these clusters? String ("tidygraph" or "pvclust")
 #' @param alphaVal What alpha value cutoff should be used for pvclust?  Number, defaults to 0.95
 #' @param bootStrap How many bootstrap rounds for pvclust? Integer, defaults to 10
+#' @param tgCutoff What sort of edge similarity should be kept for tidygraph? Number (0-1), defaults to 0.65.
 #' @return Updated metadata and misc. figures and files en route
 #' @export
 #' @examples
 #' analyzeNeighborsOutput <- analyzeNeighbors <- function(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
 #'
-analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, efiRepnodes = FALSE, neighborThreshold = 0.025, geneName = geneName, autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10)  {
+analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, efiRepnodes = FALSE, neighborThreshold = 0.025, geneName = geneName, autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10, tgCutoff = 0.6)  {
 
   if(exists(x="imgGenes") == FALSE | exists(x="imgNeighbors") == FALSE | exists(x="geneName") == FALSE) {
     print("Missing a required term (gene and neighbor metadata files or name of gene of interest)")
@@ -50,7 +51,7 @@ analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, e
   neighborMatrixOut <- neighborMatrix(imgGenesTrimmed = imgGenesTrimmed, neighborBinary = neighborHereOut, familyList = neighborCatalogOut, geneName = geneName, coreGeneName = coreGeneName)
                                         # input: imgGenesTrimmed, the neighbors binary file, the gene of interest, the file date
                                         # output: neighborMatrixData
-  neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixOut, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName)
+  neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixOut, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
                                         # input: matrix of genes/families, metadata file for genes of interest, gene of interest, auto-generated date for file names
                                         # output: neighborMatrixClustered, neighborMatrixClustered (.txt), clusterHeatmap (.pdf, png), imgGenesClustered (imgGenes + clusters)  & .txt, efiNodeDataClustered.txt (efiNodeData + clusters) & .txt
                                         # put here - trimming imgNeighborsTrimmed to the right input format

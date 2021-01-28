@@ -43,11 +43,13 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   } else {
     imgGenes <- imgGenes
   }
+  colnames(imgGenes)[1] <- "gene_oid"
   if(typeof(imgNeighbors) == "character")  {
     imgNeighbors <- read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE )
   } else {
     imgNeighbors <- imgNeighbors
   }
+  colnames(imgNeighbors)[1] <- "gene_oid"
   if (efiRepnodes == TRUE) {
     coreGeneName <- geneName
     geneName <- paste(geneName, "_repnodes",sep="")
@@ -173,7 +175,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
             ## there are annotations and they match the most specific terms (IMG Term or HypoFam)
             geneSets$gene[i] <- namedGenes$geneSymbol[j]
             foundMe <- "yes"
-            ## this is a strong match and generally should not be ovewritten
+            ## this is a strong match and generally should not be overwritten
             foundIn <- "exact"
             #print("exit A")
             next
