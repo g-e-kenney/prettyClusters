@@ -37,29 +37,29 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     ## a symmetric setup is proably safer though since the gene could be on either strand...
     yourgene <- (nnum/2) + .5
                                         # iterating through the gene list and making neighbors    
-    for (i in 1:geneNum)  {
-        for (j in 1:nnum) {
-            if(j != yourgene) {
-                neighbors <- rbind(neighbors, geneList[i] + nstart + j - 1)
-				gene_oid <- rbind(gene_oid, geneList[i] + nstart + j - 1)
-				source_gene_oid <- rbind(source_gene_oid, geneList[i])
-				source_scaffold_id <- rbind(source_scaffold_id,scaffList[i])
-            } else {
-                if(includeGene == TRUE) {
-                    neighbors <- rbind(neighbors, geneList[i] + nstart + j - 1)
-                    gene_oid <- rbind(gene_oid, geneList[i] + nstart + j - 1)
-                    source_gene_oid <- rbind(source_gene_oid, geneList[i])
-                    source_scaffold_id <- rbind(source_scaffold_id,scaffList[i])
-                } else {
-                    print("Your gene of interest is not included in the neighbors metadata.")
-                }
-            }
-        }
+    for (j in 1:nnum) {
+      if (j == 1 && j != yourgene)  {
+        neighbors <- geneList + nstart + j - 1
+        source_gene_oid <- geneList
+        source_scaffold_id <- scaffList
+      } else if (j != yourgene) {
+        neighbors <- append(neighbors, geneList + nstart + j - 1)
+        source_gene_oid <- append(source_gene_oid, geneList)
+        source_scaffold_id <- append(source_scaffold_id, scaffList)
+      } else {
+        if(includeGene == TRUE) {
+          neighbors <- append(neighbors, geneList + nstart + j - 1)
+          source_gene_oid <- append(source_gene_oid, geneList)
+          source_scaffold_id <- append(source_scaffold_id, scaffList)
+        } else {
+          print("Your gene of interest is not included in the neighbors metadata.")
+        }    
+      }
     }
     # exporting things
     ## this neighbor list contains the gene_oid for each neighbor, the source_gene_oid (i.e. the gene of of interest it neighbors), and the source scaffold
     ## this can be useful later for tracking stuff like "neighbors" that are not on the same scaffold
-    neighborsContext <- data.frame(gene_oid, source_gene_oid, source_scaffold_id)
+    neighborsContext <- data.frame(neighbors, source_gene_oid, source_scaffold_id)
     colnames(neighborsContext) <- c("gene_oid", "source_gene_oid", "source_scaffold_id")
     neighborsContext <- as.matrix(neighborsContext)
     write.table(neighborsContext, file=fileNameContext, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
