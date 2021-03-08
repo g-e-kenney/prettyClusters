@@ -24,9 +24,9 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     ## input is a standard IMG file for your genes of interest
     ## can be generated via blast or families or whatever
     inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE)
-    imgGeneSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
+    imgSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
     ## let's quickly just save that fasta file with simplified headers for EFI use
-    write.fasta(imgGeneSeqs, names=names(imgGeneSeqs),file.out=fileNameSeqs)
+    write.fasta(imgGeneSeqs, names=names(imgSeqs),file.out=fileNameSeqs)
     ## and onwards
     geneList <- inputGenes$gene_oid
     scaffList <- inputGenes$Scaffold.ID
@@ -64,12 +64,12 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     neighborsContext <- as.matrix(neighborsContext)
     write.table(neighborsContext, file=fileNameContext, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
     neighborLength <- length(neighbors)
-    neighbors <- as.matrix(neighbors)
     ## now making the versions that'll be useful for uploading to IMG
     ## particularly given the 20k gene cart limit
     ## (splits into a bunch of files that can be uploaded separately)
     if(neighborLength < 20000)  {
         fileNameOut <- paste(fileName, "_neighbors.txt", sep="")
+        neighbors <- as.data.frame(neighbors)
         colnames(neighbors) <- "gene_oid"
         write.table(neighbors, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
     } else {
@@ -77,10 +77,11 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
         for (i in 1:num20k) {
             neighborsStart <- 1 + (i-1)*20000
             neighborsEnd <- 20000*i
-            neighborsPart <- neighbors[neighborsStart:neighborsEnd]
+            neighborsPart <- neighbors[neighborsStart:neighborsEnd,]
+            neighborsPart <- as.data.frame(neighborsPart)
             colnames(neighborsPart) <- "gene_oid"
             fileNameOut <- paste(fileName, "_neighbors_",i,".txt", sep="")
-            write.table(neighbors, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
+            write.table(neighborsPart, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
         }
     }
     print("Neighbor list generated.")  
