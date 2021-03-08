@@ -17,6 +17,8 @@ Depends:
 	data.table,
 	dplyr,
 	fishualize,
+	genbankr,
+	GenomicRanges,
 	gggenes,
 	ggplot2,
 	ggraph,
