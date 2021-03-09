@@ -14,14 +14,13 @@ I spend a lot of time working with bacterial gene clusters.  I wanted some sort 
 - Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
 I haven't encountered anything that quite handles all of those things, so...
 
-## The `prettyClusters` tool set
+## The core `prettyClusters` tool set
 ### Components of the prettyClusters toolset
 - `generateNeighbors`
 - `prepNeighbors`
 - `repnodeTrim`
 - `analyzeNeighbors`
 - `prettyClusterDiagrams`
-- And some accessory functions
 
 ### External requirements
 Beyond the (many) R packages used, `analyzeNeighbors` uses local installs of [mafft](https://cytoscape.org/) and [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) in its analysis of hypothetical proteins. It's highly likely I'll be adding steps that use [hmmer](http://hmmer.org) as well. Installation instructions are going to be system-specific, but if using Windows, these tools are currently only set up to deal with installations handled via the Windows Subsystem for Linux.  It is anticipated that these tools will often be paired with use of the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).  Those are online, but [Cytoscape](https://cytoscape.org/) is used for visualizing the sequence-similarity networks generated there. 
@@ -58,7 +57,7 @@ Illustrating the output of some of the components (or, in the case of the cluste
 Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 
 ### `generateNeighbors`
-This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.
+This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.  Note that if you're starting from GenBank files, you can skip this and use the `gbToIMG` accessory tool instead, although like all tools that involve parsing GenBank files, it's a bit finicky.
 #### Use of `generateNeighbors`
 ```
 generateNeighborsOut <- generateNeighbors(imgGenes = "imgGeneMetadata.txt", imgGeneSeqs = "imgGeneSeqs.fa", neighborNumber = 10, includeGene = TRUE, geneName = "genE") 
@@ -210,21 +209,42 @@ prettyClusterDiagrams(imgGenes = "repnodeGeneMetadata.txt", imgNeighbors = "repn
 - `20210101_prettyClusters_no-axes.pdf` File. PDF file for genome neighborhood diagrams, without coordinates for each cluster.
 - `20210101_prettyClusters_annotation.txt` File. Tab-delimited table of minimal IMG-derived metadata with added metadata from this function (BGC IDs, gene assignments, etc.) added.
 
-### Accessory functions
-#### `numbers2words`
-Derived from the function found [here](http://tolstoy.newcastle.edu.au/R/help/05/04/2715.html).  Does what it says on the tin.
+## Accessory functions
+### `gbToIMG`
+This takes a directory of GenBank files and makes fake IMG-formatted metadata files for them, with the goal of making non-IMG files more compatible with the rest of this toolset.  This includes faux IMG-style gene_oids.  GenBank files from the ENA or the NCBI databases often contain less information on the annotation sources used to assign genes, so expectations should be tempered accordingly (antiSmash-annotated .gb files contain a great deal but differ too much from standard .gb files to be parsed by this tool.)  Relies on the [genbankr](https://bioconductor.org/packages/release/bioc/html/genbankr.html) and [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) packages heavily.  
+#### Use of `gbToIMG`
+```
+gbToIMGOutput <- gbToIMG(dataFolder="/user/data/gbfiles", goiListInput = "goiList.txt", neighborNum=5, geneName="genE", removeDupes=TRUE)
+```
+#### Options
+- `dataFolder` Folder path. For folder containing all .gb/.gbk files to be analyzed. Required.
+- `goiListInput` Filename. For a text file containing a list of genes of interest by the names they are likely to be identified by in their GenBank files (probably locus_tag). Names are provided on single lines, with a header.  Required. 
+- `neighborNum` Integer. Number of neighbors to be provided for each gene of interest. Required. 
+- `geneName` Character string. Name of gene family of interest (purely for file naming). Required. 
+- `removeDupes` Boolean.  Removes duplicated entries (probably an OK default, unless you have copies of genomes with different annotations that you want evaluated independently.  Required.
+- `scaffoldGenBase` Integer. Initial value for generating IMG-style faux scaffold IDs (new IDs are generated for each run currently). Defaults to 30000000000.   - `genomeGenBase` Integer. Initial value for generating IMG-style faux genome IDs (new IDs are generated for each run currently). Defaults to 40000000000.    
+#### Output
+- `20210101_gb2img_genE_geneSeqs.fa` File. Fasta-formatted file for the protein sequences of genes of interest with simplified headers containing only the IMG-style gene_oids.
+- `20210101_gb2img_genE_neighborSeqs.fa` File. Fasta-formatted file for the protein sequences of neighbors of genes of interest with simplified headers containing only the IMG-style gene_oids.
+- `20210101_gb2img_genE_neighborcontext.txt` File. Tab-delimited table with three columns: gene_oid (the neighbor gene_oid), source_gene_oid (the gene_oid for which the neighbor was generated) and scaffold_id (the scaffold on which the original gene_oid was found.)
+- `20210101_gb2img_genE_geneData.txt` File. Tab-delimited metadata table, IMG-styled, for genes of interest.
+- `20210101_gb2img_genE_neighborData.txt` File. Tab-delimited metadata table, IMG-styled, for neighbors of genes of interest.
+- `gbToIMGOutput` List. Contains `gbToIMGOutput$geneData` (a data frame of IMG-styled metadata for genes of interest), `gbToIMGOutput$neighborData` (a data frame of IMG-styled metadata for neighbors of genes of interest), and `gbToIMGOutput$neighborsContext` (a data frame connecting neighbors to the genes of interest they are associated with, along with their scaffolds).
+
+### `numbers2words`
+Derived from the function found [here](http://tolstoy.newcastle.edu.au/R/help/05/04/2715.html).  Does what it says on the tin.  No direct user interaction expected.
 
 ## Development
 ### Planned additions
-- Import from UniProt and GFF/GFF-3 formatted files. Data heterogeneity makes the latter more challenging, unfortunately; this will likely be a separate function that can feed into `generateNeighbors`.
-- Automatic generation of genome neighborhood diagrams for clusters in `prettyClusterDiagrams`.
+- Import from UniProt and GFF/GFF-3 formatted files.  As with `gbToIMG` this will likely be a separate function that can replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity that that tool does.  
+- Automatic generation of genome neighborhood diagrams for specific clusters (or for random representatives of a cluster) in `prettyClusterDiagrams`.
 - Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
 - Generation of HMMs for hypothetical protein families identified in `analyzeNeighbors`
 - User-supplied HMMs for annotation of predefined custom protein (sub)families in `analyzeNeighbors`
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`
 ### Known issues
-- Auto-annotation in `prettyClusters` may miss genes if their initial family categorization (or ORF-finding) was poor!
-- Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs and distance/clustering methods. No way around this - 
+- Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding) was poor!  This is doubly the case for GenBank-derived files.
+- Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs and distance/clustering methods. No way around this.
 - Forward- and reverse-facing genes are on the same vertical level in `prettyClusterDiagrams`. I personally find it visually clearer to have forward genes above the line and reverse genes below, but will need to probably do a bunch more digging into [gggenes](https://github.com/wilkox/gggenes) and [ggplot2](https://github.com/tidyverse/ggplot2) to figure out if/how I can make it happen.
 - Distance between genes of interest and their neighbors is not taken into account.  I have done a few initial analyses using weighted distances rather than binary present/absent values; it is not clear they've added much more info than the binary value-based analyses, and they're more complicated to run.  Could revisit?
-- Use non-WSL `mafft` and `blast` installs on Windows isn't built-in at the moment; it's a low priority, given how easy WSL is to get up and running.
+- Use of non-WSL `mafft` and `blast` installs on Windows isn't built-in at the moment; it's a low priority, given how easy WSL is to get up and running.
