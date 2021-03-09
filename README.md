@@ -236,6 +236,7 @@ Derived from the function found [here](http://tolstoy.newcastle.edu.au/R/help/05
 
 ## Development
 ### Planned additions
+- A vignette!  
 - Import from UniProt and GFF/GFF-3 formatted files.  As with `gbToIMG` this will likely be a separate function that can replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity that that tool does.  
 - Automatic generation of genome neighborhood diagrams for specific clusters (or for random representatives of a cluster) in `prettyClusterDiagrams`.
 - Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
