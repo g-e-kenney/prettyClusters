@@ -78,8 +78,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
                     }
                     if (j == 1) {
                         neighborSubset <- genesTemp[startIdx:endIdx,]
+                        tempSpan <- endIdx - startIdx
                     } else {
                         neighborSubset <- c(neighborSubset, genesTemp[startIdx:endIdx,])
+                        tempSpan <- append(tempSpan, endIdx - startIdx)
                     }
                 }
             }
@@ -100,8 +102,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
                     }
                     if (j == 1) {
                         neighborSubset <- genesTemp[startIdx:endIdx,]
+                        tempSpan <- endIdx - startIdx
                     } else {
                         neighborSubset <- c(neighborSubset, genesTemp[startIdx:endIdx,])
+                        tempSpan <- append(tempSpan, endIdx - startIdx)
                     }
                 }
             }
@@ -122,8 +126,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
                     }
                     if (j == 1) {
                         neighborSubset <- genesTemp[startIdx:endIdx,]
+                        tempSpan <- endIdx - startIdx
                     } else {
                         neighborSubset <- c(neighborSubset, genesTemp[startIdx:endIdx,])
+                        tempSpan <- append(tempSpan, endIdx - startIdx)
                     }
                 }
             }
@@ -144,8 +150,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
                     }
                     if (j == 1) {
                         neighborSubset <- genesTemp[startIdx:endIdx,]
+                        tempSpan <- endIdx - startIdx
                     } else {
                         neighborSubset <- c(neighborSubset, genesTemp[startIdx:endIdx,])
+                        tempSpan <- append(tempSpan, endIdx - startIdx)
                     }
                 }
             }
@@ -343,27 +351,27 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
             fauxIMG$Pfam <- ""
         }
         ## Tigrfam - these generally have a standard ID format
-        fauxIMG$TIGRfam <- ""
+        fauxIMG$Tigrfam <- ""
         if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$inference)))  {
             for (j in length(fauxIMG$Locus.Tag)) {
                 if (any(grepl("TIGR[[:digit:]]", neighborSubset$inference[j]))) {
-                    fauxIMG$TIGRfam[i] <- neighborSubset$inference[j]
+                    fauxIMG$Tigrfam[j] <- neighborSubset$inference[j]
                 }
             }       
         } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$note))) {
             for (j in length(fauxIMG$Locus.Tag)) {
                 if (any(grepl("TIGR[[:digit:]]", neighborSubset$note[j]))) {
-                    fauxIMG$TIGRfam[i] <- neighborSubset$note[j]
+                    fauxIMG$Tigrfam[j] <- neighborSubset$note[j]
                 }
             }  
         } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="db_xref"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$db_xref))) {
             for (j in length(fauxIMG$Locus.Tag)) {
                 if (any(grepl("TIGR[[:digit:]]", neighborSubset$db_xref[j]))) {
-                    fauxIMG$TIGRfam[j] <- neighborSubset$db_xref[j]
+                    fauxIMG$Tigrfam[j] <- neighborSubset$db_xref[j]
                 }
             }   
         } else {
-            fauxIMG$TIGRfam <- ""
+            fauxIMG$Tigrfam <- ""
         }
         ## SMART.ID, SUPERFam.ID and CATH.FunFam.ID just started showing up in IMG data
         ## haven't seen them much in GenBank files so sticking with blank for now as a placeholder
@@ -464,6 +472,6 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
     }
     seqinr::write.fasta(fauxGeneSeqList, names=names(fauxGeneSeqList),file.out=fauxGeneSeqsFile)
     print("GenBank-formatted files in folder processed.")
-    return(list(geneData=fauxGeneData, neighborData=fauxNeighborData))
+    return(list(geneData=fauxGeneData, neighborData=fauxNeighborData, neighborsContext=fullContext))
 } 
 
