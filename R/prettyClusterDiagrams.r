@@ -29,12 +29,13 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   finalpdfnameX <- paste(fileName,"_no-axes.pdf",sep="")
   finalpngnameX <- paste(fileName,"_no-axes.png",sep="")
   annotationFileName <- paste(fileName, "_annotation.txt",sep="")
-  imgCols <- list("gene_oid","Start.Coord","End.Coord", "Strand", "Gene.Symbol", "Scaffold.Name", "Scaffold.ID", "Genome.Name","Genome.ID","Pfam", "Tigrfam", "clustNum", "clustOrd","source_gene_oid")
-  ggCols <- list("gene_oid", "start", "end", "strand","gene","scaffold", "scaffoldID", "genome","genomeID","Pfam", "Tigrfam", "clustNum", "clustOrd","source_gene_oid")
+  imgCols <- list("gene_oid","Start.Coord","End.Coord", "Strand", "Gene.Symbol", "Scaffold.Name", "Scaffold.ID", "Genome.Name","Genome.ID","Pfam", "Tigrfam", "InterPro", "clustNum", "clustOrd","source_gene_oid")
+  ggCols <- list("gene_oid", "start", "end", "strand","gene","scaffold", "scaffoldID", "genome","genomeID","Pfam", "Tigrfam", "InterPro", "clustNum", "clustOrd","source_gene_oid")
                                        # geneset and annotation processing
   geneFormat <- read.table(geneFormat, header=TRUE,  sep = "\t", stringsAsFactors = FALSE)
   geneFormat$Pfam[which(is.na(geneFormat$Pfam))] <- ""
   geneFormat$Tigrfam[which(is.na(geneFormat$Tigrfam))] <- ""
+  geneFormat$InterPro[which(is.na(geneFormat$InterPro))] <- ""  
   geneFormat$Hypofam[which(is.na(geneFormat$Hypofam))] <- ""
   geneFormat$IMG.Term[which(is.na(geneFormat$IMG.Term))] <- ""
   geneFormat$Color[which(is.na(geneFormat$Color))] <- ""
@@ -73,6 +74,11 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   geneSets <- geneSets %>% dplyr::rename(genomeID = Genome.ID)
   geneSets <- data.table::as.data.table(geneSets, stringsAsFactors=FALSE)
   ## this is easier than dealing with different possible IMG-like metadata inputs
+  if ("InterPro" %in% colnames(imgNeighbors)) {
+    geneSets$InterPro <- as.character(imgNeighbors$InterPro)
+  } else {
+    geneSets$InterPro <- "none"
+  }
   if ("IMG.Term" %in% colnames(imgNeighbors)) {
     geneSets$IMGfam <- as.character(imgNeighbors$IMG.Term)
   } else {
@@ -86,6 +92,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   ## dealing with blank cells & misc metadata processing
   geneSets$Pfam[geneSets$Pfam==""]<-"none"
   geneSets$Tigrfam[geneSets$Tigrfam==""]<-"none"
+  geneSets$InterPro[geneSets$InterPro==""]<-"none"
   geneSets$IMGfam[geneSets$IMGfam==""]<-"none"
   geneSets$Hypofam[geneSets$Hypofam==""]<-"none"
   geneSets$direction <- ifelse(geneSets$strand == "+", 1, -1)
@@ -129,6 +136,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     ## then none will become a list element
     namedGenes$Pfam <- namedGenes$Pfam %>% tidyr::replace_na("none")
     namedGenes$Tigrfam <- namedGenes$Tigrfam %>% tidyr::replace_na("none")
+    namedGenes$InterPro <- namedGenes$InterPro %>% tidyr::replace_na("none")
     namedGenes$Hypofam <- namedGenes$Hypofam %>% tidyr::replace_na("none")
     namedGenes$IMGfam <- namedGenes$IMGfam %>% tidyr::replace_na("none")
     ## son of the bride of the kludge
@@ -137,13 +145,14 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     ## the return of the son of the bride of the kludge
     namedGenes$Pfam[namedGenes$Pfam==""]<-"none"
     namedGenes$Tigrfam[namedGenes$Tigrfam==""]<-"none"
+    namedGenes$InterPro[namedGenes$InterPro==""]<-"none"      
     namedGenes$IMGfam[namedGenes$IMGfam==""]<-"none"
     namedGenes$Hypofam[namedGenes$Hypofam==""]<-"none"
     annotList <- namedGenes$geneSymbol
     for (i in 1:length(geneSets$gene)) {
       foundMe <- "no"
       foundIn <- "nowhere"
-      tempRealData <- geneSets[i,] %>% dplyr::select(Pfam, Tigrfam, IMGfam, Hypofam)
+      tempRealData <- geneSets[i,] %>% dplyr::select(Pfam, Tigrfam, InterPro, IMGfam, Hypofam)
       ## entirely hypothetical proteins are easy to flag - no annotations
       if (all(tempRealData=="none") == TRUE) {
         geneSets$gene[i] <- "hyp"
@@ -161,16 +170,17 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
           ## first list is IMGfam and Hypofam - both are specific and singular, so any non-none match is legit
           tempList1 <- strsplit(namedGenes$IMGfam[j], " ")
           tempList1 <- append(tempList1, strsplit(namedGenes$Hypofam[j], " "))
-          ## second list is Pfam and TIGRfam - here you can have multiple hits, and "none" can be meaningful (e.g. for superfamilies)
+          ## second list is Pfam and TIGRfam and InterPro - here you can have multiple hits, and "none" can be meaningful (e.g. for superfamilies)
           tempList2 <- strsplit(namedGenes$Pfam[j], " ")
           tempList2 <- append(tempList2, strsplit(namedGenes$Tigrfam[j], " "))
-                ## we want "none" to be an element but _only_ for "and", it should not be a match for "any"
+          tempList2 <- append(tempList2, strsplit(namedGenes$InterPro[j], " "))
+          ## we want "none" to be an element but _only_ for "and", it should not be a match for "any"
           tempList1 <- unlist(tempList1[tempList1!="none"])
           tempList2 <- unlist(tempList2)
           tempList3 <- unlist(tempList2[tempList2!="none"])
-          tempVector1 <- sapply(lapply(tempList1,grepl,tempRealData[,3:4]),any)
-          tempVector2 <- sapply(lapply(tempList2,grepl,tempRealData[,1:2]),any)
-          tempVector3 <- sapply(lapply(tempList3,grepl,tempRealData[,1:2]),any)   
+          tempVector1 <- sapply(lapply(tempList1,grepl,tempRealData[,4:5]),any)
+          tempVector2 <- sapply(lapply(tempList2,grepl,tempRealData[,1:3]),any)
+          tempVector3 <- sapply(lapply(tempList3,grepl,tempRealData[,1:3]),any)   
           if (length(tempList1) != 0 && any(tempVector1)) {
             ## there are annotations and they match the most specific terms (IMG Term or HypoFam)
             geneSets$gene[i] <- namedGenes$geneSymbol[j]

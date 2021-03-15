@@ -71,7 +71,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
           "mafft"),
         stdout = TRUE)
     } else if (sysTerm == "nix") {
-      blastp <- system2(command = "which",
+      mafft <- system2(command = "which",
         args = c("mafft"),
         stdout=TRUE)
     } else {
@@ -87,6 +87,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   ## and interpro is sadly not yet a default in IMG data exports
   imgNeighborsData$Pfam <- as.character(imgNeighborsData$Pfam)
   imgNeighborsData$Tigrfam <- as.character(imgNeighborsData$Tigrfam)
+  ## currently EXCLUDING InterPro listings here, since those include some things that are vague enough (superfamilies) that we may still want to run hypothetical protein analysis.   
   for (i in 1:nLength) {
     if(imgNeighborsData$Pfam[i] == "" && imgNeighborsData$Tigrfam[i] == "") {
       hypoIndex[[counter]] <-  imgNeighborsData$gene_oid[i]    
@@ -126,7 +127,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   blast_db <- "hypoSeqsDb"
   input <- hypoSeqsFile
   ## easier to cut latter than rerun
-  evalue <- "10"
+  evalue <- "1"
   format <- "6"
   output <- "hypoSeqsDb"
   query <- hypoSeqsFile
@@ -162,6 +163,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
         "-in", input,
         "-out", "temporary/dbblast/hypoSeqsDb"),
       stdout=FALSE)
+    ## possibly implement stderr variant here too?  need to repeat more and see whether this is a more general issue.
     blast_out <- system2(command = blastp, 
       args = c("-db", "temporary/dbblast/hypoSeqsDb",
         "-query", query,
@@ -171,28 +173,34 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
         "-out", blastFile),
       wait = TRUE,
       stdout = TRUE)
+ #   capture.output(blast_err, blastError)
+ #   blast_out <- as.data.frame(read.csv(blastFile, header=FALSE, sep="\t" , stringsAsFactors=FALSE))
+ #   colnames(blast_out) <- blastColNames
+ #   tidyBlast <- tibble::as_tibble(blast_out)
     write.table(blast_out, blastFile, sep="\t", quote=FALSE)
     tidyBlast <- blast_out %>% tibble::as_tibble() %>% tidyr::separate(col = value, into = blastColNames, sep = "\t", convert = TRUE)
   }
   ## moving the pairwise results into a matrix form
   ## and removing things other than evalue and gene_oid interactions
   print("All-by-all blast of hypothetical proteins complete.")
-  tidierBlast <- as.data.frame(tidyBlast)
-  tidierBlast$qseqid <- as.character(tidierBlast$qseqid)
-  tidierBlast$sseqid <- as.character(tidierBlast$sseqid)
-  tidierBlast$length <- as.numeric(tidierBlast$length)
-  tidierBlast$pident <- as.numeric(tidierBlast$pident)
-  tidierBlast$bitscore <- as.numeric(tidierBlast$bitscore)
-    ##  dealing with NA issues that're sometimes gonna happen - population should generally b small enoguh to be deletable
-  tidierBlast <- na.omit(tidierBlast)
+  rm(blast_out)
+  tidyBlast <- as.data.frame(tidyBlast)
+  ## for huge datasets, gotta remove the ginormous objects
+  tidyBlast$qseqid <- as.character(tidyBlast$qseqid)
+  tidyBlast$sseqid <- as.character(tidyBlast$sseqid)
+  tidyBlast$length <- as.numeric(tidyBlast$length)
+  tidyBlast$pident <- as.numeric(tidyBlast$pident)
+  tidyBlast$bitscore <- as.numeric(tidyBlast$bitscore)
+    ##  dealing with NA issues that're sometimes gonna happen - population should generally be small enoguh to be deletable
+  tidyBlast <- na.omit(tidyBlast)
     ## making the dataset skinnier - only IDs, percentID, length, and bitscore are maintained later
-  tidierBlast <- tidierBlast[,-c(5:11)]
+  tidyBlast <- tidyBlast[,-c(5:11)]
   ## remove full-on dupes - whyyyyy blast why
-  tidierBlast <- tidierBlast %>% dplyr::distinct()
+  tidyBlast <- tidyBlast %>% dplyr::distinct()
   ## even in blastfmt 6, you sometimes get stupid-ass duplicates (multiple hits in one gene and so on)
   ## here, we only pass on the unique qseqid-sseqid pairs with the highest bitscore (as a proxy for %ID/length combo)
-  tidierBlast <- tidierBlast %>% dplyr::group_by(qseqid, sseqid) %>% dplyr::arrange(desc(bitscore), .by_group=TRUE)
-  yetTidierBlast <- dplyr::distinct_at(tidierBlast, vars(qseqid, sseqid), .keep_all=TRUE)
+  tidyBlast <- tidyBlast %>% dplyr::group_by(qseqid, sseqid) %>% dplyr::arrange(desc(bitscore), .by_group=TRUE)
+  yetTidierBlast <- dplyr::distinct_at(tidyBlast, vars(qseqid, sseqid), .keep_all=TRUE)
   yetTidierBlast <- yetTidierBlast %>% dplyr::group_by(qseqid, sseqid) %>% dplyr::arrange(desc(bitscore), .by_group=TRUE)
   ## a somewhat stringent length requirement - on the one hand, this may miss a few fusion proteins.  
   ## On the other, this avoids, like, FeS or heme motifs binding a tiny region really well.  
@@ -201,28 +209,32 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   ## and pegging it to the larger protein to prevent 30 aa peptides from nevertheless matching 3000 aa NRPS monsters
   yetTidierBlast$qseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
   yetTidierBlast$sseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$sseqid)]))
-  for (i in 1:length(yetTidierBlast$qseqLength)) {
-    yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
-  }
+    ## need to implement this better - is it fast enough with mutate?
+  yetTidierBlast <- yetTidierBlast %>% dplyr::rowwise() %>% dplyr::mutate(maxSeqLength = max(qseqLength, sseqLength))
+  ## for (i in 1:length(yetTidierBlast$qseqLength)) {
+  ##   yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
+  ## }
   tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(length>=.65*maxSeqLength)   
     ## keeping only names and percent id now that we are done with length and bitscore, then reshaping it
+  rm(yetTidierBlast)
   tidyMinBlast <- as.data.frame(tidyMonoBlast[,c(1:3)])
-  tidyBlastMatrix <- tidyMinBlast %>% tidyr::spread(sseqid, pident)
+  rm(tidyMonoBlast)
+  ## note that if using eval I'd do a log transform here to avoid crazy results
+  ## not necessary for %ID though
+  if (clustMethod == "pvClust") {
+  ## to consider - make the cluster and distance methods easy for the user to alter?
+      ## bootstrap > 10 would be better but it does not scale linearly with sequence number
+      tidyBlastMatrix <- tidyMinBlast %>% tidyr::spread(sseqid, pident)
   # alternate phrasing for some errors i have occasionally hit?  keeping these here in case they are widespread
   ## tidyBlastMatrix <- tidyMinBlast %>% group_by_at(vars(-pident)) %>% mutate(row_id=1:n()) %>% ungroup() %>% spread(key=sseqid, value=pident) %>% select(-row_id)
   ##  tidyBlastMatrix <- tidyMinBlast %>% tidyr::pivot_wider(names_from = sseqid, values_from = pident)
-  tbRnames <- tidyBlastMatrix[,1]
-  matLength <- length(tidyBlastMatrix[1,])
+      tbRnames <- tidyBlastMatrix[,1]
+      matLength <- length(tidyBlastMatrix[1,])
                                         # using the max eval (or 0% ID) to fill in NAs (things that didn't even have matches at that value)
-  tidyBlastMatrix[is.na(tidyBlastMatrix)] <- 0
-  ## note that if using eval I'd do a log transform here to avoid crazy results
-  ## not necessary for %ID though
-  tidyBlastMatrixL2 <- as.matrix(tidyBlastMatrix[,2:matLength])
-  rownames(tidyBlastMatrixL2) <- tbRnames
-  if (clustMethod == "pvClust") {
-  ## to consider - make the cluster and distance methods easy for the user to alter?
-  ## bootstrap > 10 would be better but it does not scale linearly with sequence number  
-    pvBlast <- pvclust::pvclust(tidyBlastMatrixL2, method.dist="euclidean", method.hclust="ward.D2",nboot=bootStrap, parallel=TRUE)
+      tidyBlastMatrix[is.na(tidyBlastMatrix)] <- 0
+      tidyBlastMatrixL2 <- as.matrix(tidyBlastMatrix[,2:matLength])
+      rownames(tidyBlastMatrixL2) <- tbRnames
+      pvBlast <- pvclust::pvclust(tidyBlastMatrixL2, method.dist="euclidean", method.hclust="ward.D2",nboot=bootStrap, parallel=TRUE)
                                         # output info as a .txt file and output the dendrogram with the appropriate cutoff
   ## given the slow speed of the initial pvclust, consider making the alphaVal finalization interactive
   ##if(interactive()) {#
@@ -335,7 +347,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
     ggplot2::ggsave(filename=networkFileName, tidyBlastNetworkPic, height=10, width=20, dpi=75, units="in", device="pdf")
     ## now getting the individual clusters("components") and keeping the ones above our atLastGenes cutoff
     tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate("nodes") %>% dplyr::mutate(cluster=group_components())
-    atLeastGenes <- floor(.005*length(tbRnames))
+    atLeastGenes <- floor(.005*length(unique(tidyMinBlast$qseqid)))
     keepCluster <- which(table(igraph::V(tidyBlastNetworkTrimmed)$cluster) >= atLeastGenes)
     tidyBlastClusters <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::filter(cluster %in% keepCluster)
       ## making a graph for just the larger clusters

@@ -43,18 +43,29 @@ prepNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, gene
 # decided it's easier just to explicitly re-import at this stage
   if (typeof(imgGenes) == "character" && typeof(neighborsContext) == "character") {
 ## by default, 
-    imgGenesData <-as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t" )[,1:45])
-    imgGenesData <- imgGenesData %>% dplyr::mutate_all(~ replace_na(.x, ""))
-    imgGenesData <- imgGenesData[names(imgGenesData) %in% imgCols]
+    imgGenesFull <-as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t" ))
+    imgGenesFull <- imgGenesFull %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgGenesData <- imgGenesFull[names(imgGenesFull) %in% imgCols]
+    ## if interpro exists add it
+    if (any(grepl("InterPro", colnames(imgGenesFull)))) {
+        imgGenesData$InterPro <- imgGenesFull$InterPro
+    } else {
+        imgGenesData$InterPro <- ""
+    }  
     imgNeighborsContext <-as.data.frame(read.csv(neighborsContext, header=TRUE, sep="\t" , stringsAsFactors=FALSE))
   } else {
     print("Please load an imgGenesData textfile (can be a raw IMG file) and an imgNeighborsContext file.")
     return(0)
   }
   if(typeof(imgNeighbors) == "character")  {
-    imgNeighborsFull <- as.data.frame(read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE)[,1:45])
-    imgNeighborsData <- imgNeighborsFull %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgNeighborsFull <- as.data.frame(read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE))
+    imgNeighborsFull <- imgNeighborsFull %>% dplyr::mutate_all(~ replace_na(.x, ""))
     imgNeighborsData <- imgNeighborsFull[names(imgNeighborsFull) %in% imgCols]
+    if (any(grepl("InterPro", colnames(imgNeighborsFull)))) {
+        imgNeighborsData$InterPro <- imgNeighborsFull$InterPro
+    } else {
+        imgNeighborsData$InterPro <- ""
+    }
   } else {
     print("Please load an imgNeighborsTemp textfile (can be a raw IMG metadata textfile).")
     return(0)
