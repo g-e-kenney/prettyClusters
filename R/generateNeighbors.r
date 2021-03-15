@@ -26,7 +26,7 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE)
     imgSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
     ## let's quickly just save that fasta file with simplified headers for EFI use
-    write.fasta(imgGeneSeqs, names=names(imgSeqs),file.out=fileNameSeqs)
+    write.fasta(imgSeqs, names=names(imgSeqs),file.out=fileNameSeqs)
     ## and onwards
     geneList <- inputGenes$gene_oid
     scaffList <- inputGenes$Scaffold.ID
