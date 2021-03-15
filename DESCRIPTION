@@ -23,6 +23,7 @@ Depends:
 	ggplot2,
 	ggraph,
 	ghibli,
+	influenceR,
 	lisa,
 	nord,
 	pheatmap,
