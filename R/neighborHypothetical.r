@@ -164,21 +164,21 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
         "-out", "temporary/dbblast/hypoSeqsDb"),
       stdout=FALSE)
     ## possibly implement stderr variant here too?  need to repeat more and see whether this is a more general issue.
-    blast_out <- system2(command = blastp, 
+    ## or see if the stdout file switch works better on wsl too...?
+    system2(command = blastp, 
       args = c("-db", "temporary/dbblast/hypoSeqsDb",
         "-query", query,
         "-outfmt", "6",
-        "-evalue",evalue,
+        "-evalue", evalue,
         "-num_threads", numThreads,
         "-out", blastFile),
-      wait = TRUE,
-      stdout = TRUE)
+      stdout = blastFile)
  #   capture.output(blast_err, blastError)
- #   blast_out <- as.data.frame(read.csv(blastFile, header=FALSE, sep="\t" , stringsAsFactors=FALSE))
- #   colnames(blast_out) <- blastColNames
- #   tidyBlast <- tibble::as_tibble(blast_out)
-    write.table(blast_out, blastFile, sep="\t", quote=FALSE)
-    tidyBlast <- blast_out %>% tibble::as_tibble() %>% tidyr::separate(col = value, into = blastColNames, sep = "\t", convert = TRUE)
+    blast_out <- as.data.frame(read.csv(blastFile, header=FALSE, sep="\t" , stringsAsFactors=FALSE))
+    colnames(blast_out) <- blastColNames
+    tidyBlast <- tibble::as_tibble(blast_out)
+ #   write.table(blast_out, blastFile, sep="\t", quote=FALSE)
+ #   tidyBlast <- blast_out %>% tibble::as_tibble() %>% tidyr::separate(col = value, into = blastColNames, sep = "\t", convert = TRUE)
   }
   ## moving the pairwise results into a matrix form
   ## and removing things other than evalue and gene_oid interactions
@@ -414,6 +414,14 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
             mafftOutput),
           wait = TRUE,
           stdout = TRUE)
+        ## stdout change here too?
+#        system2(command = "mafft", 
+#          args = c("--auto",
+#            "--quiet",
+#            mafftInput,
+#            ">",
+#            mafftOutput),
+#          stdout = mafftOutput)
       }
       inClustLength <- 0
       clustSeqs <- list()
