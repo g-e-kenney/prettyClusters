@@ -12,7 +12,7 @@
 #' gbToIMGOutput <- gbToIMG(dataFolder="/data/here", neighborNum=5, goiListInput = "goiList.txt", geneName="genE", removeDupes=TRUE)
 #'
 gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiListInput, geneName="genE", removeDupes=TRUE, scaffoldGenBase =3000000000, genomeGenBase=4000000000)  {
-    ## gettign the list of .gb files in the folder
+    ## getting the list of .gb files in the folder
     fileList <- list.files(path=dataFolder, pattern="*\\.gb$", full.names=TRUE, recursive=FALSE)
     scaffNum <- length(fileList)
     goiList <- read.csv(goiListInput, header=TRUE, sep = "\t",stringsAsFactors=FALSE)
@@ -445,7 +445,7 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
         fauxNeighborData <- fauxNeighborData[!duplicated(fauxNeighborData$Locus.Tag), ]
     }
     fauxNeighborData$Pfam <- as.character(fauxNeighborData$Pfam)
-    fauxNeighborData$TIGRfam <- as.character(fauxNeighborData$TIGRfam)
+    fauxNeighborData$Tigrfam <- as.character(fauxNeighborData$Tigrfam)
     fauxNeighborData$InterPro <- as.character(fauxNeighborData$InterPro)
     
     write.table(fauxNeighborData, file=fauxNeighborDataFile, row.names=FALSE, col.names = TRUE, sep="\t")
