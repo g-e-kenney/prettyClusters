@@ -18,12 +18,16 @@ I haven't encountered anything that quite handles all of those things, so...
 ### Components of the prettyClusters toolset
 - `generateNeighbors`
 - `prepNeighbors`
-- `repnodeTrim`
 - `analyzeNeighbors`
 - `prettyClusterDiagrams`
 
+### Accessory components
+- `gbToIMG`
+- `incorpIprScan`
+- `repnodeTrim`
+
 ### External requirements
-Beyond the (many) R packages used, `analyzeNeighbors` uses local installs of [mafft](https://cytoscape.org/) and [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) in its analysis of hypothetical proteins. It's highly likely I'll be adding steps that use [hmmer](http://hmmer.org) as well. Installation instructions are going to be system-specific, but if using Windows, these tools are currently only set up to deal with installations handled via the Windows Subsystem for Linux.  It is anticipated that these tools will often be paired with use of the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).  Those are online, but [Cytoscape](https://cytoscape.org/) is used for visualizing the sequence-similarity networks generated there. 
+Beyond the (many) R packages used, `analyzeNeighbors` uses local installs of [mafft](https://cytoscape.org/) and [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) in its analysis of hypothetical proteins. It's highly likely I'll be adding steps that use [hmmer](http://hmmer.org) as well. Installation instructions are going to be system-specific, but if using Windows, these tools are currently only set up to deal with installations handled via the Windows Subsystem for Linux.  It is anticipated that these tools will often be paired with use of the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).  Those are online, but [Cytoscape](https://cytoscape.org/) is used for visualizing the sequence-similarity networks generated there.  When 
 
 ### Getting started
 This package is nowhere near ready for legit repositories, so you are stuck with the development version.  Probably easiest to install via:
@@ -35,6 +39,7 @@ A sample session:
 # load the package (a number of others should autoload)
 # core packages include data.table, dplyr, gggenes, ggplot2, ggraph, pheatmap, pvclust, scales, seqinr, stringr, tibble, tidygraph, tidyr, and utils
 # palette-focused packages include fishualize, ghibli, lisa, nord, rtist, scico, viridis, and wesanderson
+# working with genbank files will add in genbankr and GenomicRanges
 library(prettyClusters)
 
 # run the initial neighbor generation 
@@ -57,7 +62,7 @@ Illustrating the output of some of the components (or, in the case of the cluste
 Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 
 ### `generateNeighbors`
-This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.  Note that if you're starting from GenBank files, you can skip this and use the `gbToIMG` accessory tool instead, although like all tools that involve parsing GenBank files, it's a bit finicky.
+This tool takes advantage of the fully numeric and contiguous nature of gene_oids in the IMG database.  Given an IMG metadata table for a set of genes of interest (identified via BLAST, protein family-based filtering, or other methods), this tool generates IDs for genes that ought to be in the same neighborhood. These gene lists can be used to download the data-rich IMG metadata files for all all of those genes from the IMG database.  Note that if you're starting from GenBank files, you can skip this and use the `gbToIMG` accessory tool instead (possibly accompanied by `incorpIprScan` to improve annotations), although like all tools that involve parsing GenBank files, it's a bit finicky.
 #### Use of `generateNeighbors`
 ```
 generateNeighborsOut <- generateNeighbors(imgGenes = "imgGeneMetadata.txt", imgGeneSeqs = "imgGeneSeqs.fa", neighborNumber = 10, includeGene = TRUE, geneName = "genE") 
@@ -77,7 +82,7 @@ generateNeighborsOut <- generateNeighbors(imgGenes = "imgGeneMetadata.txt", imgG
 ### `prepNeighbors`
 This is a wrapper for two subfunctions:
 - `neighborHypothetical`
-This tool identifies sets of hypothetical proteins that are overrepresented in the genomic neighborhood of the genes of interest.  Beyond R packages, this tool uses the NCBI blast+ package and MAFFT, which need to be pre-installed.  Note that for identifying subgroups of hypothetical proteins, an all-by-all blast step is used, which can lead to long computation time on large datasets!  [Tidygraph](https://github.com/thomasp85/tidygraph) (with [ggraph](https://github.com/thomasp85/ggraph)) and/or [pvclust](https://github.com/shimo-lab/pvclust) are used identify and visualize possible cutoff points for defining those subgroups of hypothetical proteins.
+This tool identifies sets of hypothetical proteins that are overrepresented in the genomic neighborhood of the genes of interest.  Beyond R packages, this tool uses the NCBI blast+ package and MAFFT, which need to be pre-installed.  Note that for identifying subgroups of hypothetical proteins, an all-by-all blast step is used, which can lead to long computation time on large datasets!  [Tidygraph](https://github.com/thomasp85/tidygraph) (with [ggraph](https://github.com/thomasp85/ggraph)) and/or [pvclust](https://github.com/shimo-lab/pvclust) are used identify and visualize possible cutoff points for defining those subgroups of hypothetical proteins. For computational reasons, tidygraph is likely to be quicker for large datasets.
 - `neighborTrim`
 This tool identifies genomic neighborhoods where contig ends result in small neighborhoods.  Since truncated neighborhoods can mis-weight genome neighborhood clustering, they can be removed from further analyses.
 #### Use of `prepNeighbors`
@@ -120,31 +125,8 @@ prepNeighborsOut <- prepNeighbors(imgGenes = "imgGeneMetadata.txt", imgNeighbors
 - `20210101_neighborTrim_genE_imgGeneSequencesTrimmed.fa` File. FASTA-formatted set of amino acid sequences, trimmed to match the updated gene list.
 - `20210101_neighborTrim_genE_imgNeighborsSequencesTrimmed.fa` File. FASTA-formatted set of amino acid sequences, trimmed to match the updated neighbor list.  
 
-### `repnodeTrim`
-Generally, at this point I submit the trimmed protein sequences for my genes of interest to the [EFI-EST server](https://efi.igb.illinois.edu/efi-est/) via option C (a user-uploaded fasta file).  The EFI-EST toolsets are designed to work with UniProt data, and so genes are assigned faux-UniProt IDs, which can complicate tying the output back to analyses that use the IMG gene_oid values.  This tool connects the two IDs.  Additionally, during the EFI-EST SSN setup, sequences below/above length cutoffs are often trimmed, and a %ID cutoff is established, above which highly similar sequences are grouped and a representative node is chosen for SSN visualization. These "repnodes" are also useful for avoiding over-weighting of a network towards data from very highly sequenced species and genera (e.g. pathogens) and for working with very large and computationally intensive networks.  Thus, it's often helpful to go ahead using only the representative nodes.  This function provides trimmed versions of gene and neighbor metadata and sequence for this purpose. 
-#### Use of `repnodeTrim`
-```
-repnodeTrimOut <- repnodeTrim(imgGenes = "imgGeneMetadata.txt", imgNeighbors = "imgNeighborMetadata.txt", imgGeneSeqs = "imgGeneSeqs.fa", imgNeighborSeqs = "imgNeighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiMetadataFull.csv", efiFinalMetadata = "efiMetadataRepnodes95.csv")
-```
-#### Options
-- `imgGenes` Filename. IMG-formatted metadata file for genes of interest. Required.
-- `imgNeighbors` Filename. IMG-formatted metadata file for neighbors of genes of interest. Required.
-- `geneSeqs` Filename. FASTA-formatted sequence file for genes of interest. Required.
-- `neighborSeqs` Filename. FASTA-formatted sequence file for neighbors of genes of interest. Required.
-- `geneName` Text. the name of your gene family of interest - used for filenames and figure labels. Required.
-- `efiFullMetadata` Filename. The node metadata file, exported for the full network from Cytoscape. Note for large networks: Layout and visualization of the network is not necessary to export this file!  Required.
-- `efiFinalMetadata` Filename.  A second node metadata file, exported from the network at the appropriate repnode cutoff. Required.
-#### Output
-- `20210101_repnodeTrim_genE_imgGenes.txt` File. Tab-delimited table, contains metadata for all input genes, but with EFI and repnode IDs added.
-- `20210101_repnodeTrim_genE_imgNeighbors.txt` File. Tab-delimited table, contains metadata for all input neighbors, but with EFI and repnode ID for the associated genes of interest added.
-- `20210101_repnodeTrim_genE_repnodeGenes.txt` File. Tab-delimited table, contains metadata (including EFI IDs) for repnodes only.
-- `20210101_repnodeTrim_genE_repnodeNeighbors.txt` File. Tab-delimited table, contains metadata for neighbors of repnodes only.
-- `20210101_repnodeTrim_genE_repnodeGeneSeqs.fa` File. FASTA-formatted file with amino acid sequences for repnodes only.
-- `20210101_repnodeTrim_genE_repnodeNeighborSeqs.fa` File. FASTA-formatted file with amino acid sequences for neighbors of repnodes only.
-- `repnodeTrimOut` List. Contains `repnodeTrimOut$repGenesTrimmed` (data frame containing the metadata for the repnodes) and `repnodeTrimOut$repNeighborsTrimmed` (data frame containing the metadata for the neighbors of repnodes)
-
 ### `analyzeNeighbors`
-This is separate from `prepNeighbors` because most of the analyses make sense to do _after_ submitting data to EFI for SSN generation.  This is a wrapper for four subfunctions:
+This is separate from `prepNeighbors` because most of the analyses make sense to do _after_ submitting data to EFI for SSN generation, so that they can be run on representative nodes and their neighbors only, or full datasets.  However, EFI processing is not required to proceed with data analysis.  This is a wrapper for four subfunctions:
 - `neighborCatalog` Identifies what protein families are present in all genomic neighborhoods, and which are above the neighborThreshold cutoff and will be used in further analyses.
 - `neighborHere` Identifies which of those families are present in the genomic neighborhoods of genes of interest. Currently a binary present/absent value; it's not clear that weighting 
 - `neighborMatrix` Generates a horrible matrix based on that binary data.
@@ -189,7 +171,7 @@ prettyClusterDiagrams(imgGenes = "repnodeGeneMetadata.txt", imgNeighbors = "repn
 #### Options
 - `imgGenes` Filename. IMG-formatted metadata file for genes of interest. Can also be the name of the equivalent object or object subset from the previous suite member. Required.
 - `imgNeighbors` Filename. IMG-formatted metadata file for neighboring genes. Can also be the name of the equivalent object or object subset from the previous suite member. Required.
-- `geneFormat` Filename. Tab-delimited text file that provides key for annotation. Required.
+- `geneFormat` Filename. Comma-delimited text file that provides key for annotation. Columns: geneSymbol (genE, annotation gene name to be assigned), fusion (yes/no, is this a fused version of other genes in the list), Requirement (all/any, which families must match to assign annotation - all/any), Pfam (pfam00001, with additional families separated by spaces), Tigrfam (TIGR00001, additional families separated by spaces), Hypofam (hypofam1, ditto), IMG.Term (0001, ditto), InterPro (IPR000001, ditto), Color (#000000, if manual color assignment is required, otherwise leave empty).  Required.
 - `geneName` Text. The name of your gene family of interest - used for filenames and figure labels. Required.
 - `efiRepnodes`	T/F. Signals when you are working with a repnode subset - just for labeling filenames. Defaults to FALSE.
 - `neighborNumber` Integer. The number of neighboring genes that will be shown on either side. Required.
@@ -231,8 +213,48 @@ gbToIMGOutput <- gbToIMG(dataFolder="/user/data/gbfiles", goiListInput = "goiLis
 - `20210101_gb2img_genE_neighborData.txt` File. Tab-delimited metadata table, IMG-styled, for neighbors of genes of interest.
 - `gbToIMGOutput` List. Contains `gbToIMGOutput$geneData` (a data frame of IMG-styled metadata for genes of interest), `gbToIMGOutput$neighborData` (a data frame of IMG-styled metadata for neighbors of genes of interest), and `gbToIMGOutput$neighborsContext` (a data frame connecting neighbors to the genes of interest they are associated with, along with their scaffolds).
 
-### `numbers2words`
-Derived from the function found [here](http://tolstoy.newcastle.edu.au/R/help/05/04/2715.html).  Does what it says on the tin.  No direct user interaction expected.
+### `incorpIprScan`
+NCBI GenBank-derived metadata often does not list the families from which gene annotations are derived, which is a problem for this workflow.  This function takes a tab-delimited InterProScan output file and an IMG-formatted metadata file for the same genes and adds Pfam, TIGRfam, and/or InterPro families to the metadata file.  Note that you may need to run [InterProScan](https://github.com/ebi-pf-team/interproscan) on your local cluster or install it on a linux machine or VM; there is not a Windows or MacOS-compatible version, and actually running it is thus not included in this workflow.  That said, a basic command outputting the required tab-delimited output file looks like this:  
+```
+./interproscan.sh -i neighborSeqs.fa -t p -o neighborSeqs_iprScan.txt -f TSV -iprlookup
+```
+#### Use of `incorpIprScan`
+```
+incorpIprScanOutput <- incorpIprScan(iprScanSource = "iprScanfile.txt", imgNeighborsSource = "imgNeighborsData.txt", geneName = "genE", addPfam = TRUE, addTigrfam = TRUE, addIPRfam = TRUE)
+```
+#### Options
+- `iprScanSource` Folder path. For folder containing all .gb/.gbk files to be analyzed. Required.
+- `imgNeighborsSource` Filename. For a text file IMG-formatted metadata for neighbors of genes of interest.  Required. 
+- `geneName` Character string. Name of gene family of interest (purely for file naming). Required. 
+- `addPfam` Boolean.  Specifies whether or not Pfam annotations should be added to the metadata sheet. 
+- `addTigrfam` Boolean.  Specifies whether or not Pfam annotations should be added to the metadata sheet. 
+- `addIprfam` Boolean.  Specifies whether or not Pfam annotations should be added to the metadata sheet. 
+#### Output
+- `20210101_incorpIprScan_genE_neighborData.txt` File. Fasta-formatted file for the protein sequences of genes of interest with simplified headers containing only the IMG-style gene_oids.
+- `incorpIprScanOutput` List. Contains `imgNeighborsData` (a data frame of IMG-styled metadata for neighbors of genes of interest, now with more annotation info.)
+
+### `repnodeTrim`
+Generally, after running `prepNeighbors`, I submit the trimmed protein sequences for my genes of interest to the [EFI-EST server](https://efi.igb.illinois.edu/efi-est/) via option C (a user-uploaded fasta file).  The EFI-EST toolsets are designed to work with UniProt data, and so genes are assigned faux-UniProt IDs, which can complicate tying the output back to analyses that use the IMG gene_oid values.  This tool connects the two IDs.  Additionally, during the EFI-EST SSN setup, sequences below/above length cutoffs are often trimmed, and a %ID cutoff is established, above which highly similar sequences are grouped and a representative node is chosen for SSN visualization. These "repnodes" are also useful for avoiding over-weighting of a network towards data from very highly sequenced species and genera (e.g. pathogens) and for working with very large and computationally intensive networks.  Thus, it's often helpful to go ahead using only the representative nodes.  This function provides trimmed versions of gene and neighbor metadata and sequence for this purpose (but use of this function is not required for the . 
+#### Use of `repnodeTrim`
+```
+repnodeTrimOut <- repnodeTrim(imgGenes = "imgGeneMetadata.txt", imgNeighbors = "imgNeighborMetadata.txt", imgGeneSeqs = "imgGeneSeqs.fa", imgNeighborSeqs = "imgNeighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiMetadataFull.csv", efiFinalMetadata = "efiMetadataRepnodes95.csv")
+```
+#### Options
+- `imgGenes` Filename. IMG-formatted metadata file for genes of interest. Required.
+- `imgNeighbors` Filename. IMG-formatted metadata file for neighbors of genes of interest. Required.
+- `geneSeqs` Filename. FASTA-formatted sequence file for genes of interest. Required.
+- `neighborSeqs` Filename. FASTA-formatted sequence file for neighbors of genes of interest. Required.
+- `geneName` Text. the name of your gene family of interest - used for filenames and figure labels. Required.
+- `efiFullMetadata` Filename. The node metadata file, exported for the full network from Cytoscape. Note for large networks: Layout and visualization of the network is not necessary to export this file!  Required.
+- `efiFinalMetadata` Filename.  A second node metadata file, exported from the network at the appropriate repnode cutoff. Required.
+#### Output
+- `20210101_repnodeTrim_genE_imgGenes.txt` File. Tab-delimited table, contains metadata for all input genes, but with EFI and repnode IDs added.
+- `20210101_repnodeTrim_genE_imgNeighbors.txt` File. Tab-delimited table, contains metadata for all input neighbors, but with EFI and repnode ID for the associated genes of interest added.
+- `20210101_repnodeTrim_genE_repnodeGenes.txt` File. Tab-delimited table, contains metadata (including EFI IDs) for repnodes only.
+- `20210101_repnodeTrim_genE_repnodeNeighbors.txt` File. Tab-delimited table, contains metadata for neighbors of repnodes only.
+- `20210101_repnodeTrim_genE_repnodeGeneSeqs.fa` File. FASTA-formatted file with amino acid sequences for repnodes only.
+- `20210101_repnodeTrim_genE_repnodeNeighborSeqs.fa` File. FASTA-formatted file with amino acid sequences for neighbors of repnodes only.
+- `repnodeTrimOut` List. Contains `repnodeTrimOut$repGenesTrimmed` (data frame containing the metadata for the repnodes) and `repnodeTrimOut$repNeighborsTrimmed` (data frame containing the metadata for the neighbors of repnodes)
 
 ## Development
 ### Planned additions
@@ -244,7 +266,7 @@ Derived from the function found [here](http://tolstoy.newcastle.edu.au/R/help/05
 - User-supplied HMMs for annotation of predefined custom protein (sub)families in `analyzeNeighbors`
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`
 ### Known issues
-- Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding) was poor!  This is doubly the case for GenBank-derived files.
+- Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding) was poor!  This is doubly the case for GenBank-derived files (use of `incorpIprScan` can improve annotation, but not ORF-finding).
 - Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs and distance/clustering methods. No way around this.
 - Forward- and reverse-facing genes are on the same vertical level in `prettyClusterDiagrams`. I personally find it visually clearer to have forward genes above the line and reverse genes below, but will need to probably do a bunch more digging into [gggenes](https://github.com/wilkox/gggenes) and [ggplot2](https://github.com/tidyverse/ggplot2) to figure out if/how I can make it happen.
 - Distance between genes of interest and their neighbors is not taken into account.  I have done a few initial analyses using weighted distances rather than binary present/absent values; it is not clear they've added much more info than the binary value-based analyses, and they're more complicated to run.  Could revisit?
