@@ -16,25 +16,26 @@
 #' @examples
 #' analyzeNeighborsOutput <- analyzeNeighbors <- function(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
 #'
-analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, efiRepnodes = FALSE, neighborThreshold = 0.025, geneName = geneName, autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10, tgCutoff = 0.6)  {
+analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, efiRepnodes = FALSE, neighborThreshold = 0.025, geneName = geneName, useInterPro = TRUE, useHypo = TRUE, autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10, tgCutoff = 0.6)  {
 
   if(exists(x="imgGenes") == FALSE | exists(x="imgNeighbors") == FALSE | exists(x="geneName") == FALSE) {
     print("Missing a required term (gene and neighbor metadata files or name of gene of interest)")
     return(0)
   }
-  fileDate <- format(Sys.Date(),format="%Y%m%d")
+    fileDate <- format(Sys.Date(),format="%Y%m%d")
+    imgCols <- list("gene_oid", "Locus.Tag", "Gene.Product.Name", "Genome.ID", "Genome.Name", "Gene.Symbol", "GenBank.Accession", "Chromosome", "Start.Coord", "End.Coord", "Strand", "DNA.Sequence.Length..bp.", "Amino.Acid.Sequence.Length..aa.", "Transmembrane.Helices", "Signal.Peptides", "Scaffold.ID", "Scaffold.External.Accession", "Scaffold.Name", "Scaffold.GC..", "COG", "Pfam", "Tigrfam", "SMART.ID", "SUPERFam.ID", "CATH.FunFam.ID", "Enzyme", "KO", "IMG.Term")
   if(typeof(imgGenes) == "character") {
-    imgGenesTrimmed <-read.csv(imgGenes, header=TRUE, sep="\t", stringsAsFactors=FALSE )
+    imgGenesTemp <-read.csv(imgGenes, header=TRUE, sep="\t", stringsAsFactors=FALSE )
   } else {
-    imgGenesTrimmed <- imgGenes
+    imgGenesTemp <- imgGenes
   }
   if(typeof(imgNeighbors) == "character")  {
-    imgNeighborsTrimmed <- read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE )
+    imgNeighborsTemp <- read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE )
   } else {
-    imgNeighborsTrimmed <- imgNeighbors
+    imgNeighborsTemp <- imgNeighbors
   }
-                                        # a purely cosmetic option to track whether input data consists of EFI repnodes or not
-                                        # will help for keeping track of ten zillion output files
+    ## a purely cosmetic option to track whether input data consists of EFI repnodes or not
+    ## will help for keeping track of ten zillion output files
   if (efiRepnodes == TRUE) {
     coreGeneName <- geneName
     geneName <- paste(geneName, "_repnodes",sep="")
@@ -42,8 +43,37 @@ analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, e
     geneName <- geneName
     coreGeneName <- geneName
   }
+    ## some cleanup for the input files, JUST IN CASE
+    ## even though they should be ifne if coming out of prepNeighbors or repnodeTrim
+    ## nevertheless, adds the two columns that may not be in standard IMG metadata files
+    imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgNeighborsTrimmed <- imgNeighborsTemp[names(imgNeighborsTemp) %in% imgCols]
+    ## if interpro exists add it
+    if (any(grepl("InterPro", colnames(imgNeighborsTemp)))) {
+        imgNeighborsTrimmed$InterPro <- imgNeighborsTemp$InterPro
+    } else {
+        imgNeighborsTrimmed$InterPro <- ""
+    }
+    if (any(grepl("Hypofam", colnames(imgNeighborsTemp)))) {
+        imgNeighborsTrimmed$InterPro <- imgNeighborsTemp$Hypofam
+    } else {
+        imgNeighborsTrimmed$InterPro <- ""
+    }     
+    imgGenesTemp <- imgGenesTemp %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgGenesTrimmed <- imgGenesTemp[names(imgGenesTemp) %in% imgCols]
+    ## if interpro exists add it
+    if (any(grepl("InterPro", colnames(imgGenesTemp)))) {
+        imgGenesTrimmed$InterPro <- imgGenesTemp$InterPro
+    } else {
+        imgGenesTrimmed$InterPro <- ""
+    }
+    if (any(grepl("Hypofam", colnames(imgGenesTemp)))) {
+        imgGenesTrimmed$InterPro <- imgGenesTemp$Hypofam
+    } else {
+        imgGenesTrimmed$InterPro <- ""
+    } 
                                         # process imgNeighborsTrimmed here: if genes-of-interest are not present in it, add in imgGeneMetadata. trim extra columns, adjust formatting if needed.
-  neighborCatalogOut <- neighborCatalog(imgNeighborsTrimmed = imgNeighborsTrimmed, imgGenesTrimmed=imgGenesTrimmed, geneName = geneName, neighborThreshold = neighborThreshold, coreGeneName = coreGeneName)
+  neighborCatalogOut <- neighborCatalog(imgNeighborsTrimmed = imgNeighborsTrimmed, imgGenesTrimmed=imgGenesTrimmed, geneName = geneName, neighborThreshold = neighborThreshold, coreGeneName = coreGeneName, useInterPro = useInterPro, useHypo = useHypo)
                                         # output: familyList (list of neighboring families), familyAbundance, familyAbundance.txt)
   neighborHereOut <- neighborHere(imgNeighborsTrimmed = imgNeighborsTrimmed, familyList = neighborCatalogOut, geneName = geneName, coreGeneName = coreGeneName)
                                         # input: neighbor metadata table, family abundance file, gene of interest, fileDate)

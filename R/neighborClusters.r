@@ -9,7 +9,7 @@
 #' @param clustMethod String specifying what tool (tidygraph, pvclust) will be used to identify clusters
 #' @param alphaVal Alpha value cutoff for pvclust (Num, 0-1)
 #' @param coreGeneName Name of gene of interest as string, without any suffix.
-#' @param tgCutoff Number (0-1) representing edge similarity to keep for tidygraph. Default 0.65.
+#' @param tgCutoff Number (0-1) representing edge similarity to keep for tidygraph. Default 0.6.
 #' @return List with matrix object and updated metadata, with misc. files output along the way
 #' @export
 #' @examples
@@ -118,17 +118,17 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
       names(eucDistPairs) <- c("node1", "node2", "eucDist")
       ## dealing with the identical-neighborhood issue, do not want 0-weighted edges
       eucDistPairs$eucDist <- eucDistPairs$eucDist + 1
-      ## using something handwavily similar to the gene stuff - let's toss the worst 33% of edges
+      ## default using something handwavily similar to the gene stuff - let's toss the worst 40% of edges
       eucCutoff <- max(eucDistPairs$eucDist)*tgCutoff
       eucPairsTrimmed <- eucDistPairs %>% dplyr::filter(eucDist <= eucCutoff)
       write.table(eucPairsTrimmed, networkFile, row.names=FALSE,sep="\t", quote=FALSE) 
       ## zomg network
       eucNetwork <- tidygraph::as_tbl_graph(eucPairsTrimmed, directed=FALSE)    
       ## calculating some stuff - dunno if i'll keep all of these in the end
-      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(group = group_infomap())
-      eucNetwork <- eucNetwork %>% tidygraph::activate(edges) %>% dplyr::mutate(betweenness = centrality_edge_betweenness())
-      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center_dist = node_distance_to(node_is_center()))
-      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center = node_is_center(), keyplayer  = node_is_keyplayer(k = 10))
+      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(group = tidygraph::group_infomap())
+      eucNetwork <- eucNetwork %>% tidygraph::activate(edges) %>% dplyr::mutate(betweenness = tidygraph::centrality_edge_betweenness())
+      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center_dist = tidygraph::node_distance_to(node_is_center()))
+      eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center = tidygraph::node_is_center(), keyplayer = tidygraph::node_is_keyplayer(k = 10))
       titleText <- paste("Identifying genome neighborhood clusters for ", coreGeneName," via tidygraph",sep="")
       subtitleText <- paste("Edge values represent euclidean distance between neighborhoods. Analyzed ",fileDate,".",sep="")
       eucNetworkPic <- ggraph::ggraph(eucNetwork , layout="stress") + 
@@ -233,7 +233,7 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
     clustColorList <- list(clustNum=clustNumListTemp)
         ## this adds colors at the left (gene) dendrogram corresponding to the cluster number
     prettyHeatmap <- pheatmap::pheatmap(matrixData, annotation_row=heatAnnoRow, cluster_cols = colCluster, cluster_rows = rowCluster, color=c("#FFFFFF", "#000000"), fontsize=8, fontsize_row=5, fontsize_col=5, cellwidth=5, cellheight=5, border=FALSE, legend=FALSE, annotation_names_row=FALSE, annotation_colors=clustColorList, main=heatmapName, angle_col=45)
-  } else {
+  } else if (autoClust == FALSE) {
         ## this just has the raw heatmap without cluster info
     prettyHeatmap <- pheatmap::pheatmap(matrixData, cluster_cols = colCluster, cluster_rows = rowCluster, color=c("#FFFFFF", "#000000"),  fontsize=8, fontsize_row=5, fontsize_col=5, cellwidth=5, cellheight=5, border=FALSE, legend=FALSE, main=heatmapName, angle_col=45)
   }    

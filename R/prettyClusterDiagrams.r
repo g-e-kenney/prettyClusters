@@ -32,7 +32,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   imgCols <- list("gene_oid","Start.Coord","End.Coord", "Strand", "Gene.Symbol", "Scaffold.Name", "Scaffold.ID", "Genome.Name","Genome.ID","Pfam", "Tigrfam", "InterPro", "clustNum", "clustOrd","source_gene_oid")
   ggCols <- list("gene_oid", "start", "end", "strand","gene","scaffold", "scaffoldID", "genome","genomeID","Pfam", "Tigrfam", "InterPro", "clustNum", "clustOrd","source_gene_oid")
                                        # geneset and annotation processing
-  geneFormat <- read.table(geneFormat, header=TRUE,  sep = "\t", stringsAsFactors = FALSE)
+  geneFormat <- read.csv(geneFormat, header=TRUE,  sep = ",", stringsAsFactors = FALSE)
   geneFormat$Pfam[which(is.na(geneFormat$Pfam))] <- ""
   geneFormat$Tigrfam[which(is.na(geneFormat$Tigrfam))] <- ""
   geneFormat$InterPro[which(is.na(geneFormat$InterPro))] <- ""  
@@ -96,6 +96,13 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   geneSets$IMGfam[geneSets$IMGfam==""]<-"none"
   geneSets$Hypofam[geneSets$Hypofam==""]<-"none"
   geneSets$direction <- ifelse(geneSets$strand == "+", 1, -1)
+  ## dealing with NAs
+    geneSets$Pfam <- geneSets$Pfam %>% tidyr::replace_na("none")
+    geneSets$Tigrfam <- geneSets$Tigrfam %>% tidyr::replace_na("none")
+    geneSets$InterPro <- geneSets$InterPro %>% tidyr::replace_na("none")
+    geneSets$Hypofam <- geneSets$Hypofam %>% tidyr::replace_na("none")
+    geneSets$IMGfam <- geneSets$IMGfam %>% tidyr::replace_na("none")
+  ## misc 
   rowidx <- order(geneSets$gene_oid)
   geneSets <- geneSets[rowidx,,drop=FALSE]
   ## in case of stupid factor stuff
@@ -549,25 +556,39 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     ## this specifically codes (unidentified) hypothetical proteins, mobile genetic elements, and known proteins not on the annotation list
     ## and reinserts them into the palette, so now it doesn't sacrifice pretty colors for them either
     tempColors <- geneColors[1:(notMe-1)]
-    tempColors <- append(tempColors, "#FFFFFF")
-    if (notMe == (notMeEither-1))  {
-      tempColors <- append(tempColors, "#888888")
-    } else {
-      temp2Colors <- geneColors[(notMe):(notMeEither-2)]
-      tempColors <- append(tempColors, temp2Colors)
-      tempColors <- append(tempColors, "#888888")
-    }
-    if (notMeEither == (norMe-1)) {
-      tempColors <- append(tempColors, "#DEDEDE")
-    } else {    
-      temp3Colors <- geneColors[(notMeEither-1):(norMe-3)]
-      tempColors <- append(tempColors, temp3Colors)
-      tempColors <- append(tempColors, "#EEEEEE")
-    }
-    if (geneColors[(norMe-3)] != geneColors[length(geneColors)]) {
-      temp4Colors <-geneColors[(norMe-2):length(geneColors)]
-      tempColors <- append(tempColors, temp4Colors)
-    }
+      tempColors <- append(tempColors, "#FFFFFF")
+      if (length(notMeEither)>=1) {
+          if (notMe == (notMeEither-1))  {
+              tempColors <- append(tempColors, "#888888")
+          } else {
+              temp2Colors <- geneColors[(notMe):(notMeEither-2)]
+              tempColors <- append(tempColors, temp2Colors)
+              tempColors <- append(tempColors, "#888888")
+          }
+          if (notMeEither == (norMe-1)) {
+              tempColors <- append(tempColors, "#DEDEDE")
+          } else {
+              temp3Colors <- geneColors[(notMeEither-1):(norMe-3)]
+              tempColors <- append(tempColors, temp3Colors)            
+              tempColors <- append(tempColors, "#EEEEEE")
+          }
+          if (geneColors[(norMe-3)] != geneColors[length(geneColors)]) {
+              temp4Colors <-geneColors[(norMe-2):length(geneColors)]
+              tempColors <- append(tempColors, temp4Colors)
+          }
+      } else {
+          if (notMe == (norMe-1)) {
+              tempColors <- append(tempColors, "#DEDEDE")
+          } else {
+              temp5Colors <- geneColors[(notMe):(norMe-2)]
+              tempColors <- append(tempColors, temp5Colors)            
+              tempColors <- append(tempColors, "#EEEEEE")
+          }
+          if (geneColors[(norMe-2)] != geneColors[length(geneColors)]) {
+              temp6Colors <-geneColors[(norMe-1):length(geneColors)]
+              tempColors <- append(tempColors, temp6Colors)
+          }              
+      }   
     finalColors <- tempColors
     print("Palettes generated.")
   }
