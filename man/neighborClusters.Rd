@@ -13,7 +13,8 @@ neighborClusters(
   clustMethod = clustMethod,
   alphaVal = alphaVal,
   bootStrap = bootStrap,
-  coreGeneName = coreGeneName
+  coreGeneName = coreGeneName,
+  tgCutoff = tgCutoff
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ neighborClusters(
 \item{alphaVal}{Alpha value cutoff for pvclust (Num, 0-1)}
 
 \item{coreGeneName}{Name of gene of interest as string, without any suffix.}
+
+\item{tgCutoff}{Number (0-1) representing edge similarity to keep for tidygraph. Default 0.6.}
 }
 \value{
 List with matrix object and updated metadata, with misc. files output along the way
@@ -40,6 +43,6 @@ List with matrix object and updated metadata, with misc. files output along the 
 This function cluster-based methods to identify subgroups of gene clusters containing genes of interest that have similar genomic neighborhoods.
 }
 \examples{
-neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName)
+neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
 
 }

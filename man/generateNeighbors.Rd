@@ -6,13 +6,16 @@
 \usage{
 generateNeighbors(
   imgGenes = imgGenes,
+  imgGeneSeqs = imgGeneSeqs,
   neighborNumber = neighborNumber,
   includeGene = TRUE,
   geneName = geneName
 )
 }
 \arguments{
-\item{imgGenes}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
+\item{imgGenes}{What is the file with the metadata for your gene family of interest? Filename as string ("filename.txt")}
+
+\item{imgGeneSeqs}{What is the file with sequences of your gene family of interest? Filename as string ("filename.fa")}
 
 \item{neighborNumber}{How many neighbors do you want to look at on each side of the gene? Integer.}
 
@@ -27,6 +30,6 @@ Lists of neighboring genes to upload to your IMG Gene Cart
 This function uses IMG metadatasets to generate relatively attractive gene cluster/genomic neighborhood diagrams that are scaled and that generate vector graphics
 }
 \examples{
-generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", neighborNumber=10, geneName="genE")
+generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", imgGeneSeqs="geneSeqs.fa", neighborNumber=10, geneName="genE")
 
 }

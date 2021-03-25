@@ -39,3 +39,6 @@ Depends:
 	utils,
 	viridis,
 	wesanderson
+Remotes:
+	bioc::3.12/genbankr,
+	bioc::3.12/GenomicRanges

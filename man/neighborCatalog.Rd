@@ -9,7 +9,9 @@ neighborCatalog(
   imgNeighborsTrimmed = imgNeighborsTrimmed,
   geneName = geneName,
   neighborThreshold = neighborThreshold,
-  coreGeneName = coreGeneName
+  coreGeneName = coreGeneName,
+  useInterPro = useInterPro,
+  useHypo = useHypo
 )
 }
 \arguments{

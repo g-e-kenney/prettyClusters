@@ -10,10 +10,13 @@ analyzeNeighbors(
   efiRepnodes = FALSE,
   neighborThreshold = 0.025,
   geneName = geneName,
+  useInterPro = TRUE,
+  useHypo = TRUE,
   autoClust = TRUE,
   clustMethod = "tidygraph",
   alphaVal = 0.95,
-  bootStrap = 10
+  bootStrap = 10,
+  tgCutoff = 0.6
 )
 }
 \arguments{
@@ -30,6 +33,8 @@ analyzeNeighbors(
 \item{alphaVal}{What alpha value cutoff should be used for pvclust?  Number, defaults to 0.95}
 
 \item{bootStrap}{How many bootstrap rounds for pvclust? Integer, defaults to 10}
+
+\item{tgCutoff}{What sort of edge similarity should be kept for tidygraph? Number (0-1), defaults to 0.65.}
 
 \item{imgGenesTrimmed}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
 
