@@ -28,12 +28,9 @@ The Wiki entries contain a more detailed description of the use of specific func
 - [`repnodeTrim`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-repnodeTrim)
 
 ### Using `prettyClusters`
-#### Preparing for use of `prettyClusters`
 - A [basic installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) is the best starting point.
-#### Basic workflow
-- A [standard run](https://github.com/g-e-kenney/prettyClusters/wiki/a-standard-prettyClusters-run) for the `prettyClusters` toolset
-#### Incorporation of EMBL and GenBank data
-- This is very much a work in progress, and doing this is using `prettyClusters` in Difficult mode, but I've got a [rough workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Running-prettyClusters-with-GenBank-files) for this as well.
+- I've got a simple walkthrough for a [standard run](https://github.com/g-e-kenney/prettyClusters/wiki/a-standard-prettyClusters-run) using the `prettyClusters` toolset.
+- This is very much a work in progress, and doing this is using `prettyClusters` in difficult mode, but I've got a [rough workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Running-prettyClusters-with-GenBank-files) for this as well.
 
 ### `prettyClusters` output
 Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
