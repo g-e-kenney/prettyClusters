@@ -13,6 +13,11 @@
 #' @param numThreads The number of processor threads to be devoted to certain steps
 #' @return Updated metadata for neighboring genes (additional files generated en route)
 #' @export
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
+#' @importFrom utils capture.output combn read.csv write.csv write.table
+#' @importFrom stats dist end hclust na.omit start
+#' @importFrom grDevices cairo_pdf cairo_ps col2rgb colorRampPalette dev.off hsv pdf rgb2hsv
 #' @examples 
 #' imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData, imgNeighborsData = imgNeighborsData, imgNeighborSeqs=imgNeighborSeqs, geneName = "genE", clustMethod = "tidygraph", pidCutoff = 35, alphaVal = 0.95, bootStrap = 10, sysTerm = "nix", numThreads = 5) 
 #'
@@ -36,7 +41,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   hypoSeqs <- data.frame()
   hsReList <- list()
   tidyMonoBlast <- data.frame()
-  clustListings <- data.table(stringsAsFactors = FALSE)
+  clustListings <- data.table::data.table(stringsAsFactors = FALSE)
                                         # making sure we have the external tools for this
     ## note:  on windows, the easiest way to Deal is to install blast and mafft via Windows Subsystem for Linux
     ## FIIK how to deal with them as full windows installs.
@@ -107,8 +112,8 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   colnames(hSeqTable) <- c("gene_oid", "sequence")
                                         # sometimes neighbors are rRNA or tRNA or whatever
   badSeq <- "No sequence found"
-  goodSeqs <- hSeqTable %>% dplyr::filter(sequence != badSeq)
-  hypoSeqs <- goodSeqs %>% dplyr::filter(gene_oid %in% hypoIndex)
+  goodSeqs <- hSeqTable %>% dplyr::filter(.data$sequence != badSeq)
+  hypoSeqs <- goodSeqs %>% dplyr::filter(.data$gene_oid %in% hypoIndex)
   hsReList <- list()
                                         # export the hypothetical sequences separately after re-fasta-ifying
   for (i in 1:length(hypoSeqs[,1])) {
@@ -199,9 +204,9 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   tidyBlast <- tidyBlast %>% dplyr::distinct()
   ## even in blastfmt 6, you sometimes get stupid-ass duplicates (multiple hits in one gene and so on)
   ## here, we only pass on the unique qseqid-sseqid pairs with the highest bitscore (as a proxy for %ID/length combo)
-  tidyBlast <- tidyBlast %>% dplyr::group_by(qseqid, sseqid) %>% dplyr::arrange(desc(bitscore), .by_group=TRUE)
-  yetTidierBlast <- dplyr::distinct_at(tidyBlast, vars(qseqid, sseqid), .keep_all=TRUE)
-  yetTidierBlast <- yetTidierBlast %>% dplyr::group_by(qseqid, sseqid) %>% dplyr::arrange(desc(bitscore), .by_group=TRUE)
+  tidyBlast <- tidyBlast %>% dplyr::group_by(.data$qseqid, .data$sseqid) %>% dplyr::arrange(dplyr::desc(.data$bitscore), .by_group=TRUE)
+  yetTidierBlast <- dplyr::distinct_at(tidyBlast, dplyr::vars(.data$qseqid, .data$sseqid), .keep_all=TRUE)
+  yetTidierBlast <- yetTidierBlast %>% dplyr::group_by(.data$qseqid, .data$sseqid) %>% dplyr::arrange(dplyr::desc(.data$bitscore), .by_group=TRUE)
   ## a somewhat stringent length requirement - on the one hand, this may miss a few fusion proteins.  
   ## On the other, this avoids, like, FeS or heme motifs binding a tiny region really well.  
   ## Bitscore is OK for the relative calls, but not great for single matches with crappy length.
@@ -210,11 +215,11 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   yetTidierBlast$qseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
   yetTidierBlast$sseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$sseqid)]))
     ## need to implement this better - is it fast enough with mutate?
-  yetTidierBlast <- yetTidierBlast %>% dplyr::rowwise() %>% dplyr::mutate(maxSeqLength = max(qseqLength, sseqLength))
+  yetTidierBlast <- yetTidierBlast %>% dplyr::rowwise() %>% dplyr::mutate(maxSeqLength = max(.data$qseqLength, .data$sseqLength))
   ## for (i in 1:length(yetTidierBlast$qseqLength)) {
   ##   yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
   ## }
-  tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(length>=.65*maxSeqLength)   
+  tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
     ## keeping only names and percent id now that we are done with length and bitscore, then reshaping it
   rm(yetTidierBlast)
   tidyMinBlast <- as.data.frame(tidyMonoBlast[,c(1:3)])
@@ -224,7 +229,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   if (clustMethod == "pvClust") {
   ## to consider - make the cluster and distance methods easy for the user to alter?
       ## bootstrap > 10 would be better but it does not scale linearly with sequence number
-      tidyBlastMatrix <- tidyMinBlast %>% tidyr::spread(sseqid, pident)
+      tidyBlastMatrix <- tidyMinBlast %>% tidyr::spread(.data$sseqid, .data$pident)
   # alternate phrasing for some errors i have occasionally hit?  keeping these here in case they are widespread
   ## tidyBlastMatrix <- tidyMinBlast %>% group_by_at(vars(-pident)) %>% mutate(row_id=1:n()) %>% ungroup() %>% spread(key=sseqid, value=pident) %>% select(-row_id)
   ##  tidyBlastMatrix <- tidyMinBlast %>% tidyr::pivot_wider(names_from = sseqid, values_from = pident)
@@ -272,7 +277,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
           clustSeqs[[as.character(inClustGene)]] <- hypoSeqs[[inClustGene]]
   ##      clustSeqs <- append(clustSeqs,hypoSeqs[[inClustGene]])
           if (i == 1 && j == 1) {
-            clustListings <- data.table(stringsAsFactors = FALSE)
+            clustListings <- data.table::data.table(stringsAsFactors = FALSE)
             clustListings$gene_oid[1] <- inClustGene
             clustListings$Hypofam[1] <- inClustNum
           } else {
@@ -316,7 +321,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
       }
       } else {
         if (i == 1) {
-          clustListings <- data.table(stringsAsFactors = FALSE)
+          clustListings <- data.table::data.table(stringsAsFactors = FALSE)
         } else {
           clustListings <- clustListings
         }
@@ -327,38 +332,38 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
   } else if (clustMethod == "tidygraph") {
     ## the tidygraph option
         ## make the object using the percent ID cutoff, and do so as an undirected network (deleting self-linking edges)
-    tidyMinBlastTrimmed <- tidyMinBlast %>% dplyr::filter(pident>=pidCutoff)
+    tidyMinBlastTrimmed <- tidyMinBlast %>% dplyr::filter(.data$pident>=pidCutoff)
     tidyBlastNetwork <- tidygraph::as_tbl_graph(tidyMinBlastTrimmed, directed=FALSE)
-    tidyBlastNetworkTrimmed <- tidyBlastNetwork %>% tidygraph::activate(edges) %>% dplyr::filter(from != to)
+    tidyBlastNetworkTrimmed <- tidyBlastNetwork %>% tidygraph::activate(edges) %>% dplyr::filter(.data$from != .data$to)
       ## highlighting the gene of interest, in case it is a hypothetical protein
       ## not useful if it isn't, but if it is, it provides an easy way to track whether cluster-making is crap
-    tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::mutate(isGene = ifelse(name %in% imgGenesData$gene_oid, "yes", "no"))
+    tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::mutate(isGene = ifelse(.data$name %in% imgGenesData$gene_oid, "yes", "no"))
     titleText <- paste("Cluster-based identification of hypothetical protein subgroups in neighbors of ",geneName, ".",sep="")
     subtitleText <- paste(" %ID cutoff of ", pidCutoff, " and a 65% match length used for edges. Analyzed on ", fileDate,".",sep="")
       ## pic of the full-sized cluster
     tidyBlastNetworkPic <- ggraph::ggraph(tidyBlastNetworkTrimmed, layout="stress") + 
-      ggraph::geom_edge_link0(aes(edge_alpha=pident/100), edge_colour="black", edge_width=.5) + 
-      ggraph::geom_node_point(aes(color=isGene), size=3) + 
+      ggraph::geom_edge_link0(ggplot2::aes(edge_alpha=.data$pident/100), edge_colour="black", edge_width=.5) + 
+      ggraph::geom_node_point(ggplot2::aes(color=.data$isGene), size=3) + 
       ggplot2::labs(title=titleText, subtitle=subtitleText) + 
-      ggplot2::theme(plot.title=element_text(color="black", size=18, margin=margin(10,0,10,0)), plot.subtitle=element_text(color="grey", size=12, margin=margin(10,0,10,0))) +
+      ggplot2::theme(plot.title=ggplot2::element_text(color="black", size=18, margin=ggplot2::margin(10,0,10,0)), plot.subtitle=ggplot2::element_text(color="grey", size=12, margin=ggplot2::margin(10,0,10,0))) +
       ggraph::theme_graph(base_family="sans") + 
       ggplot2::scale_color_manual(values=c("yes"="firebrick","no"="steelblue")) + 
-      ggplot2::theme(legend.position="none", plot.margin=unit(c(.2,.2,.2,.2), "cm"))  
+      ggplot2::theme(legend.position="none", plot.margin=ggplot2::unit(c(.2,.2,.2,.2), "cm"))  
     ggplot2::ggsave(filename=networkFileName, tidyBlastNetworkPic, height=10, width=20, dpi=75, units="in", device="pdf")
     ## now getting the individual clusters("components") and keeping the ones above our atLastGenes cutoff
-    tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate("nodes") %>% dplyr::mutate(cluster=group_components())
+    tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::mutate(cluster=tidygraph::group_components())
     atLeastGenes <- floor(.005*length(unique(tidyMinBlast$qseqid)))
     keepCluster <- which(table(igraph::V(tidyBlastNetworkTrimmed)$cluster) >= atLeastGenes)
-    tidyBlastClusters <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::filter(cluster %in% keepCluster)
+    tidyBlastClusters <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::filter(.data$cluster %in% keepCluster)
       ## making a graph for just the larger clusters
     tidyBlastClusterPic <- ggraph::ggraph(tidyBlastClusters, layout="stress") + 
-      ggraph::geom_edge_link0(aes(edge_alpha=pident/100), edge_colour="black", edge_width=.5) + 
-      ggraph::geom_node_point(aes(color=isGene), size=3) + 
+      ggraph::geom_edge_link0(ggplot2::aes(edge_alpha=.data$pident/100), edge_colour="black", edge_width=.5) + 
+      ggraph::geom_node_point(ggplot2::aes(color=.data$isGene), size=3) + 
       ggplot2::labs(title=titleText, subtitle=subtitleText) + 
-      ggplot2::theme(plot.title=element_text(color="black", size=18), plot.subtitle=element_text(color="grey", size=12)) +
+      ggplot2::theme(plot.title=ggplot2::element_text(color="black", size=18), plot.subtitle=ggplot2::element_text(color="grey", size=12)) +
       ggraph::theme_graph(base_family="sans") + 
       ggplot2::scale_color_manual(values=c("yes"="firebrick","no"="steelblue")) + 
-      ggplot2::theme(legend.position="bottom", plot.margin=unit(c(.2,.2,.2,.2), "cm")) 
+      ggplot2::theme(legend.position="bottom", plot.margin=ggplot2::unit(c(.2,.2,.2,.2), "cm")) 
     ggplot2::ggsave(filename=clustNetworkFileName, tidyBlastClusterPic, height=10, width=20, dpi=75, units="in", device="pdf")
       ## and now to get that data exported
     clustSeqs <- list()
@@ -375,7 +380,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
         clustSeqs[[as.character(inClustGene)]] <- hypoSeqs[[inClustGene]]
  ##                   clustSeqs <- append(clustSeqs,hypoSeqs[[inClustGene]])
         if (i == 1 && j == 1) {
-          clustListings <- data.table(stringsAsFactors = FALSE)
+          clustListings <- data.table::data.table(stringsAsFactors = FALSE)
           clustListings$gene_oid[1] <- inClustGene
           clustListings$Hypofam[1] <- inClustNum
         } else {
@@ -428,7 +433,7 @@ neighborHypothetical <- function(imgGenesData, imgNeighborsData = imgNeighborsDa
     }
   }
                                         # write out the cluster info separately, just in case
-  write.table(clustListings, file=clustListFile, sep="\t")
+  write.table(clustListings, file=clustListFile, row.names=FALSE, sep="\t")
   ## add the hypo cluster IDs to the neighbor metadata table, under the column name Hypofam. 
   for (i in 1:length(imgNeighborsData$gene_oid)) {
     findHypo <- grepl(imgNeighborsData$gene_oid[i], clustListings$gene_oid)

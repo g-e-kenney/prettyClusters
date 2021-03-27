@@ -1,13 +1,17 @@
 #' Subfunction to catalog protein families in IMG metadata file
 #'
 #' This function identifies and quantifies protein families found in genomic neighborhoods (as defined by IMG metadata)
-#' @param imgGenesTrimmed Data frame from analyzeNeighbors containing metadata for genes of interest
-#' @param imgNeighborsTrimmed Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest
-#' @param geneName Name of gene of interest as string
-#' @param coreGeneName Name of gene of interest as string, without any suffix.
-#' @param neighborThreshold Abundance of protein family required to include it in further analysis (0-1)
+#' @param imgGenesTrimmed Data frame from analyzeNeighbors containing metadata for genes of interest. Character string, required.
+#' @param imgNeighborsTrimmed Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest. Character string, required.
+#' @param geneName Name of gene of interest as string. Character string, required.
+#' @param neighborThreshold Abundance of protein family required to include it in further analysis. Number (0-1)
+#' @param coreGeneName Name of gene of interest as string, without any suffix. Character string, required.
+#' @param useInterPro Should InterPro families be used for analysis? Boolean, defaults to FALSE.
+#' @param useHypo Should hypothetical protein families from prepNeighbors be used for analysis? Boolean, defaults to TRUE.
 #' @return List of relevant protein families
 #' @export
+#' @importFrom magrittr %>% 
+#' @importFrom utils read.csv write.csv write.table read.table
 #' @examples
 #' neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, neighborNumber=neighborNumber, includeGene=includeGene, geneName=geneName, coreGeneName = coreGeneName)
 #'

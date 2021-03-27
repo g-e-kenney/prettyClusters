@@ -18,11 +18,23 @@
 #' @param labelGenes Should all genes be labeled in the diagrams? T/F, defaults to FALSE
 #' @return Gene diagrams as .png and .pdf files.
 #' @export
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
+#' @importFrom utils capture.output combn read.csv write.csv write.table
+#' @importFrom stats dist end hclust na.omit start
+#' @importFrom grDevices cairo_pdf cairo_ps col2rgb colorRampPalette dev.off hsv pdf rgb2hsv
 #' @examples
 #' prettyClusterOutput <- prettyClusterDiagrams(imgGenes = "genesFile.txt", imgNeighbors = "neighborsFile.txt", geneFormat = "formatFile.txt", geneName = "genE", neighborNumber = 10)
 #' 
-prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, geneFormat = geneFormat, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "nord", paletteInput = "aurora", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE) { 
+prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, geneFormat = geneFormat, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE) { 
   fileDate <- format(Sys.Date(),format="%Y%m%d")
+  if (efiRepnodes == TRUE) {
+    coreGeneName <- geneName
+    geneName <- paste(geneName, "_repnodes",sep="")
+  } else {
+    geneName <- geneName
+    coreGeneName <- geneName
+  }
   fileName <- paste(fileDate,"_prettyClusters_",geneName,sep="")
   finalpngname <- paste(fileName,"_with-axes.png",sep="")
   finalpdfname <- paste(fileName,"_with-axes.pdf",sep="")
@@ -51,27 +63,20 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     imgNeighbors <- imgNeighbors
   }
   colnames(imgNeighbors)[1] <- "gene_oid"
-  if (efiRepnodes == TRUE) {
-    coreGeneName <- geneName
-    geneName <- paste(geneName, "_repnodes",sep="")
-  } else {
-    geneName <- geneName
-    coreGeneName <- geneName
-  }
   print("Opening data files.")
   ## img metadata conversion - filters out things other than the core info because why do we need it
   inputColNames <- colnames(imgNeighbors)
   inputColNames <- stringr::str_replace_all(inputColNames, c(" " = "." , "," = "" ))
   colnames(imgNeighbors) <- inputColNames
   geneSets <- imgNeighbors[names(imgNeighbors) %in% imgCols]
-  geneSets <- geneSets %>% dplyr::rename(scaffold = Scaffold.Name)
-  geneSets <- geneSets %>% dplyr::rename(scaffoldID = Scaffold.ID)
-  geneSets <- geneSets %>% dplyr::rename(start = Start.Coord)
-  geneSets <- geneSets %>% dplyr::rename(end = End.Coord)
-  geneSets <- geneSets %>% dplyr::rename(strand = Strand)
-  geneSets <- geneSets %>% dplyr::rename(gene = Gene.Symbol)
-  geneSets <- geneSets %>% dplyr::rename(genome = Genome.Name)
-  geneSets <- geneSets %>% dplyr::rename(genomeID = Genome.ID)
+  geneSets <- geneSets %>% dplyr::rename(scaffold = .data$Scaffold.Name)
+  geneSets <- geneSets %>% dplyr::rename(scaffoldID = .data$Scaffold.ID)
+  geneSets <- geneSets %>% dplyr::rename(start = .data$Start.Coord)
+  geneSets <- geneSets %>% dplyr::rename(end = .data$End.Coord)
+  geneSets <- geneSets %>% dplyr::rename(strand = .data$Strand)
+  geneSets <- geneSets %>% dplyr::rename(gene = .data$Gene.Symbol)
+  geneSets <- geneSets %>% dplyr::rename(genome = .data$Genome.Name)
+  geneSets <- geneSets %>% dplyr::rename(genomeID = .data$Genome.ID)
   geneSets <- data.table::as.data.table(geneSets, stringsAsFactors=FALSE)
   ## this is easier than dealing with different possible IMG-like metadata inputs
   if ("InterPro" %in% colnames(imgNeighbors)) {
@@ -131,14 +136,14 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     geneSets$gene <- as.character(geneSets$gene)
     geneSets$scaffold <- as.character(geneSets$scaffold)
     ## slightly a kludge -  genes where a complete match is required write over previous annotations
-    reorderGenes1 <- geneFormat %>% dplyr::filter(!Requirement == "and")
-    reqGenes <- geneFormat %>% dplyr::filter(Requirement == "and")
+    reorderGenes1 <- geneFormat %>% dplyr::filter(!.data$Requirement == "and")
+    reqGenes <- geneFormat %>% dplyr::filter(.data$Requirement == "and")
     namedGenes <- rbind(reorderGenes1, reqGenes)
     ## bride of the slight kludge - fused genes _also_ write over previous annotations
-    reorderGenes2 <- namedGenes %>% dplyr::filter(!Fusion == "yes")
-    fusedGenes <- namedGenes %>% dplyr::filter(Fusion == "yes")
+    reorderGenes2 <- namedGenes %>% dplyr::filter(!.data$Fusion == "yes")
+    fusedGenes <- namedGenes %>% dplyr::filter(.data$Fusion == "yes")
     namedGenes <- rbind(reorderGenes2, fusedGenes)
-    namedGenes <- namedGenes %>% dplyr::rename(IMGfam = IMG.Term)
+    namedGenes <- namedGenes %>% dplyr::rename(IMGfam = .data$IMG.Term)
     ## "" or NA becomes "none"
     ## then none will become a list element
     namedGenes$Pfam <- namedGenes$Pfam %>% tidyr::replace_na("none")
@@ -159,7 +164,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     for (i in 1:length(geneSets$gene)) {
       foundMe <- "no"
       foundIn <- "nowhere"
-      tempRealData <- geneSets[i,] %>% dplyr::select(Pfam, Tigrfam, InterPro, IMGfam, Hypofam)
+      tempRealData <- geneSets[i,] %>% dplyr::select(.data$Pfam, .data$Tigrfam, .data$InterPro, .data$IMGfam, .data$Hypofam)
       ## entirely hypothetical proteins are easy to flag - no annotations
       if (all(tempRealData=="none") == TRUE) {
         geneSets$gene[i] <- "hyp"
@@ -253,11 +258,11 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   if (standAlone == TRUE) {
     initScaff <- unique(geneSets$scaffoldID)
     for (m in 1:length(initScaff)) {
-      scaffTest <- geneSets %>% dplyr::filter(scaffoldID == initScaff[m])
+      scaffTest <- geneSets %>% dplyr::filter(.data$scaffoldID == initScaff[m])
       if (any(grepl(coreGeneName,scaffTest$gene)) == TRUE) {
         next
       } else {
-        geneSets <- geneSets %>% dplyr::filter(!scaffoldID == initScaff[m])
+        geneSets <- geneSets %>% dplyr::filter(!.data$scaffoldID == initScaff[m])
       }
     }
     print("Genes on incorrect scaffolds trimmed.")
@@ -313,10 +318,10 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   multiBGC <- data.frame()
   multicoord <- list()
   for(k in 1:length(species)) {
-    tempSpecies <- geneSets %>% dplyr::filter(genomeID == species[k])
+    tempSpecies <- geneSets %>% dplyr::filter(.data$genomeID == species[k])
     specContigs <- unique(tempSpecies$scaffoldID)
     for (j in 1:length(specContigs))  {
-      tempContig <- tempSpecies %>% dplyr::filter(scaffoldID == specContigs[j])
+      tempContig <- tempSpecies %>% dplyr::filter(.data$scaffoldID == specContigs[j])
       ## using a rough "within 50kb" guideline to catch multiple gene clusters on the same scaffold
       if (max(tempContig$start) <= min(tempContig$start) + 50000 && k == 1 && j == 1) {
         tempContig$bgc <- paste(tempContig$genome[1], " (bgc ",j,")",sep="")
@@ -353,7 +358,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
               whichBGC <- 1
               tempContig$bgc[g] <- paste(tempContig$genome[g], " (bgc ",j,".",whichBGC,")",sep="")
             } else {
-              if (between(tempContig$start[g], min(tempCoord[c(whichBGC*2-1,whichBGC*2)]), max(tempCoord[c(whichBGC*2-1,whichBGC*2)])) == TRUE) {
+              if (dplyr::between(tempContig$start[g], min(tempCoord[c(whichBGC*2-1,whichBGC*2)]), max(tempCoord[c(whichBGC*2-1,whichBGC*2)])) == TRUE) {
                 whichBGC <- whichBGC
                 tempContig$bgc[g] <- paste(tempContig$genome[g], " (bgc ",j,".",whichBGC,")",sep="")
               } else  {
@@ -388,7 +393,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   ## some of this may end up in flux as i try to nuke the extra x-axes.
   maxval <- 0
   for (i in 1:length(bgcScaffolds)) {
-    tempPositioning <- dplyr::filter(multiBGC, scaffoldID == bgcScaffolds[i])
+    tempPositioning <- dplyr::filter(multiBGC, .data$scaffoldID == bgcScaffolds[i])
     zeroval <- tempPositioning$start[1]
     tempPositioning$start <- tempPositioning$start - zeroval
     tempPositioning$end <- tempPositioning$end - zeroval
@@ -457,7 +462,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     print("Gene abundance calculated based on geneFormat-derived annotations.")
   } else {
     figureTitle <- paste("<b>genomic neighborhood diagrams for *",coreGeneName,"*</b>",sep="")
-    captionText <- "no automated annotation and gene quantification for these diagrams."
+    captionText <- "No automated annotation and gene quantification for these diagrams."
   }
   uniqueBGCs <- unique(finalGeneSets$bgc)
   ## aligning gene clusters to your gene of interest
@@ -466,7 +471,7 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     # dirGeneSets <- NULL
     for (i in 1:length(uniqueBGCs)) {
       aligningGenes <- data.frame()
-      aligningGenes <- dplyr::filter(finalGeneSets, bgc == uniqueBGCs[i])
+      aligningGenes <- dplyr::filter(finalGeneSets, .data$bgc == uniqueBGCs[i])
       core <- which(aligningGenes$gene == coreGeneName)
       if (length(core)==0) {next}
       if (aligningGenes$direction[core] == 1) {
@@ -504,14 +509,63 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
   ## it will also add a 2nd light/dark color shade if there are > 10 named genes
   ## standardizing on a minimal palette set so that all get colorRamped similarly
   ## fish!
-    if (colorType == "fishualize") {tempPalette <- fishualize::fish(5,option=paletteInput)}
-    if (colorType == "ghibli") {tempPalette <- ghibli::ghibli_palette(paletteInput)[1:7]}
-    if (colorType == "lisa") { tempPalette <- lisa::lisa_palette(paletteInput, 5)[1:5]} 
-    if (colorType == "nord") {tempPalette <- nord::nord(paletteInput,5)}
-    if (colorType == "rtist") {tempPalette <- rtist::rtist_palette(paletteInput,5)[1:5]}
-    if (colorType == "scico") {tempPalette <- scico::scico(5,palette=paletteInput)}
-    if (colorType == "viridis") {tempPalette <- viridis::viridis(5,option=paletteInput)}
-    if (colorType == "wesanderson") {tempPalette <- wesanderson::wes_palette(paletteInput,5)}
+    if (colorType == "fishualize") {
+      if(require(fishualize)) {
+        tempPalette <- fishualize::fish(5,option=paletteInput)
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "ghibli") {
+      if(require(ghibli)) {
+        tempPalette <- ghibli::ghibli_palette(paletteInput)[1:7]
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "lisa") { 
+      if(require(lisa)) {
+        tempPalette <- lisa::lisa_palette(paletteInput, 5)[1:5]
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "nord") {
+      if(require(nord)) {
+        tempPalette <- nord::nord(paletteInput,5)      
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "rtist") {
+      if(require(rtist)) {
+        tempPalette <- rtist::rtist_palette(paletteInput,5)[1:5]      
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "scico") {
+      if(require(scico)) {
+        tempPalette <- scico::scico(5,palette=paletteInput)      
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "wesanderson") {
+      if(require(wesanderson)) {
+        tempPalette <- wesanderson::wes_palette(paletteInput,5)      
+      } else {
+        print("Chosen palette not installed, using viridis.")
+        tempPalette <- viridis::viridis(5,option=paletteInput)
+      }
+    }
+    if (colorType == "viridis.") {tempPalette <- viridis::viridis(5,option=paletteInput)}
   ## now tailoring palettes to our gene set
     geneTypes <- unique(processed$gene)
     colorNum <- length(geneTypes)
@@ -610,15 +664,15 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
       tempSeqID <- as.numeric(processed$clustOrd[tempSpeciesLoc[1]]) + 100000
       tempSeqID <- as.character(tempSeqID)
       tempClustID <- processed$clustNum[tempSpeciesLoc[1]]
-      tempColorID <- clustColors$clustColor[grep(tempClustID,clustColors$clustNum)]
+      tempColorID <- clustColors$clustColor[which(clustColors$clustNum %in% tempClustID)]
       if (grepl("none",tempClustID) == TRUE)  {
-        extName <- paste("<span style = 'font-size:9pt; color:#9F9F9F'>sequence ",tempSeqID,"</span><br>","<span style = 'font-size:9pt; color:#000000'>",tempLabel, "</span>",sep="")
+          extName <- paste("<span style = 'font-size:9pt; color:#9F9F9F'>sequence ",tempSeqID,"</span><br>","<span style = 'font-size:9pt; color:#000000'>",tempLabel, "</span>",sep="") 
       } else {
         ## this will match coloring with the coloring from the heatmap in analyzeNeighbors
-        extName <- paste("<span style = 'font-size:9pt; color:",tempColorID,"'>sequence ",tempSeqID,", **cluster ",numbers2words(as.numeric(tempClustID)),"**</span><br>","<span style = 'font-size:9pt; color:#000000'>",tempLabel,"</span>",sep="")
+          extName <- paste("<span style = 'font-size:9pt; color:",tempColorID,"'>sequence ",tempSeqID,", **cluster ",numbers2words(as.numeric(tempClustID)),"**</span><br>","<span style = 'font-size:9pt; color:#000000'>",tempLabel,"</span>",sep="")
       }
       for (j in 1:length(tempSpeciesLoc)) {
-         processed$bgc[tempSpeciesLoc[j]] <- extName
+          processed$bgc[tempSpeciesLoc[j]] <- extName 
       }
     }
     print("Cluster number labels added to diagram.")
@@ -630,56 +684,56 @@ prettyClusterDiagrams <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbo
     ## so a version with and without the axes for all clusters is also generated as a .pdf so that you can have a properly scaled vector scale
   if (labelGenes == TRUE) {
     if (alignToCore == TRUE) {
-    dummies <- gggenes::make_alignment_dummies(processed, aes(xmin = start, xmax = end, y = bgc, id = gene), on = coreGeneName)
-    clusterDiagram <- ggplot2::ggplot(processed, aes(xmin = start, xmax = end, y = bgc, fill = gene, forward = direction, label="gene_oid")) +
-      gggenes::geom_gene_arrow(arrowhead_height=unit(3,"mm"), arrowhead_width=unit(1,"mm")) +
-      ggplot2::geom_blank(data=dummies, aes(forward = 1)) +
-      ggplot2::facet_wrap(~ bgc, ncol = 1, scales = "free") +
+    dummies <- gggenes::make_alignment_dummies(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, id = .data$gene), on = coreGeneName)
+    clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction, label="gene_oid")) +
+      gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+      ggplot2::geom_blank(data=dummies, ggplot2::aes(forward = 1)) +
+      ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
       ggplot2::scale_fill_manual(values = finalColors) +
       ggplot2::labs(title=figureTitle, caption=captionText, y="**genomic neighborhoods**", x=NULL) +
       gggenes::theme_genes()
     xPlusDiagram <- clusterDiagram +
-      ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
+      ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
     } else  {
-      clusterDiagram <- ggplot2::ggplot(processed, aes(xmin = start, xmax = end, y = bgc, fill = gene, forward = direction, label="gene_oid")) +
-        gggenes::geom_gene_arrow(arrowhead_height=unit(3,"mm"), arrowhead_width=unit(1,"mm")) +
-        ggplot2::facet_wrap(~ bgc, ncol = 1, scales = "free") +
+      clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction, label="gene_oid")) +
+        gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+        ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
         ggplot2::scale_fill_manual(values = finalColors) +
         ggplot2::labs(title=figureTitle, caption=captionText, y="**genomic neighborhoods**", x=NULL) +
         gggenes::theme_genes()
       xPlusDiagram <- clusterDiagram +
-        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
+        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
     }
   } else  {
     if (alignToCore == TRUE) {
-      dummies <- gggenes::make_alignment_dummies(processed, aes(xmin = start, xmax = end, y = bgc, id = gene), on = coreGeneName)
-      clusterDiagram <- ggplot2::ggplot(processed, aes(xmin = start, xmax = end, y = bgc, fill = gene, forward = direction)) +
-        gggenes::geom_gene_arrow(arrowhead_height=unit(3,"mm"), arrowhead_width=unit(1,"mm")) +
-        ggplot2::geom_blank(data=dummies, aes(forward = 1)) +
-        ggplot2::facet_wrap(~ bgc, ncol = 1, scales = "free") +
+      dummies <- gggenes::make_alignment_dummies(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, id = .data$gene), on = coreGeneName)
+      clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction)) +
+        gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+        ggplot2::geom_blank(data=dummies, ggplot2::aes(forward = 1)) +
+        ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
         ggplot2::scale_fill_manual(values = finalColors) +
         ggplot2::labs(title=figureTitle, caption=captionText, y="**genomic neighborhoods**", x=NULL) +
         gggenes::theme_genes()
       xPlusDiagram <- clusterDiagram +
-        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
+        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
     } else  {
-      clusterDiagram <- ggplot2::ggplot(processed, aes(xmin = start, xmax = end, y = bgc, fill = gene, forward = direction)) +
-        gggenes::geom_gene_arrow(arrowhead_height=unit(3,"mm"), arrowhead_width=unit(1,"mm")) +
-        ggplot2::facet_wrap(~ bgc, ncol = 1, scales = "free") +
+      clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction)) +
+        gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+        ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
         ggplot2::scale_fill_manual(values = finalColors) +
         ggplot2::labs(title=figureTitle, caption=captionText, y="**genomic neighborhoods**", x=NULL) +
         gggenes::theme_genes()
       xPlusDiagram <- clusterDiagram +
-        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=margin(10,10,10,10), margin=margin(5,0,5,0), r=grid::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
+        ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,  padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#EEEEEE", halign=0.5, valign=0.5), plot.title.position = "plot", axis.title.y = ggtext::element_markdown(size=12), axis.text.y = ggtext::element_markdown(size=9), plot.caption = ggtext::element_textbox_simple(lineheight=1.2, size=11, padding=ggplot2::margin(10,10,10,10), margin=ggplot2::margin(5,0,5,0), r=ggplot2::unit(8,"pt"), fill="#D9D9D9", halign=0.5, valign=0.5), plot.caption.position = "plot")
     }
   }
     ## get rid of the extra axes (but means no scale on-figure, for now)
-  xMinusDiagram <- xPlusDiagram + ggplot2::theme(axis.line.x=element_blank(), axis.text.x=element_blank(),  axis.ticks.x=element_blank())
+  xMinusDiagram <- xPlusDiagram + ggplot2::theme(axis.line.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),  axis.ticks.x=ggplot2::element_blank())
     ## this gets rid of that ggplot2 grid error by scaling sizing to the number of gene clusters being visualized
     ## also adapts width if you have chosen the longest names
   print("Cluster diagrams generated.")
   modheight <- length(uniqueBGCs)/2
-  if (exists(x="showScaffolds") && showScaffolds==TRUE) {
+  if (exists(x="showScaffold") && showScaffold==TRUE) {
     modwidth <- modheight/2
   } else if (length(uniqueBGCs)/2 <=50) {
     modwidth <- modheight  

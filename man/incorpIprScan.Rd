@@ -14,11 +14,17 @@ incorpIprScan(
 )
 }
 \arguments{
-\item{iprScanSource}{Data frame from neighborPrep with metadata for your genes of interest.}
+\item{iprScanSource}{Data frame from neighborPrep with metadata for your genes of interest. Character string, required.}
 
-\item{imgNeighborsSource}{Data frame from neighborPrep with metadata for neighbors of your genes of interest.}
+\item{imgNeighborsSource}{Data frame from neighborPrep with metadata for neighbors of your genes of interest. Character string, required.}
 
-\item{geneName}{Character string with your gene of interest's name}
+\item{geneName}{Character string with your gene of interest's name.  Required.}
+
+\item{addPfam}{Should Pfam assignments be added to the metadata table? Boolean, defaults to TRUE.}
+
+\item{addTigrfam}{Should TIGRfam assignments be added to the metadata table? Boolean, defaults to TRUE.}
+
+\item{addIPRfam}{Should InterPro family assignments be added to the metadata table? Boolean, defaults to TRUE.}
 }
 \value{
 Updated metadata for neighboring genes (additional files generated en route)

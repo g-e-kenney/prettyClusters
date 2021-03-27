@@ -1,16 +1,19 @@
 #' Subfunction to clean up IMG metadata files
 #'
 #' Given a desired genome neighborhood and lists of genes of interest and their neighbors, this function removes any genes not on the same scaffold as their ostensible neighbors and trims truncated clusters, removing them from further analysis.
-#' @param imgGenesTemp Data frame from hypoProteins or neighborPrep with metadata for your gene of interest? 
+#' @param imgGenesData Data frame from hypoProteins or neighborPrep with metadata for your gene of interest? 
 #' @param imgNeighborsData Data frame from hypoProteins or neighborPrep with metadata for neighbors of your gene of interest.
 #' @param imgGeneSeqs Data frame from hypoProteins or neighborPrep with sequence information for your gene of interest.
 #' @param imgNeighborSeqs Data frame from hypoProteins or neighborPrep with sequence information for neighbors of your gene of interest.
 #' @param imgNeighborsContext Data frame from hypoProteins or neighborPrep tying genes of interest to their neighbors.
-#' @param geneName Character string with your gene of interest's name
-#' @param neighborNumber How many neighbors do you want to look at on each side of the gene? Integer from 1 up.
-#' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? T/F value.
+#' @param geneName Character string with your gene of interest's name.
+#' @param neighborNumber How many neighbors do you want to look at on each side of the gene? Integer greater than 1.
+#' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? Boolean, defaults to TRUE in parent..
 #' @return List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
 #' @examples 
 #'  neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData, imgGenesData = imgGenesData, imgNeighborsContext = imgNeighborsContext, trimShortClusters = TRUE, neighborNumber = 10, geneName = "genE", imgNeighborSeqs=imgNeighborSeqs, imgGeneSeqs=imgGeneSeqs)
 #'
@@ -39,12 +42,12 @@ neighborTrim <- function(imgNeighborsData = imgNeighborsData, imgGenesData = img
   numNeighbors <- length(imgNeighborsData$gene_oid)
     ## deals with the occasional disappearance of gene_oids from IMG metadata
     ## yeah i dunno why this happens
-  imgNeighborsContext <- as.data.table(imgNeighborsContext)
+  imgNeighborsContext <- data.table::as.data.table(imgNeighborsContext)
   if(length(imgNeighborsData$gene_oid) != length(imgNeighborsContext$gene_oid)) {
     print("You have different numbers of genes in your current neighbor metadata and your original neighbor list; adjusting the latter to match the former.") 
   }
-  imgNeighborsTrimmed <- dplyr::filter(imgNeighborsData, gene_oid %in% uniqueNeighbors)
-  imgNeighborsContextTrimmed <- dplyr::filter(imgNeighborsContext, gene_oid %in% uniqueNeighbors)
+  imgNeighborsTrimmed <- dplyr::filter(imgNeighborsData, .data$gene_oid %in% uniqueNeighbors)
+  imgNeighborsContextTrimmed <- dplyr::filter(imgNeighborsContext, .data$gene_oid %in% uniqueNeighbors)
   imgNeighborSeqsTrimmed <- imgNeighborSeqs[which(names(imgNeighborSeqs) %in% uniqueNeighbors)]
   imgGeneSeqsTrimmed <- imgGeneSeqs
   imgGenesTrimmed <- imgGenesData
@@ -82,11 +85,11 @@ neighborTrim <- function(imgNeighborsData = imgNeighborsData, imgGenesData = img
   imgNeighborsContextTrimmed$gene_oid <- as.character(imgNeighborsContextTrimmed$gene_oid)    
   imgNeighborsTrimmed$gene_oid <- as.character(imgNeighborsTrimmed$gene_oid)
   imgNeighborsTrimmed <- imgNeighborsTrimmed %>% dplyr::left_join(imgNeighborsContextTrimmed, by="gene_oid")
-  wrongScaffold <- imgNeighborsTrimmed %>% dplyr::filter(Scaffold.ID != source_scaffold_id)
+  wrongScaffold <- imgNeighborsTrimmed %>% dplyr::filter(.data$Scaffold.ID != .data$source_scaffold_id)
   wrongScaffold <- wrongScaffold$gene_oid
-  imgNeighborsTrimmed <-imgNeighborsTrimmed %>% dplyr::filter(!gene_oid %in% wrongScaffold)
-  imgNeighborsContextTrimmed <- imgNeighborsContextTrimmed %>% dplyr::filter(!gene_oid %in% wrongScaffold)
-  nSeqTable <- nSeqTable %>% dplyr::filter(!gene_oid %in% wrongScaffold)
+  imgNeighborsTrimmed <-imgNeighborsTrimmed %>% dplyr::filter(!.data$gene_oid %in% wrongScaffold)
+  imgNeighborsContextTrimmed <- imgNeighborsContextTrimmed %>% dplyr::filter(!.data$gene_oid %in% wrongScaffold)
+  nSeqTable <- nSeqTable %>% dplyr::filter(!.data$gene_oid %in% wrongScaffold)
   print("Scaffold mismatches trimmed.")
                                         # trimming gene clusters that are truncated
                                         ## it's possible to not remove the short gene clusters, and appropriate in some circumstances
@@ -110,15 +113,15 @@ neighborTrim <- function(imgNeighborsData = imgNeighborsData, imgGenesData = img
         next
       }    
     }
-    imgNeighborsTrimmed <- imgNeighborsTrimmed %>%  dplyr::filter(!gene_oid %in% smallNeighbors)
-    imgNeighborsContextTrimmed <-imgNeighborsContextTrimmed %>% dplyr::filter(!gene_oid %in% smallNeighbors)
-    imgGenesTrimmed <-imgGenesTrimmed %>% dplyr::filter(!gene_oid %in% smallNeighborhood)
-    gSeqTable <- gSeqTable %>% dplyr::filter(!gene_oid %in% smallNeighborhood)
-    nSeqTable <- nSeqTable %>% dplyr::filter(!gene_oid %in% smallNeighbors)
+    imgNeighborsTrimmed <- imgNeighborsTrimmed %>%  dplyr::filter(!.data$gene_oid %in% smallNeighbors)
+    imgNeighborsContextTrimmed <-imgNeighborsContextTrimmed %>% dplyr::filter(!.data$gene_oid %in% smallNeighbors)
+    imgGenesTrimmed <-imgGenesTrimmed %>% dplyr::filter(!.data$gene_oid %in% smallNeighborhood)
+    gSeqTable <- gSeqTable %>% dplyr::filter(!.data$gene_oid %in% smallNeighborhood)
+    nSeqTable <- nSeqTable %>% dplyr::filter(!.data$gene_oid %in% smallNeighbors)
     print("Truncated neighborhoods trimmed.")
   }
 #    imgNeighborsTrimmed 
-  imgNeighborsContextTrimmed <- as.character(imgNeighborsContextTrimmed)
+#  imgNeighborsContextTrimmed <- as.character(imgNeighborsContextTrimmed)
   write.table(imgNeighborsTrimmed, file=fileNameiNT, row.names=FALSE, col.names = TRUE, sep="\t")
   write.table(imgNeighborsContextTrimmed, file=fileNameiNCT, row.names=FALSE, col.names = TRUE, sep="\t")
   write.table(imgGenesTrimmed, file=fileNameiGT, row.names=FALSE, col.names = TRUE, sep="\t")

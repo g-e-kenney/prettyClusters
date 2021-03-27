@@ -18,21 +18,23 @@ neighborClusters(
 )
 }
 \arguments{
-\item{imgGenesTrimmed}{Data frame from analyzeNeighbors containing metadata for genes of interest}
+\item{imgGenesTrimmed}{Data frame from analyzeNeighbors containing metadata for genes of interest. Character string, required.}
 
-\item{imgNeighborsTrimmed}{Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest}
+\item{imgNeighborsTrimmed}{Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest. Character string, required.}
 
-\item{geneName}{Name of gene of interest as string}
+\item{geneName}{Name of gene of interest as string.  Required.}
 
-\item{neighborMatrixData}{Matrix from analyzeNeighbors/neighborMatrix containing binary data re: protein family presence in gene clusters}
+\item{neighborMatrixData}{Matrix from analyzeNeighbors/neighborMatrix containing binary data re: protein family presence in gene clusters. Required.}
 
-\item{autoClust}{T/F value determining whether clusters will be automatically assigned}
+\item{autoClust}{Should clusters be automatically assigned? Boolean, defaults to TRUE in parent function.}
 
-\item{clustMethod}{String specifying what tool (tidygraph, pvclust) will be used to identify clusters}
+\item{clustMethod}{String specifying what tool (tidygraph, pvclust) will be used to identify clusters. Defaults to "tidygraph" in parent function.}
 
-\item{alphaVal}{Alpha value cutoff for pvclust (Num, 0-1)}
+\item{alphaVal}{Alpha value cutoff for pvclust. Number, defined in parent function.}
 
-\item{coreGeneName}{Name of gene of interest as string, without any suffix.}
+\item{bootStrap}{Bootstrap rounds for pvclust. Integer, defined in parent function.}
+
+\item{coreGeneName}{Name of gene of interest as string, without any suffix. String, defined in parent function.}
 
 \item{tgCutoff}{Number (0-1) representing edge similarity to keep for tidygraph. Default 0.6.}
 }

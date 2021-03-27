@@ -8,6 +8,9 @@
 #' @param coreGeneName Name of gene of interest as string, without any suffix.
 #' @return Matrix object
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
 #' @examples
 #' neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
 #'
@@ -32,7 +35,7 @@ neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed, neighborBinary = n
   for (i in 1:centralGeneNum) {
     neighborMatrixData$gene_oid[i] <- centralGenes[i]
     ## getting the mini-set of neighbors of that source gene id
-    nearestBinary <- neighborBinary %>% dplyr::filter(source_gene_oid == centralGenes[i])
+    nearestBinary <- neighborBinary %>% dplyr::filter(.data$source_gene_oid == centralGenes[i])
     for (j in 1:colTally) {
       if(any(grepl(1,nearestBinary[[matrixColNames[j+1]]])) == TRUE) {
         neighborMatrixData[[matrixColNames[j+1]]][i] <- 1

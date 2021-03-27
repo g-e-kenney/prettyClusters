@@ -10,6 +10,9 @@
 #' @param efiFinalMetadata Filename for the Cytoscape node table for the EFI-EST network at the final repnode %ID cutoff. Text ("finalnetwork.txt")
 #' @return List with the trimmed gene and neighbor metadata
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
 #' @examples
 #' repnodeTrimOut <- repnodeTrim(imgGenes = "geneFile.txt", imgNeighbors="neighborFile.txt", imgGeneSeqs = "geneSeqs.fa", imgNeighborSeqs = "neighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiFullMetadata.csv", efiFinalMetadata = "efiFinalMetadata.csv")
 #'
@@ -44,10 +47,10 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   efiFullNodes <- read.csv(efiFullMetadata, header=TRUE, stringsAsFactors=FALSE)
   efiFinalNodes <- read.csv(efiFinalMetadata, header=TRUE, stringsAsFactors=FALSE)
   ## starting to reformat
-  efiFullNodes <- efiFullNodes %>% dplyr::rename(gene_oid=Description)
-  efiFullNodes <- efiFullNodes %>% dplyr::rename(efi_oid=name)
-  efiFinalNodes <- efiFinalNodes %>% dplyr::rename(gene_oid=Description)
-  efiFinalNodes <- efiFinalNodes %>% dplyr::rename(efi_oid=name)
+  efiFullNodes <- efiFullNodes %>% dplyr::rename(gene_oid=.data$Description)
+  efiFullNodes <- efiFullNodes %>% dplyr::rename(efi_oid=.data$name)
+  efiFinalNodes <- efiFinalNodes %>% dplyr::rename(gene_oid=.data$Description)
+  efiFinalNodes <- efiFinalNodes %>% dplyr::rename(efi_oid=.data$name)
   efiFullNodes$gene_oid <- as.character(efiFullNodes$gene_oid)
   efiFullNodes$gene_oid <- gsub(" .*$", "", efiFullNodes$gene_oid)
   imgGenesTemp$gene_oid <- as.character(imgGenesTemp$gene_oid)
@@ -57,7 +60,7 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   efiGenesData <- imgGenesTemp %>% dplyr::left_join(efiFullNodes[,c("gene_oid","efi_oid")], by="gene_oid")
   ## what repnode does a gene have, and is it a repnode?
   repnodeList <- efiFinalNodes$shared.name
-  efiGenesData <- efiGenesData %>% dplyr::mutate(isRepnode = ifelse(efi_oid %in% repnodeList,TRUE,FALSE))
+  efiGenesData <- efiGenesData %>% dplyr::mutate(isRepnode = ifelse(.data$efi_oid %in% repnodeList,TRUE,FALSE))
   for (i in 1:length(efiGenesData$gene_oid)) {
     if (is.na(efiGenesData$efi_oid[i])==TRUE) {
       efiGenesData$repnodeIs[i] <- ""
@@ -77,12 +80,12 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
       }
     }
   }
-  repGenesTrimmed <- efiGenesData %>% dplyr::filter(isRepnode == TRUE)
-  efiFullNodes <- efiFullNodes %>% dplyr::rename(source_gene_oid=gene_oid)
+  repGenesTrimmed <- efiGenesData %>% dplyr::filter(.data$isRepnode == TRUE)
+  efiFullNodes <- efiFullNodes %>% dplyr::rename(source_gene_oid=.data$gene_oid)
   efiNeighborsData <- imgNeighborsTemp %>% dplyr::left_join(efiFullNodes[,c("source_gene_oid","efi_oid")], by="source_gene_oid")
-  efiNeighborsData <- efiNeighborsData %>% dplyr::mutate(isRepnode = ifelse(efi_oid %in% repnodeList,TRUE,FALSE))
-  repNeighborsTrimmed <- efiNeighborsData %>% dplyr::filter(isRepnode == TRUE)
-  efiFullNodes <- efiFullNodes %>% dplyr::rename(gene_oid=source_gene_oid)
+  efiNeighborsData <- efiNeighborsData %>% dplyr::mutate(isRepnode = ifelse(.data$efi_oid %in% repnodeList,TRUE,FALSE))
+  repNeighborsTrimmed <- efiNeighborsData %>% dplyr::filter(.data$isRepnode == TRUE)
+  efiFullNodes <- efiFullNodes %>% dplyr::rename(gene_oid=.data$source_gene_oid)
   ## exporting the datatables as full and repnode-only datases
   write.table(efiGenesData, file=fullGenesFile, row.names=F, col.names = T, sep="\t")
   write.table(efiNeighborsData, file=fullNeighborsFile, row.names=F, col.names = T, sep="\t")
@@ -97,12 +100,12 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
     nSeqTable[i,2] <- imgNeighborSeqs[[i]]
   }
   colnames(nSeqTable) <- c("gene_oid", "sequence")
-  nRepSeqs <- nSeqTable %>% dplyr::filter(gene_oid %in% repNeighborsTrimmed$gene_oid)
+  nRepSeqs <- nSeqTable %>% dplyr::filter(.data$gene_oid %in% repNeighborsTrimmed$gene_oid)
   for (i in 1:length(nRepSeqs[,1])) {
     nReList[[nRepSeqs[i,1]]] <- nRepSeqs[i,2] 
   }
   repNeighborSeqs <- nReList
-  write.fasta(repNeighborSeqs, names=names(repNeighborSeqs),file.out=repNeighborSeqsFile)
+  seqinr::write.fasta(repNeighborSeqs, names=names(repNeighborSeqs),file.out=repNeighborSeqsFile)
   ## trimming the sequence files for the repnodes themselves
   gSeqNnames <- names(imgGeneSeqs)
   gSeqTable <- data.frame()
@@ -112,12 +115,12 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
     gSeqTable[i,2] <- imgGeneSeqs[[i]]
   }
   colnames(gSeqTable) <- c("gene_oid", "sequence")
-  gRepSeqs <- gSeqTable %>% dplyr::filter(gene_oid %in% repGenesTrimmed$gene_oid)
+  gRepSeqs <- gSeqTable %>% dplyr::filter(.data$gene_oid %in% repGenesTrimmed$gene_oid)
   for (i in 1:length(gRepSeqs[,1])) {
     gReList[[gRepSeqs[i,1]]] <- gRepSeqs[i,2] 
   }  
   repGeneSeqs <- gReList
-  write.fasta(repGeneSeqs, names=names(repGeneSeqs),file.out=repGeneSeqsFile)
+  seqinr::write.fasta(repGeneSeqs, names=names(repGeneSeqs),file.out=repGeneSeqsFile)
   print("Repnode metadata files generated.")           
   return(list(repGenesTrimmed=repGenesTrimmed,repNeighborsTrimmed=repNeighborsTrimmed))
 }

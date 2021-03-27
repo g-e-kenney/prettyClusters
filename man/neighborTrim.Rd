@@ -18,19 +18,19 @@ neighborTrim(
 \arguments{
 \item{imgNeighborsData}{Data frame from hypoProteins or neighborPrep with metadata for neighbors of your gene of interest.}
 
+\item{imgGenesData}{Data frame from hypoProteins or neighborPrep with metadata for your gene of interest?}
+
 \item{imgNeighborsContext}{Data frame from hypoProteins or neighborPrep tying genes of interest to their neighbors.}
 
-\item{trimShortClusters}{Should gene clusters with fewer than the minimum gene number be visualized? T/F value.}
+\item{trimShortClusters}{Should gene clusters with fewer than the minimum gene number be visualized? Boolean, defaults to TRUE in parent..}
 
-\item{neighborNumber}{How many neighbors do you want to look at on each side of the gene? Integer from 1 up.}
+\item{neighborNumber}{How many neighbors do you want to look at on each side of the gene? Integer greater than 1.}
 
-\item{geneName}{Character string with your gene of interest's name}
+\item{geneName}{Character string with your gene of interest's name.}
 
 \item{imgNeighborSeqs}{Data frame from hypoProteins or neighborPrep with sequence information for neighbors of your gene of interest.}
 
 \item{imgGeneSeqs}{Data frame from hypoProteins or neighborPrep with sequence information for your gene of interest.}
-
-\item{imgGenesTemp}{Data frame from hypoProteins or neighborPrep with metadata for your gene of interest?}
 }
 \value{
 List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)

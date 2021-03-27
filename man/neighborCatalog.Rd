@@ -15,15 +15,19 @@ neighborCatalog(
 )
 }
 \arguments{
-\item{imgGenesTrimmed}{Data frame from analyzeNeighbors containing metadata for genes of interest}
+\item{imgGenesTrimmed}{Data frame from analyzeNeighbors containing metadata for genes of interest. Character string, required.}
 
-\item{imgNeighborsTrimmed}{Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest}
+\item{imgNeighborsTrimmed}{Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest. Character string, required.}
 
-\item{geneName}{Name of gene of interest as string}
+\item{geneName}{Name of gene of interest as string. Character string, required.}
 
-\item{neighborThreshold}{Abundance of protein family required to include it in further analysis (0-1)}
+\item{neighborThreshold}{Abundance of protein family required to include it in further analysis. Number (0-1)}
 
-\item{coreGeneName}{Name of gene of interest as string, without any suffix.}
+\item{coreGeneName}{Name of gene of interest as string, without any suffix. Character string, required.}
+
+\item{useInterPro}{Should InterPro families be used for analysis? Boolean, defaults to FALSE.}
+
+\item{useHypo}{Should hypothetical protein families from prepNeighbors be used for analysis? Boolean, defaults to TRUE.}
 }
 \value{
 List of relevant protein families

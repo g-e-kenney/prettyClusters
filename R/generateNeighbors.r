@@ -8,6 +8,7 @@
 #' @param geneName What is the name of your gene? Gene name as string ("genE")
 #' @return Lists of neighboring genes to upload to your IMG Gene Cart
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
 #' @examples
 #' generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", imgGeneSeqs="geneSeqs.fa", neighborNumber=10, geneName="genE")
 #'
@@ -26,7 +27,7 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE)
     imgSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
     ## let's quickly just save that fasta file with simplified headers for EFI use
-    write.fasta(imgSeqs, names=names(imgSeqs),file.out=fileNameSeqs)
+    seqinr::write.fasta(imgSeqs, names=names(imgSeqs),file.out=fileNameSeqs)
     ## and onwards
     geneList <- inputGenes$gene_oid
     scaffList <- inputGenes$Scaffold.ID

@@ -25,6 +25,10 @@ prepNeighbors(
 )
 }
 \arguments{
+\item{imgGenes}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
+
+\item{imgNeighbors}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
+
 \item{geneSeqs}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
 
 \item{neighborSeqs}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
@@ -54,10 +58,6 @@ prepNeighbors(
 \item{pidCutoff}{Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.}
 
 \item{trimShortClusters}{Should gene clusters with fewer than the minimum gene number be visualized? T/F value.}
-
-\item{imgGenesTemp}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
-
-\item{imgNeighborsTemp}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
 }
 \value{
 List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)

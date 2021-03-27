@@ -1,17 +1,22 @@
 #' Making a fake IMG metadata file from a GenBank file
 #'
 #' This function takes GenBank files as input and outputs fake IMG-style metadata files for genes of interest and for their neighbors, along with sequences etc.  Replaces generateNeighbors for GenBank input.
-#' @param dataFolder location of folder containing GenBank files to be processed. Character string.
-#' @param neighborNum number of neighbors surrounding the gene of interest. Integer.
-#' @param goiListInput filename of file containing list of locus tags for gene of interest.  Character string.
-#' @param geneName name of family of genes of interest (for filenaming purposes).  Character string.
-#' @param removeDupes remove duplicate gene entries if they show up.  Boolean.
-#' @return
+#' @param dataFolder Location of folder containing GenBank files to be processed. Character string, required.
+#' @param neighborNum Number of neighbors surrounding the gene of interest. Integer, defaults to 10.
+#' @param goiListInput Filename of file containing list of locus tags for gene of interest.  Character string, required.
+#' @param geneName Name of family of genes of interest (for filenaming purposes).  Character string, required.
+#' @param removeDupes Remove duplicate gene entries if they show up.  Boolean, defaults to TRUE.
+#' @param scaffoldGenBase Starting faux scaffold ID number. Integer, defaults to 3000000000.
+#' @param genomeGenBase Starting faux genome ID number. Integer, defaults to 4000000000.
+#' @return List containing IMG-style metadata for genes of interest, their neighbors, and a generateNeighbors-like neighborsContext file
 #' @export
+#' @importFrom magrittr %>% 
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom rlang .data
 #' @examples
 #' gbToIMGOutput <- gbToIMG(dataFolder="/data/here", neighborNum=5, goiListInput = "goiList.txt", geneName="genE", removeDupes=TRUE)
 #'
-gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiListInput, geneName="genE", removeDupes=TRUE, scaffoldGenBase =3000000000, genomeGenBase=4000000000)  {
+gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiListInput, geneName=geneName, removeDupes=TRUE, scaffoldGenBase =3000000000, genomeGenBase=4000000000)  {
     ## getting the list of .gb files in the folder
     fileList <- list.files(path=dataFolder, pattern="*\\.gb$", full.names=TRUE, recursive=FALSE)
     scaffNum <- length(fileList)
@@ -197,7 +202,7 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
             for (j in 1:length(locGOI)) {
                 minTemp <- fauxIMG$gene_oid[locGOI[j]] - neighborNum
                 maxTemp <- fauxIMG$gene_oid[locGOI[j]] + neighborNum
-                contextTable <- contextTable  %>% dplyr::mutate(source_gene_oid = ifelse (gene_oid >= minTemp & gene_oid <= maxTemp,fauxIMG$gene_oid[locGOI[j]], source_gene_oid))
+                contextTable <- contextTable  %>% dplyr::mutate(source_gene_oid = ifelse(.data$gene_oid >= minTemp & .data$gene_oid <= maxTemp,fauxIMG$gene_oid[locGOI[j]], .data$source_gene_oid))
             }
         }
         ## Gene Product
@@ -431,7 +436,7 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
             fauxSeqIMG <- as.data.frame(fauxSeqIMG)
             colnames(fauxSeqIMG) <- c("sequence")
             fauxSeqIMG$gene_oid <- as.character(fauxIMG$gene_oid)
-            fauxSeqIMG <- fauxSeqIMG %>% dplyr::select(gene_oid, everything())
+            fauxSeqIMG <- fauxSeqIMG %>% dplyr::select(.data$gene_oid, dplyr::everything())
             if (exists(x="fauxNeighborSeqs")==FALSE) {
                 fauxNeighborSeqs <- fauxSeqIMG
             } else {
@@ -458,14 +463,14 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
     }
     seqinr::write.fasta(fauxNeighborSeqList, names=names(fauxNeighborSeqList),file.out=fauxNeighborSeqsFile)
     ## and outputting the genes of interest separately
-    fauxGeneData <- fauxNeighborData %>% dplyr::filter(Locus.Tag %in% goiList$locus_tag)
+    fauxGeneData <- fauxNeighborData %>% dplyr::filter(.data$Locus.Tag %in% goiList$locus_tag)
     if (removeDupes == TRUE) {
         fauxGeneData <- fauxGeneData[!duplicated(fauxGeneData$Locus.Tag), ]
     }
     write.table(fauxGeneData, file=fauxGeneDataFile, row.names=F, col.names = T, sep="\t")
     ## and their sequences too
     fauxGeneList <- fauxGeneData$gene_oid
-    fauxGeneSeqs <- fauxNeighborSeqs %>% dplyr::filter(gene_oid %in% fauxGeneList)
+    fauxGeneSeqs <- fauxNeighborSeqs %>% dplyr::filter(.data$gene_oid %in% fauxGeneList)
     fauxGeneSeqList <- list()
     for (j in 1:length(fauxGeneSeqs[,2])) {
         fauxGeneSeqList[[fauxGeneSeqs[j,1]]] <- fauxGeneSeqs[j,2]

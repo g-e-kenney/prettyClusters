@@ -1,11 +1,16 @@
 #' Subfunction to identify subgroups of hypothetical proteins in larger IMG datasets
 #'
 #' Given a desired genome neighborhood and lists of genes of interest and their neighbors, along with their protein sequences, this program uses all-by-all-blast & a clustering method of choice to identify subsets of hypothetical proteins that may represent meaningfully associated proteins.
-#' @param iprScanSource Data frame from neighborPrep with metadata for your genes of interest.
-#' @param imgNeighborsSource Data frame from neighborPrep with metadata for neighbors of your genes of interest.
-#' @param geneName Character string with your gene of interest's name
+#' @param iprScanSource Data frame from neighborPrep with metadata for your genes of interest. Character string, required.
+#' @param imgNeighborsSource Data frame from neighborPrep with metadata for neighbors of your genes of interest. Character string, required.
+#' @param geneName Character string with your gene of interest's name.  Required.
+#' @param addPfam Should Pfam assignments be added to the metadata table? Boolean, defaults to TRUE.
+#' @param addTigrfam Should TIGRfam assignments be added to the metadata table? Boolean, defaults to TRUE.
+#' @param addIPRfam Should InterPro family assignments be added to the metadata table? Boolean, defaults to TRUE.
 #' @return Updated metadata for neighboring genes (additional files generated en route)
 #' @export
+#' @importFrom magrittr %>% 
+#' @importFrom utils read.csv write.csv write.table read.table
 #' @examples 
 #' incorpIprScanOut <- incorpIprScan(iprScanSource = "iprScan.txt", imgNeighborsSource = "fauxNeighborsData.txt", geneName = "genE", addPfam = TRUE, addTigrfam = TRUE)  
 #'

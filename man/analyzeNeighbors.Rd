@@ -10,7 +10,7 @@ analyzeNeighbors(
   efiRepnodes = FALSE,
   neighborThreshold = 0.025,
   geneName = geneName,
-  useInterPro = TRUE,
+  useInterPro = FALSE,
   useHypo = TRUE,
   autoClust = TRUE,
   clustMethod = "tidygraph",
@@ -20,13 +20,21 @@ analyzeNeighbors(
 )
 }
 \arguments{
-\item{efiRepnodes}{Are values here post-EFI-EST? T/F value, defaults to FALSE.}
+\item{imgGenes}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
+
+\item{imgNeighbors}{What is the file with the metadata for neighbors of your gene of interest? Filename as string ("filename.txt")}
+
+\item{efiRepnodes}{Are values here post-EFI-EST? Boolean, defaults to FALSE.}
 
 \item{neighborThreshold}{In what percentage of neighborhoods must a protein family show up to be of interest?  Number, defaults to 0.025}
 
 \item{geneName}{What is the name of your gene? Gene name as string ("genE")}
 
-\item{autoClust}{Should clusters be automatically identified? T/F, defaults to TRUE.}
+\item{useInterPro}{Should InterPro families be used in neighborhood analyses? Boolean, defaults to FALSE}
+
+\item{useHypo}{Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to TRUE}
+
+\item{autoClust}{Should clusters be automatically identified? Boolean, defaults to TRUE.}
 
 \item{clustMethod}{What method should be used to identify these clusters? String ("tidygraph" or "pvclust")}
 
@@ -35,10 +43,6 @@ analyzeNeighbors(
 \item{bootStrap}{How many bootstrap rounds for pvclust? Integer, defaults to 10}
 
 \item{tgCutoff}{What sort of edge similarity should be kept for tidygraph? Number (0-1), defaults to 0.65.}
-
-\item{imgGenesTrimmed}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
-
-\item{imgNeighborsTrimmed}{What is the file with the metadata for neighbors of your gene of interest? Filename as string ("filename.txt")}
 }
 \value{
 Updated metadata and misc. figures and files en route
@@ -47,6 +51,6 @@ Updated metadata and misc. figures and files en route
 This function encompasses several subfunctions that catalog and quantify protein families in the neighborhood of genes of interest and use that data to identify genomic neighborhoods that are themselves similar.
 }
 \examples{
-analyzeNeighborsOutput <- analyzeNeighbors <- function(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
+analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
 
 }

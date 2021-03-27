@@ -15,8 +15,8 @@ prettyClusterDiagrams(
   standAlone = FALSE,
   markClusters = FALSE,
   autoColor = TRUE,
-  colorType = "nord",
-  paletteInput = "aurora",
+  colorType = "viridis",
+  paletteInput = "plasma",
   showScaffold = FALSE,
   alignToCore = TRUE,
   labelGenes = FALSE

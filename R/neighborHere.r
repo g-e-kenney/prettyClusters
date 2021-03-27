@@ -7,6 +7,9 @@
 #' @param coreGeneName Name of gene of interest as string, without any suffix.
 #' @return Table of binary data indicating presence of absence of a protein family in the proximity of a gene of interest
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom data.table :=
+#' @importFrom magrittr %>%
 #' @examples
 #' neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
 #'

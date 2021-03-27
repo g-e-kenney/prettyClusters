@@ -13,32 +13,41 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Depends:
+Imports:
 	data.table,
 	dplyr,
-	fishualize,
 	genbankr,
 	GenomicRanges,
+	GenomeInfoDb,
 	gggenes,
 	ggplot2,
 	ggraph,
-	ghibli,
-	influenceR,
-	lisa,
-	nord,
+	ggtext,
+	igraph,
+	magrittr,
 	pheatmap,
 	pvclust,
-	rtist,
+	rlang,
 	scales,
-	scico,
 	seqinr,
 	stringr,
 	tibble,
 	tidygraph,
 	tidyr,
 	utils,
-	viridis,
-	wesanderson
+	viridis
+Suggests:
+    knitr,
+    fishualize,
+    ghibli,
+    lisa,
+    nord,
+    rtist,
+    scico,
+    wesanderson,
+    rmarkdown
 Remotes:
 	bioc::3.12/genbankr,
-	bioc::3.12/GenomicRanges
+	bioc::3.12/GenomicRanges,
+	bioc::3.12/GenomeInfoDb
+VignetteBuilder: knitr

@@ -17,48 +17,26 @@ I haven't encountered anything that quite handles all of those things, so...
 ## The `prettyClusters` toolset
 The Wiki entries contain a more detailed description of the use of specific functions.
 ### The core toolset
-- [`generateNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/generateNeighbors)
-- [`prepNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/prepNeighbors)
-- [`analyzeNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/analyzeNeighbors)
-- [`prettyClusterDiagrams`](https://github.com/g-e-kenney/prettyClusters/wiki/prettyClusterDiagrams)
+- [`generateNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-generateNeighbors)
+- [`prepNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-prepNeighbors)
+- [`analyzeNeighbors`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-analyzeNeighbors)
+- [`prettyClusterDiagrams`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-prettyClusterDiagrams)
 
 ### Accessory components
-- [`gbToIMG`](https://github.com/g-e-kenney/prettyClusters/wiki/gbToIMG)
-- [`incorpIprScan`](https://github.com/g-e-kenney/prettyClusters/wiki/incorpIprScan)
-- [`repnodeTrim`](https://github.com/g-e-kenney/prettyClusters/wiki/repnodeTrim)
+- [`gbToIMG`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-gbToIMG)
+- [`incorpIprScan`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-incorpIprScan)
+- [`repnodeTrim`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-repnodeTrim)
 
-### External requirements
-Some [basic guidelines](https://github.com/g-e-kenney/prettyClusters/wiki/preparing-to-use-prettyClusters) for installing required packages and tools are listed on the wiki.  Beyond the (many) R packages used, `analyzeNeighbors` uses local installs of [mafft](https://cytoscape.org/) and [blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) in its analysis of hypothetical proteins. It's highly likely I'll be adding steps that use [hmmer](http://hmmer.org) as well. Installation instructions are going to be system-specific, but if using Windows, these tools are currently only set up to deal with installations handled via the Windows Subsystem for Linux.  It is anticipated that these tools will often be paired with use of the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).  Those are online, but [Cytoscape](https://cytoscape.org/) is used for visualizing the sequence-similarity networks generated there.  Direct integration with [InterProScan](https://github.com/ebi-pf-team/interproscan) is not planned, since it is Linux-only, but access is required to produce the input for `incorpIprScan`. 
+### Using `prettyClusters`
+#### Preparing for use of `prettyClusters`
+- A [basic installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) is the best starting point.
+#### Basic workflow
+- A [standard run](https://github.com/g-e-kenney/prettyClusters/wiki/a-standard-prettyClusters-run) for the `prettyClusters` toolset
+#### Incorporation of EMBL and GenBank data
+- This is very much a work in progress, and doing this is using `prettyClusters` in Difficult mode, but I've got a [rough workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Running-prettyClusters-with-GenBank-files) for this as well.
 
-### Running `prettyClusters`
-This package is nowhere near ready for legit repositories, so you are stuck with the development version.  Probably easiest to install via:
-```
-devtools::install_github("g-e-kenney/prettyClusters")
-```
-A sample session:
-```
-# load the package (a number of others should autoload)
-# core packages include data.table, dplyr, gggenes, ggplot2, ggraph, pheatmap, pvclust, scales, seqinr, stringr, tibble, tidygraph, tidyr, and utils
-# palette-focused packages include fishualize, ghibli, lisa, nord, rtist, scico, viridis, and wesanderson
-# working with genbank files will add in genbankr and GenomicRanges
-library(prettyClusters)
-
-# run the initial neighbor generation 
-generateNeighborsOut <- generateNeighbors(imgGenes = "imgGeneMetadata.txt", imgGeneSeqs = "imgGeneSeqs.fa", neighborNumber = 10, includeGene = TRUE, geneName = "genE") 
-
-# after the neighbor list has been uploaded to the IMG database and the neighbor metadata files have been downloaded
-prepNeighborsOut <- prepNeighbors(imgGenes = generateNeighborsOut$gene_oid, imgNeighbors = "imgNeighborMetadata.txt", geneSeqs = "imgGeneSeqs.fa", neighborSeqs = "imgNeighborSeqs.fa", neighborsContext = generateNeighborsOut$neighborsContext, geneName = "genE", neighborNumber = 10, sysTerm = "wsl", efiRepnodes = FALSE, neighborThreshold = 0.025, hypoAnalysis = TRUE, clustMethod = "tidygraph", numThreads = 7, alphaVal = 0.95, bootStrap = 10, pidCutoff = 35, trimShortClusters = TRUE)
-
-# after generating an EFI-EST SSN and looking at the repnode options
-repnodeTrimOut <- repnodeTrim(imgGenes = "imgGenesTrimmed.txt", imgNeighbors = "imgNeighborsTrimmed.txt", imgGeneSeqs = "imgGeneSeqs.fa", imgNeighborSeqs = "imgNeighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiMetadataFull.csv", efiFinalMetadata = "efiMetadataRepnodes95.csv")
-
-# passing on the trimmed data for neighborhood-based cluster analysis
-analyzeNeighborsOut <- analyzeNeighbors(imgGenes =  repnodeTrimOut$repGenesTrimmed, imgNeighbors = repnodeTrimOut$repNeighborsTrimmed, efiRepnodes = TRUE, neighborThreshold = 0.025, geneName = "genE", autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap = 10, tgCutoff = 0.65)	
-
-# generating the actual diagrams
-prettyClusterDiagrams(imgGenes = neighborClustersOut$imgGenesTrimmed, imgNeighbors = neighborClustersOut$imgNeighborsTrimmed, geneFormat = "geneFormat.txt", geneName = "genE", efiRepnodes = TRUE, neighborNumber = 10, annotateGenes = TRUE, standAlone = FALSE, markClusters = TRUE, autoColor = TRUE, colorType = "fishualize", paletteInput = "Scarus_hoefleri", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE)
-```
-(Again, see the Wiki entries for per-function details, and soon for a vignette).  Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
+### `prettyClusters` output
+Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
 <img src="https://github.com/g-e-kenney/prettyClusters/raw/master/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
 Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 

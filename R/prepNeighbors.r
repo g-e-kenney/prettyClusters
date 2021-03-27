@@ -1,8 +1,8 @@
 #' Function for preliminary analysis of neighboring genes from IMG
 #'
 #' This function uses IMG metadatasets for genes of interest and their genomic neighbors to do some QC and identify subfamilies of hypothetical proteins.
-#' @param imgGenesTemp What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
-#' @param imgNeighborsTemp What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
+#' @param imgGenes What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
+#' @param imgNeighbors What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
 #' @param geneSeqs What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
 #' @param neighborSeqs What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")
 #' @param neighborsContext File from neighborGenerate tying genes of interest to their neighbors. Filename as string ("filename.txt")
@@ -20,6 +20,9 @@
 #' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? T/F value.
 #' @return List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)
 #' @export
+#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%   
 #' @examples 
 #' prepNeighborsOutput <- prepNeighbors(imgGenes="geneFile.txt", imgNeighbors="neighborsFile.txt", geneSeqs="geneSeqs.fa", neighborSeqs="neighborSeqs.fa", neighborsContext = "context.txt", geneName="genE",  neighborNumber=10, sysTerm="wsl")
 #'
@@ -44,7 +47,7 @@ prepNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, gene
   if (typeof(imgGenes) == "character" && typeof(neighborsContext) == "character") {
 ## by default, 
     imgGenesFull <-as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t" ))
-    imgGenesFull <- imgGenesFull %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgGenesFull <- imgGenesFull %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
     imgGenesData <- imgGenesFull[names(imgGenesFull) %in% imgCols]
     ## if interpro exists add it
     if (any(grepl("InterPro", colnames(imgGenesFull)))) {
@@ -59,7 +62,7 @@ prepNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, gene
   }
   if(typeof(imgNeighbors) == "character")  {
     imgNeighborsFull <- as.data.frame(read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE))
-    imgNeighborsFull <- imgNeighborsFull %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgNeighborsFull <- imgNeighborsFull %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
     imgNeighborsData <- imgNeighborsFull[names(imgNeighborsFull) %in% imgCols]
     if (any(grepl("InterPro", colnames(imgNeighborsFull)))) {
         imgNeighborsData$InterPro <- imgNeighborsFull$InterPro

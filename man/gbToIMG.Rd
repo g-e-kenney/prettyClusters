@@ -8,25 +8,29 @@ gbToIMG(
   dataFolder = dataFolder,
   neighborNum = 10,
   goiListInput = goiListInput,
-  geneName = "genE",
+  geneName = geneName,
   removeDupes = TRUE,
   scaffoldGenBase = 3e+09,
   genomeGenBase = 4e+09
 )
 }
 \arguments{
-\item{dataFolder}{location of folder containing GenBank files to be processed. Character string.}
+\item{dataFolder}{Location of folder containing GenBank files to be processed. Character string, required.}
 
-\item{neighborNum}{number of neighbors surrounding the gene of interest. Integer.}
+\item{neighborNum}{Number of neighbors surrounding the gene of interest. Integer, defaults to 10.}
 
-\item{goiListInput}{filename of file containing list of locus tags for gene of interest.  Character string.}
+\item{goiListInput}{Filename of file containing list of locus tags for gene of interest.  Character string, required.}
 
-\item{geneName}{name of family of genes of interest (for filenaming purposes).  Character string.}
+\item{geneName}{Name of family of genes of interest (for filenaming purposes).  Character string, required.}
 
-\item{removeDupes}{remove duplicate gene entries if they show up.  Boolean.}
+\item{removeDupes}{Remove duplicate gene entries if they show up.  Boolean, defaults to TRUE.}
+
+\item{scaffoldGenBase}{Starting faux scaffold ID number. Integer, defaults to 3000000000.}
+
+\item{genomeGenBase}{Starting faux genome ID number. Integer, defaults to 4000000000.}
 }
 \value{
-
+List containing IMG-style metadata for genes of interest, their neighbors, and a generateNeighbors-like neighborsContext file
 }
 \description{
 This function takes GenBank files as input and outputs fake IMG-style metadata files for genes of interest and for their neighbors, along with sequences etc.  Replaces generateNeighbors for GenBank input.
