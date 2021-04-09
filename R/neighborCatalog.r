@@ -97,8 +97,8 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
     uDataFams[j,2] <- length(tempAbund)
   }
   if (any(is.na(uDataFams))) {
-    if (any(is.na(uDataFams$fams)) == TRUE && any(is.na(uDataFams$abund)) == FALSE) { 
-      uDataFams$fams[which(is.na(uDataFams$fams))
+    ## we don't want to include 
+    uDataFams <- uDataFams[-which(is.na(uDataFams)),]
   }
   uDataFams <- uDataFams[-which(is.na(uDataFams$fams)),]
   uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
