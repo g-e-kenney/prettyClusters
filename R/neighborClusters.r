@@ -28,8 +28,8 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborClusters_",geneName,sep="")
   finaltxtname <- paste(fileName,"_clusterList.txt",sep="")
-  finalMetaGenes <- paste(fileName,"_clusterGeneMetadata.txt",sep="")
-  finalMetaNeighbors <- paste(fileName,"_clusterNeighborMetadata.txt",sep="")
+  finalMetaGenes <- paste(fileName,"_geneMetadata.txt",sep="")
+  finalMetaNeighbors <- paste(fileName,"_neighborMetadata.txt",sep="")
   finalpdfname <- paste(fileName,"_heatmap.pdf",sep="")
   finalpsname <- paste(fileName,"_heatmap.ps",sep="")
   finalpngname <- paste(fileName,"_heatmap.png",sep="")
@@ -199,7 +199,8 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
   imgGenesTrimmed$name <- imgGenesTrimmed$efi_oid
   write.table(imgGenesTrimmed, finalMetaGenes, row.names=FALSE, sep="\t", quote=FALSE) 
   write.table(imgNeighborsTrimmed, finalMetaNeighbors, row.names=FALSE, sep="\t", quote=FALSE) 
-  write.table(orderedMatrix, finaltxtname, sep="\t", quote=FALSE)
+  orderedMatrix$clustOrd <- rownames(orderedMatrix)
+  write.table(orderedMatrix, finaltxtname, row.names=FALSE, sep="\t", quote=FALSE)
                                         # drawing the heatmap
   heatmapName <- paste("genome neighborhood clustering for ",coreGeneName,sep="")
     ## depending on whether or not pvClust has been used
@@ -255,6 +256,6 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrim
 #    prettyHeatmap
 #  dev.off()
   print("Genes of interest clustered by genome neighborhood similarity.")
-  neighborClustersOut <- list(imgGenesTrimmed, imgNeighborsTrimmed, orderedMatrix)
+  neighborClustersOut <- list(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, orderedMatrix = orderedMatrix)
   return(neighborClustersOut)
 }

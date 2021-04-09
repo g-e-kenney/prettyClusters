@@ -18,7 +18,8 @@
 neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborThreshold = neighborThreshold, coreGeneName = coreGeneName, useInterPro = useInterPro, useHypo = useHypo) { 
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborCatalog_",geneName,sep="")
-  finaltxtname <- paste(fileName,"_family-abundance.txt",sep="")
+  fileSummary <- paste(fileName,"_familySummary.txt",sep="")
+  fileList <- paste(fileName,"_familyList.txt",sep="")
     ## identifying extant families
   numGenes <- length(unique(imgNeighborsTrimmed$source_gene_oid))
   pfamFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Pfam, "pfam")==TRUE)
@@ -94,21 +95,16 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
   for (j in 1:length(uDataFams[,1]))  {
     tempAbund <- grep(uDataFams[j,1], allFams)
     uDataFams[j,2] <- length(tempAbund)
-    if (length(tempAbund)/numGenes >= neighborThreshold)  {
-      if(exists(x="trimmedFams")) {
-        trimmedFams <- append(trimmedFams, uDataFams[j,1])
-        next
-      } else   {
-        trimmedFams <-  uDataFams[j,1]
-        next
-      }
-    } else {
-      next
-    }
   }
-  trimmedFams <- unlist(trimmedFams)
-  write.table(uniqueFams, file=finaltxtname, sep="\t", quote=FALSE)
-  familyList <- trimmedFams
+  uDataFams <- uDataFams[-which(is.na(uDataFams$fams)),]
+  uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
+  commonFams <- uDataFams %>% dplyr::filter(pAbund >= neighborThreshold)
+  colnames(commonFams) <- c("imgNames", "abund", "pAbund")
+  commonFams <- dplyr::left_join(commonFams, famBible)
+  commonFams[which(!(commonFams$imgNames %in% famBible$imgNames)),4:6] <- ""
+  familyList <- commonFams$imgNames
+  write.table(commonFams, file=fileSummary, row.names=FALSE, sep="\t", quote=FALSE)
+  write.table(uniqueFams, file=fileList, row.names=FALSE, sep="\t", quote=FALSE)
   print("Protein families in neighboring genes catalogued.")
   return(familyList)
 }

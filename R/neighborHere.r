@@ -22,7 +22,7 @@ imgNeighborsTrimmed <- imgNeighborsTrimmed %>% dplyr::distinct()
   nbTemp <- list(gene_oid = as.character(imgNeighborsTrimmed$gene_oid), source_gene_oid = as.character(imgNeighborsTrimmed$source_gene_oid))
   neighborBinary <- data.frame(nbTemp, stringsAsFactors = FALSE)
   famNum <- length(familyList)
-  geneNum <- length(unique(imgNeighborsTrimmed$gene_oid))
+  geneNum <- length(imgNeighborsTrimmed$gene_oid)
   ## loop through the families
   for (i in 1:famNum){
     tempFam <- vector()
