@@ -18,7 +18,7 @@ neighborHere <- function(imgNeighborsTrimmed = imgNeighborsTrimmed, familyList =
   fileName <- paste(fileDate,"_neighborHere_",geneName,sep="")
   finalCSV <- paste(fileName,"_neighborBinary.csv",sep="")
                                         # gene_oid and source_gene_oid start neighborBinary
-imgNeighborsTrimmed <- imgNeighborsTrimmed %>% dplyr::distinct()
+  imgNeighborsTrimmed <- imgNeighborsTrimmed %>% dplyr::distinct()
   nbTemp <- list(gene_oid = as.character(imgNeighborsTrimmed$gene_oid), source_gene_oid = as.character(imgNeighborsTrimmed$source_gene_oid))
   neighborBinary <- data.frame(nbTemp, stringsAsFactors = FALSE)
   famNum <- length(familyList)
@@ -37,7 +37,7 @@ imgNeighborsTrimmed <- imgNeighborsTrimmed %>% dplyr::distinct()
       ## need to alter how this step works to include img terms
       ## since they have no prefix, they could have a false hit in a pfam/tigrfam
       ##imgfam <- grepl(familyList[i], imgNeighborsTrimmed$IMG.Term[j])
-      if (any(c(pfam,tigrfam,iprfam,hypofam))==TRUE) {
+      if (any(c(pfam,tigrfam,iprfam,hypofam)) == TRUE) {
         tempFam[j] <- 1
       } else {
         tempFam[j] <- 0

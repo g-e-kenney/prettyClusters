@@ -96,6 +96,10 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
     tempAbund <- grep(uDataFams[j,1], allFams)
     uDataFams[j,2] <- length(tempAbund)
   }
+  if (any(is.na(uDataFams))) {
+    if (any(is.na(uDataFams$fams)) == TRUE && any(is.na(uDataFams$abund)) == FALSE) { 
+      uDataFams$fams[which(is.na(uDataFams$fams))
+  }
   uDataFams <- uDataFams[-which(is.na(uDataFams$fams)),]
   uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
   commonFams <- uDataFams %>% dplyr::filter(pAbund >= neighborThreshold)
