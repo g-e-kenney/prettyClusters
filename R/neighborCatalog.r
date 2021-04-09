@@ -100,7 +100,6 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
     ## we don't want to include 
     uDataFams <- uDataFams[-which(is.na(uDataFams)),]
   }
-  uDataFams <- uDataFams[-which(is.na(uDataFams$fams)),]
   uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
   commonFams <- uDataFams %>% dplyr::filter(pAbund >= neighborThreshold)
   colnames(commonFams) <- c("imgNames", "abund", "pAbund")
