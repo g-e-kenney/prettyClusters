@@ -100,8 +100,9 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
   uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
   commonFams <- uDataFams %>% dplyr::filter(pAbund >= neighborThreshold)
   colnames(commonFams) <- c("imgNames", "abund", "pAbund")
-  commonFams <- dplyr::left_join(commonFams, famBible)
-  commonFams[which(!(commonFams$imgNames %in% famBible$imgNames)),4:6] <- ""
+  data(famInfoList)
+  commonFams <- dplyr::left_join(commonFams, famInfoList)
+  commonFams[which(!(commonFams$imgNames %in% famInfoList$imgNames)),4:6] <- ""
   familyList <- commonFams$imgNames
   write.table(commonFams, file=fileSummary, row.names=FALSE, sep="\t", quote=FALSE)
   write.table(uniqueFams, file=fileList, row.names=FALSE, sep="\t", quote=FALSE)
