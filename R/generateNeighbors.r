@@ -68,9 +68,9 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     ## now making the versions that'll be useful for uploading to IMG
     ## particularly given the 20k gene cart limit
     ## (splits into a bunch of files that can be uploaded separately)
+    neighbors <- as.data.frame(neighbors)
     if(neighborLength < 20000)  {
         fileNameOut <- paste(fileName, "_neighbors.txt", sep="")
-        neighbors <- as.data.frame(neighbors)
         colnames(neighbors) <- "gene_oid"
         write.table(neighbors, file=fileNameOut, row.names=FALSE, col.names = TRUE, quote=FALSE, sep="\t")
     } else {
