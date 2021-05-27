@@ -115,25 +115,25 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
     }
   }
                                         # process imgNeighborsTrimmed here: if genes-of-interest are not present in it, add in imgGeneMetadata. trim extra columns, adjust formatting if needed.
-    neighborCatalogOut <- neighborCatalog2(imgNeighborsTrimmed = imgNeighborsTrimmed,
+    neighborCatalogOut <- neighborCatalog(imgNeighborsTrimmed = imgNeighborsTrimmed,
                                            imgGenesTrimmed=imgGenesTrimmed,
                                            geneName = geneName,
                                            neighborThreshold = neighborThreshold,
                                            useInterPro = useInterPro,
                                            useHypo = useHypo)
                                         # output: familyList (list of neighboring families), familyAbundance, familyAbundance.txt)
-    neighborHereOut <- neighborHere2(imgNeighborsTrimmed = imgNeighborsTrimmed,
+    neighborHereOut <- neighborHere(imgNeighborsTrimmed = imgNeighborsTrimmed,
                                      familyList = neighborCatalogOut,
                                      geneName = geneName)
                                         # input: neighbor metadata table, family abundance file, gene of interest, fileDate)
                                         # output: neighborBinary, neighborBinary (.txt)
-    neighborMatrixOut <- neighborMatrix2(imgGenesTrimmed = imgGenesTrimmed,
+    neighborMatrixOut <- neighborMatrix(imgGenesTrimmed = imgGenesTrimmed,
                                          neighborBinary = neighborHereOut,
                                          familyList = neighborCatalogOut,
                                          geneName = geneName)
                                         # input: imgGenesTrimmed, the neighbors binary file, the gene of interest, the file date
                                         # output: neighborMatrixData
-    neighborClustersOut <- neighborClusters2(imgGenesTrimmed = imgGenesTrimmed,
+    neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed,
                                              imgNeighborsTrimmed = imgNeighborsTrimmed,
                                              geneName = geneName,
                                              neighborMatrixData = neighborMatrixOut,
