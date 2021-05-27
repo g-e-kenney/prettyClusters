@@ -21,10 +21,20 @@
 #' @importFrom utils read.csv write.csv write.table read.table
 #'
 #' @examples
-#' analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
+#' analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE", tgCutoff = 0.6, efiRepnodes = FALSE) 
 #'
-analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, efiRepnodes = FALSE, neighborThreshold = 0.025, geneName = geneName, useInterPro = FALSE, useHypo = TRUE, autoClust = TRUE, clustMethod = "tidygraph", alphaVal = 0.95, bootStrap= 10, tgCutoff = 0.6)  {
-
+analyzeNeighbors <- function(imgGenes = imgGenes,
+                             imgNeighbors = imgNeighbors,
+                             efiRepnodes = FALSE,
+                             neighborThreshold = 0.025,
+                             geneName = geneName,
+                             useInterPro = FALSE,
+                             useHypo = TRUE,
+                             autoClust = TRUE,
+                             clustMethod = "tidygraph",
+                             alphaVal = 0.95,
+                             bootStrap= 10,
+                             tgCutoff = 0.6)  {
   if(exists(x="imgGenes") == FALSE | exists(x="imgNeighbors") == FALSE | exists(x="geneName") == FALSE) {
     print("Missing a required term (gene and neighbor metadata files or name of gene of interest)")
     return(0)
@@ -105,15 +115,34 @@ analyzeNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, e
     }
   }
                                         # process imgNeighborsTrimmed here: if genes-of-interest are not present in it, add in imgGeneMetadata. trim extra columns, adjust formatting if needed.
-  neighborCatalogOut <- neighborCatalog(imgNeighborsTrimmed = imgNeighborsTrimmed, imgGenesTrimmed=imgGenesTrimmed, geneName = geneName, neighborThreshold = neighborThreshold, coreGeneName = coreGeneName, useInterPro = useInterPro, useHypo = useHypo)
+    neighborCatalogOut <- neighborCatalog2(imgNeighborsTrimmed = imgNeighborsTrimmed,
+                                           imgGenesTrimmed=imgGenesTrimmed,
+                                           geneName = geneName,
+                                           neighborThreshold = neighborThreshold,
+                                           useInterPro = useInterPro,
+                                           useHypo = useHypo)
                                         # output: familyList (list of neighboring families), familyAbundance, familyAbundance.txt)
-  neighborHereOut <- neighborHere(imgNeighborsTrimmed = imgNeighborsTrimmed, familyList = neighborCatalogOut, geneName = geneName, coreGeneName = coreGeneName)
+    neighborHereOut <- neighborHere2(imgNeighborsTrimmed = imgNeighborsTrimmed,
+                                     familyList = neighborCatalogOut,
+                                     geneName = geneName)
                                         # input: neighbor metadata table, family abundance file, gene of interest, fileDate)
                                         # output: neighborBinary, neighborBinary (.txt)
-  neighborMatrixOut <- neighborMatrix(imgGenesTrimmed = imgGenesTrimmed, neighborBinary = neighborHereOut, familyList = neighborCatalogOut, geneName = geneName, coreGeneName = coreGeneName)
+    neighborMatrixOut <- neighborMatrix2(imgGenesTrimmed = imgGenesTrimmed,
+                                         neighborBinary = neighborHereOut,
+                                         familyList = neighborCatalogOut,
+                                         geneName = geneName)
                                         # input: imgGenesTrimmed, the neighbors binary file, the gene of interest, the file date
                                         # output: neighborMatrixData
-  neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixOut, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
+    neighborClustersOut <- neighborClusters2(imgGenesTrimmed = imgGenesTrimmed,
+                                             imgNeighborsTrimmed = imgNeighborsTrimmed,
+                                             geneName = geneName,
+                                             neighborMatrixData = neighborMatrixOut,
+                                             autoClust = autoClust,
+                                             clustMethod = clustMethod,
+                                             alphaVal = alphaVal,
+                                             bootStrap = bootStrap,
+                                             coreGeneName = coreGeneName,
+                                             tgCutoff=tgCutoff)
                                         # input: matrix of genes/families, metadata file for genes of interest, gene of interest, auto-generated date for file names
                                         # output: neighborMatrixClustered, neighborMatrixClustered (.txt), clusterHeatmap (.pdf, png), imgGenesClustered (imgGenes + clusters)  & .txt, efiNodeDataClustered.txt (efiNodeData + clusters) & .txt
                                         # put here - trimming imgNeighborsTrimmed to the right input format

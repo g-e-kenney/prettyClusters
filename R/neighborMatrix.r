@@ -5,16 +5,18 @@
 #' @param neighborBinary Data frame from analyzeNeighbors/neighborHere binary data regarding presence of protein families in close proximity
 #' @param familyList Data from analyzeNeighbors/neighborCatalog listing common nearby protein families
 #' @param geneName Name of gene of interest as string
-#' @param coreGeneName Name of gene of interest as string, without any suffix.
 #' @return Matrix object
 #' @export
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples
-#' neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
+#' neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName) 
 #'
-neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) {
+neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed,
+                           neighborBinary = neighborBinary,
+                           familyList = familyList,
+                           geneName = geneName) {
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborMatrix_",geneName,sep="")
   finalCSV <- paste(fileName,".csv",sep="")

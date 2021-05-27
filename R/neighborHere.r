@@ -4,16 +4,17 @@
 #' @param imgNeighborsTrimmed Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest
 #' @param familyList Data from from analyzeNeighbors/neighborCatalog containing a list of protein families for further analysis
 #' @param geneName Name of gene of interest as string
-#' @param coreGeneName Name of gene of interest as string, without any suffix.
 #' @return Table of binary data indicating presence of absence of a protein family in the proximity of a gene of interest
 #' @export
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @importFrom data.table :=
 #' @importFrom magrittr %>%
 #' @examples
-#' neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
+#' neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, familyList = familyList, geneName = geneName) 
 #'
-neighborHere <- function(imgNeighborsTrimmed = imgNeighborsTrimmed, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) {
+neighborHere <- function(imgNeighborsTrimmed = imgNeighborsTrimmed,
+                          familyList = familyList,
+                          geneName = geneName) {
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborHere_",geneName,sep="")
   finalCSV <- paste(fileName,"_neighborBinary.csv",sep="")

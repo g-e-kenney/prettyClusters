@@ -5,7 +5,6 @@
 #' @param imgNeighborsTrimmed Data frame from analyzeNeighbors containing metadata for neighbors of genes of interest. Character string, required.
 #' @param geneName Name of gene of interest as string. Character string, required.
 #' @param neighborThreshold Abundance of protein family required to include it in further analysis. Number (0-1)
-#' @param coreGeneName Name of gene of interest as string, without any suffix. Character string, required.
 #' @param useInterPro Should InterPro families be used for analysis? Boolean, defaults to FALSE.
 #' @param useHypo Should hypothetical protein families from prepNeighbors be used for analysis? Boolean, defaults to TRUE.
 #' @return List of relevant protein families
@@ -13,9 +12,14 @@
 #' @importFrom magrittr %>% 
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @examples
-#' neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, neighborNumber=neighborNumber, includeGene=includeGene, geneName=geneName, coreGeneName = coreGeneName)
+#' neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, neighborNumber=neighborNumber, includeGene=includeGene, geneName=geneName)
 #'
-neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborThreshold = neighborThreshold, coreGeneName = coreGeneName, useInterPro = useInterPro, useHypo = useHypo) { 
+neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed,
+                             imgNeighborsTrimmed = imgNeighborsTrimmed,
+                             geneName = geneName,
+                             neighborThreshold = neighborThreshold,
+                             useInterPro = useInterPro,
+                             useHypo = useHypo) { 
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   fileName <- paste(fileDate,"_neighborCatalog_",geneName,sep="")
   fileSummary <- paste(fileName,"_familySummary.txt",sep="")
@@ -87,7 +91,7 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimm
   ##}
   uniqueFams <- unlist(unique(uniqueFams))
   uniqueFamNum <- length(uniqueFams)
-  tempFamList <- list(fams=unlist(uniqueFams), abund=sprintf("",1:uniqueFamNum))
+  tempFamList <- list(fams=unlist(uniqueFams), abund=vector(mode = "character", length = uniqueFamNum))
   uDataFams <- data.frame(tempFamList, stringsAsFactors=FALSE)
   trimmedFams <- list()
     ## calculating abundance
