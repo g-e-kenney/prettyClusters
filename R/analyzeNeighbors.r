@@ -52,7 +52,7 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
     imgNeighborsTemp <- imgNeighbors
   }
     ## some cleanup for the input files, JUST IN CASE
-    ## even though they should be ifne if coming out of prepNeighbors or repnodeTrim
+    ## even though they should be fine if coming out of prepNeighbors or repnodeTrim
     ## nevertheless, adds the two columns that may not be in standard IMG metadata files
     imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
     imgNeighborsTrimmed <- imgNeighborsTemp[names(imgNeighborsTemp) %in% imgCols]
