@@ -14,8 +14,13 @@
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @importFrom rlang .data
 #' @examples
-#' gbToIMGOutput <- gbToIMG(dataFolder="/data/here", neighborNum=5, goiListInput = "goiList.txt", geneName="genE", removeDupes=TRUE)
-#'
+#' \dontrun{
+#' gbToIMGOutput <- gbToIMG(dataFolder="/data/here", 
+#'                          neighborNum=5, 
+#'                          goiListInput = "goiList.txt", 
+#'                          geneName="genE", 
+#'                          removeDupes=TRUE)
+#' }
 gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiListInput, geneName=geneName, removeDupes=TRUE, scaffoldGenBase =3000000000, genomeGenBase=4000000000)  {
     ## getting the list of .gb files in the folder
     fileList <- list.files(path=dataFolder, pattern="*\\.gb$", full.names=TRUE, recursive=FALSE)

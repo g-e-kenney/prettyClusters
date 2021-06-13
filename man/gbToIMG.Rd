@@ -36,6 +36,11 @@ List containing IMG-style metadata for genes of interest, their neighbors, and a
 This function takes GenBank files as input and outputs fake IMG-style metadata files for genes of interest and for their neighbors, along with sequences etc.  Replaces generateNeighbors for GenBank input.
 }
 \examples{
-gbToIMGOutput <- gbToIMG(dataFolder="/data/here", neighborNum=5, goiListInput = "goiList.txt", geneName="genE", removeDupes=TRUE)
-
+\dontrun{
+gbToIMGOutput <- gbToIMG(dataFolder="/data/here", 
+                         neighborNum=5, 
+                         goiListInput = "goiList.txt", 
+                         geneName="genE", 
+                         removeDupes=TRUE)
+}
 }

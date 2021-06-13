@@ -14,7 +14,15 @@
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples
-#' repnodeTrimOut <- repnodeTrim(imgGenes = "geneFile.txt", imgNeighbors="neighborFile.txt", imgGeneSeqs = "geneSeqs.fa", imgNeighborSeqs = "neighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiFullMetadata.csv", efiFinalMetadata = "efiFinalMetadata.csv")
+#' \dontrun{
+#' repnodeTrimOut <- repnodeTrim(imgGenes = "geneFile.txt", 
+#'                               imgNeighbors="neighborFile.txt", 
+#'                               imgGeneSeqs = "geneSeqs.fa", 
+#'                               imgNeighborSeqs = "neighborSeqs.fa", 
+#'                               geneName = "genE", 
+#'                               efiFullMetadata = "efiFullMetadata.csv", 
+#'                               efiFinalMetadata = "efiFinalMetadata.csv")
+#' }
 #'
 repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneSeqs = imgGeneSeqs, imgNeighborSeqs = imgNeighborSeqs, geneName = geneName, efiFullMetadata = efiFullMetadata, efiFinalMetadata = efiFinalMetadata) {
     # leaving trimming of the gene seq as optional - 

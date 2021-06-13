@@ -5,9 +5,9 @@
 \title{Umbrella function generates pretty gene cluster diagrams}
 \usage{
 prettyClusterDiagrams(
-  imgGenes = imgGenes,
-  imgNeighbors = imgNeighbors,
-  geneFormat = geneFormat,
+  imgGenesFile = imgGenesFile,
+  imgNeighborsFile = imgNeighborsFile,
+  annotationGuideFile = annotationGuideFile,
   geneName = geneName,
   efiRepnodes = FALSE,
   neighborNumber = neighborNumber,
@@ -19,15 +19,16 @@ prettyClusterDiagrams(
   paletteInput = "plasma",
   showScaffold = FALSE,
   alignToCore = TRUE,
-  labelGenes = FALSE
+  labelGenes = FALSE,
+  subclusterDiagrams = FALSE
 )
 }
 \arguments{
-\item{imgGenes}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
+\item{imgGenesFile}{What is the file with the metadata for your gene of interest? Filename as string ("filename.txt")}
 
-\item{imgNeighbors}{What is the file with the metadata for neighbors of your gene of interest? Filename as string ("filename.txt")}
+\item{imgNeighborsFile}{What is the file with the metadata for neighbors of your gene of interest? Filename as string ("filename.txt")}
 
-\item{geneFormat}{User-defined annotation fine, assigning gene names via protein families.  Filename as string ("filename.txt")}
+\item{annotationGuideFile}{User-defined annotation fine, assigning gene names via protein families.  Filename as string ("filename.txt")}
 
 \item{geneName}{What is the name of your gene? Gene name as string ("genE")}
 
@@ -52,6 +53,8 @@ prettyClusterDiagrams(
 \item{alignToCore}{Should the core gene be centered in the diagrams? T/F, defaults to TRUE}
 
 \item{labelGenes}{Should all genes be labeled in the diagrams? T/F, defaults to FALSE}
+
+\item{subclusterDiagrams}{Should additional figures be made for each group of gene clusters? T/F, defaults to FALSE.}
 }
 \value{
 Gene diagrams as .png and .pdf files.
@@ -60,6 +63,12 @@ Gene diagrams as .png and .pdf files.
 This function generates gene cluster diagrams incorporating annotation and clustering info from several sources.
 }
 \examples{
-prettyClusterOutput <- prettyClusterDiagrams(imgGenes = "genesFile.txt", imgNeighbors = "neighborsFile.txt", geneFormat = "formatFile.txt", geneName = "genE", neighborNumber = 10)
-
+\dontrun{
+prettyClusterOutput <- prettyClusterDiagrams(imgGenesFile = "genesFile.txt", 
+                                             imgNeighborsFile = "neighborsFile.txt", 
+                                             annotationGuideFile = "formatFile.txt", 
+                                             geneName = "genE", 
+                                             neighborNumber = 10)
+}
+ 
 }

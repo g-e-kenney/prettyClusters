@@ -12,8 +12,14 @@
 #' @importFrom magrittr %>% 
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @examples 
-#' incorpIprScanOut <- incorpIprScan(iprScanSource = "iprScan.txt", imgNeighborsSource = "fauxNeighborsData.txt", geneName = "genE", addPfam = TRUE, addTigrfam = TRUE)  
-#'
+#' \dontrun{
+#' incorpIprScanOut <- incorpIprScan(iprScanSource = "iprScan.txt", 
+#'                                   imgNeighborsSource = "fauxNeighborsData.txt", 
+#'                                   geneName = "genE", 
+#'                                   addPfam = TRUE, 
+#'                                   addTigrfam = TRUE)  
+#' }
+#' 
 incorpIprScan <- function(iprScanSource = iprScanSource, imgNeighborsSource = imgNeighborsSource, geneName = geneName, addPfam = TRUE, addTigrfam = TRUE, addIPRfam = TRUE) { 
 # setwd("/Volumes/drink-me/gkenney/dropbox-arbeit/epb-labor/papers-and-grants/2021_clbP/uniprot-bioinfo/genomes")
 ## import the IMG neighbor data

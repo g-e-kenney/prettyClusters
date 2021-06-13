@@ -7,8 +7,7 @@
 neighborHere(
   imgNeighborsTrimmed = imgNeighborsTrimmed,
   familyList = familyList,
-  geneName = geneName,
-  coreGeneName = coreGeneName
+  geneName = geneName
 )
 }
 \arguments{
@@ -17,8 +16,6 @@ neighborHere(
 \item{familyList}{Data from from analyzeNeighbors/neighborCatalog containing a list of protein families for further analysis}
 
 \item{geneName}{Name of gene of interest as string}
-
-\item{coreGeneName}{Name of gene of interest as string, without any suffix.}
 }
 \value{
 Table of binary data indicating presence of absence of a protein family in the proximity of a gene of interest
@@ -27,6 +24,10 @@ Table of binary data indicating presence of absence of a protein family in the p
 This subfunction identifies whether members are a given protein family are present in the genomic neighborhood of a gene of interest
 }
 \examples{
-neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
+\dontrun{
+neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, 
+                                familyList = familyList, 
+                                geneName = "genE") 
+}
 
 }

@@ -10,10 +10,16 @@
 #' @return List of relevant protein families
 #' @export
 #' @importFrom magrittr %>% 
-#' @importFrom utils read.csv write.csv write.table read.table
+#' @importFrom utils read.csv write.csv write.table read.table data
 #' @examples
-#' neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, neighborNumber=neighborNumber, includeGene=includeGene, geneName=geneName)
-#'
+#' \dontrun{
+#' neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, 
+#'                                       imgNeighborsTrimmed = imgNeighborsTrimmed, 
+#'                                       neighborNumber=neighborNumber, 
+#'                                       includeGene=includeGene, 
+#'                                       geneName=geneName)
+#' }
+#' 
 neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed,
                              imgNeighborsTrimmed = imgNeighborsTrimmed,
                              geneName = geneName,
@@ -105,7 +111,7 @@ neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed,
     uDataFams <- uDataFams[-which(is.na(uDataFams)),]
   }
   uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
-  commonFams <- uDataFams %>% dplyr::filter(pAbund >= neighborThreshold)
+  commonFams <- uDataFams %>% dplyr::filter(.data$pAbund >= neighborThreshold)
   colnames(commonFams) <- c("imgNames", "abund", "pAbund")
   data(famInfoList)
   commonFams <- dplyr::left_join(commonFams, famInfoList)

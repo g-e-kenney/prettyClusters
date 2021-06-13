@@ -33,6 +33,12 @@ Updated metadata for neighboring genes (additional files generated en route)
 Given a desired genome neighborhood and lists of genes of interest and their neighbors, along with their protein sequences, this program uses all-by-all-blast & a clustering method of choice to identify subsets of hypothetical proteins that may represent meaningfully associated proteins.
 }
 \examples{
-incorpIprScanOut <- incorpIprScan(iprScanSource = "iprScan.txt", imgNeighborsSource = "fauxNeighborsData.txt", geneName = "genE", addPfam = TRUE, addTigrfam = TRUE)  
+\dontrun{
+incorpIprScanOut <- incorpIprScan(iprScanSource = "iprScan.txt", 
+                                  imgNeighborsSource = "fauxNeighborsData.txt", 
+                                  geneName = "genE", 
+                                  addPfam = TRUE, 
+                                  addTigrfam = TRUE)  
+}
 
 }

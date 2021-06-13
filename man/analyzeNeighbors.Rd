@@ -51,6 +51,12 @@ Updated metadata and misc. figures and files en route
 This function encompasses several subfunctions that catalog and quantify protein families in the neighborhood of genes of interest and use that data to identify genomic neighborhoods that are themselves similar.
 }
 \examples{
-analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE") 
+\dontrun{
+analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", 
+                                           imgNeighbors = "repnodeNeighbors.txt", 
+                                           geneName = "genE", 
+                                           tgCutoff = 0.6, 
+                                           efiRepnodes = FALSE) 
+}
 
 }

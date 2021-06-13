@@ -39,6 +39,15 @@ List with trimmed metadata sets for both genes of interest and neighboring genes
 Given a desired genome neighborhood and lists of genes of interest and their neighbors, this function removes any genes not on the same scaffold as their ostensible neighbors and trims truncated clusters, removing them from further analysis.
 }
 \examples{
- neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData, imgGenesData = imgGenesData, imgNeighborsContext = imgNeighborsContext, trimShortClusters = TRUE, neighborNumber = 10, geneName = "genE", imgNeighborSeqs=imgNeighborSeqs, imgGeneSeqs=imgGeneSeqs)
+\dontrun{
+neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData, 
+                                   imgGenesData = imgGenesData, 
+                                   imgNeighborsContext = imgNeighborsContext, 
+                                   trimShortClusters = TRUE, 
+                                   neighborNumber = 10, 
+                                   geneName = "genE", 
+                                   imgNeighborSeqs=imgNeighborSeqs, 
+                                   imgGeneSeqs=imgGeneSeqs)
+}
 
 }

@@ -24,7 +24,16 @@
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples 
-#' prepNeighborsOutput <- prepNeighbors(imgGenes="geneFile.txt", imgNeighbors="neighborsFile.txt", geneSeqs="geneSeqs.fa", neighborSeqs="neighborSeqs.fa", neighborsContext = "context.txt", geneName="genE",  neighborNumber=10, sysTerm="wsl")
+#' \dontrun{
+#' prepNeighborsOutput <- prepNeighbors(imgGenes="geneFile.txt", 
+#'                                      imgNeighbors="neighborsFile.txt", 
+#'                                      geneSeqs="geneSeqs.fa", 
+#'                                      neighborSeqs="neighborSeqs.fa", 
+#'                                      neighborsContext = "context.txt", 
+#'                                      geneName="genE",  
+#'                                      neighborNumber=10, 
+#'                                      sysTerm="wsl")
+#' }
 #'
 prepNeighbors <- function(imgGenes = imgGenes, imgNeighbors = imgNeighbors, geneSeqs = geneSeqs, neighborSeqs = neighborSeqs, neighborsContext = neighborsContext, geneName = geneName, neighborNumber = neighborNumber, sysTerm = sysTerm, efiRepnodes = FALSE, neighborThreshold = 0.025, hypoAnalysis = TRUE, clustMethod = "tidygraph", numThreads = 1, alphaVal = 0.95, bootStrap = 10, pidCutoff = 35, trimShortClusters = TRUE)  {
                                         # starting stuff

@@ -66,6 +66,15 @@ List with trimmed metadata sets for both genes of interest and neighboring genes
 This function uses IMG metadatasets for genes of interest and their genomic neighbors to do some QC and identify subfamilies of hypothetical proteins.
 }
 \examples{
-prepNeighborsOutput <- prepNeighbors(imgGenes="geneFile.txt", imgNeighbors="neighborsFile.txt", geneSeqs="geneSeqs.fa", neighborSeqs="neighborSeqs.fa", neighborsContext = "context.txt", geneName="genE",  neighborNumber=10, sysTerm="wsl")
+\dontrun{
+prepNeighborsOutput <- prepNeighbors(imgGenes="geneFile.txt", 
+                                     imgNeighbors="neighborsFile.txt", 
+                                     geneSeqs="geneSeqs.fa", 
+                                     neighborSeqs="neighborSeqs.fa", 
+                                     neighborsContext = "context.txt", 
+                                     geneName="genE",  
+                                     neighborNumber=10, 
+                                     sysTerm="wsl")
+}
 
 }

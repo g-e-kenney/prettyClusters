@@ -36,6 +36,14 @@ List with the trimmed gene and neighbor metadata
 After SSN generation via EFI-EST, this function ties together the EFI-EST gene IDs with gene IDs in existing metadata files and produces trimmed metadata and sequence files for the genes and their neighbors using the list of representative nodes at the desired cutoff.
 }
 \examples{
-repnodeTrimOut <- repnodeTrim(imgGenes = "geneFile.txt", imgNeighbors="neighborFile.txt", imgGeneSeqs = "geneSeqs.fa", imgNeighborSeqs = "neighborSeqs.fa", geneName = "genE", efiFullMetadata = "efiFullMetadata.csv", efiFinalMetadata = "efiFinalMetadata.csv")
+\dontrun{
+repnodeTrimOut <- repnodeTrim(imgGenes = "geneFile.txt", 
+                              imgNeighbors="neighborFile.txt", 
+                              imgGeneSeqs = "geneSeqs.fa", 
+                              imgNeighborSeqs = "neighborSeqs.fa", 
+                              geneName = "genE", 
+                              efiFullMetadata = "efiFullMetadata.csv", 
+                              efiFinalMetadata = "efiFinalMetadata.csv")
+}
 
 }

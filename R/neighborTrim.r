@@ -15,7 +15,16 @@
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples 
-#'  neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData, imgGenesData = imgGenesData, imgNeighborsContext = imgNeighborsContext, trimShortClusters = TRUE, neighborNumber = 10, geneName = "genE", imgNeighborSeqs=imgNeighborSeqs, imgGeneSeqs=imgGeneSeqs)
+#' \dontrun{
+#' neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData, 
+#'                                    imgGenesData = imgGenesData, 
+#'                                    imgNeighborsContext = imgNeighborsContext, 
+#'                                    trimShortClusters = TRUE, 
+#'                                    neighborNumber = 10, 
+#'                                    geneName = "genE", 
+#'                                    imgNeighborSeqs=imgNeighborSeqs, 
+#'                                    imgGeneSeqs=imgGeneSeqs)
+#' }
 #'
 neighborTrim <- function(imgNeighborsData = imgNeighborsData, imgGenesData = imgGenesData, imgNeighborsContext = imgNeighborsContext, trimShortClusters = trimShortClusters, neighborNumber = neighborNumber, geneName = geneName, imgNeighborSeqs=imgNeighborSeqs, imgGeneSeqs=imgGeneSeqs) {
                                         # let's make things

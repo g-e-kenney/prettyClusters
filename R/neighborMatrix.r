@@ -11,7 +11,12 @@
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples
-#' neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName) 
+#' \dontrun{
+#' neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, 
+#'                                     neighborBinary = neighborBinary, 
+#'                                     familyList = familyList, 
+#'                                     geneName = "genE")
+#' }
 #'
 neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed,
                            neighborBinary = neighborBinary,

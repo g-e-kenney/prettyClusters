@@ -1,6 +1,6 @@
 Package: prettyClusters
 Title: Makes Scaled and Vector-Compatible Genome Neighborhood Diagrams from IMG Metadata
-Version: 0.0.0.7700
+Version: 0.0.0.7801
 Authors@R: 
     person(given = "G.",
            family = "Kenney",

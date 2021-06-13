@@ -10,7 +10,11 @@
 #' @importFrom data.table :=
 #' @importFrom magrittr %>%
 #' @examples
-#' neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, familyList = familyList, geneName = geneName) 
+#' \dontrun{
+#' neighborHereOut <- neighborHere(imgNeighborsTrimmed=imgNeighborsTrimmed, 
+#'                                 familyList = familyList, 
+#'                                 geneName = "genE") 
+#' }
 #'
 neighborHere <- function(imgNeighborsTrimmed = imgNeighborsTrimmed,
                           familyList = familyList,

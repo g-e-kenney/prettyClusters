@@ -19,7 +19,16 @@
 #' @importFrom stats dist end hclust na.omit start
 #' @importFrom grDevices cairo_pdf cairo_ps col2rgb colorRampPalette dev.off hsv pdf rgb2hsv
 #' @examples
-#' neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
+#' \dontrun{
+#' neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, 
+#'                                         imgNeighborsTrimmed = imgNeighborsTrimmed, 
+#'                                         geneName = "genE", 
+#'                                         neighborMatrixData = neighborMatrixData, 
+#'                                         autoClust = TRUE, 
+#'                                         clustMethod = "tidygraph", 
+#'                                         coreGeneName = "genE", 
+#'                                         tgCutoff=.6)
+#' }
 #'
 neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed,
                              imgNeighborsTrimmed = imgNeighborsTrimmed,

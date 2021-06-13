@@ -10,8 +10,13 @@
 #' @export
 #' @importFrom utils read.csv write.csv write.table read.table
 #' @examples
-#' generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", imgGeneSeqs="geneSeqs.fa", neighborNumber=10, geneName="genE")
-#'
+#' \dontrun{
+#' generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", 
+#'                                              imgGeneSeqs="geneSeqs.fa", 
+#'                                              neighborNumber=10, 
+#'                                              geneName="genE")
+#'}
+#' 
 generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, neighborNumber = neighborNumber, includeGene = TRUE, geneName = geneName) {
                                         # boring setup
     fileDate <- format(Sys.Date(),format="%Y%m%d")

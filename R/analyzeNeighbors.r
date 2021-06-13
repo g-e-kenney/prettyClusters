@@ -21,7 +21,13 @@
 #' @importFrom utils read.csv write.csv write.table read.table
 #'
 #' @examples
-#' analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", imgNeighbors = "repnodeNeighbors.txt", geneName = "genE", tgCutoff = 0.6, efiRepnodes = FALSE) 
+#' \dontrun{
+#' analyzeNeighborsOutput <- analyzeNeighbors(imgGenes="repnodeGenes.txt", 
+#'                                            imgNeighbors = "repnodeNeighbors.txt", 
+#'                                            geneName = "genE", 
+#'                                            tgCutoff = 0.6, 
+#'                                            efiRepnodes = FALSE) 
+#' }
 #'
 analyzeNeighbors <- function(imgGenes = imgGenes,
                              imgNeighbors = imgNeighbors,

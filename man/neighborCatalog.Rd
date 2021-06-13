@@ -9,7 +9,6 @@ neighborCatalog(
   imgNeighborsTrimmed = imgNeighborsTrimmed,
   geneName = geneName,
   neighborThreshold = neighborThreshold,
-  coreGeneName = coreGeneName,
   useInterPro = useInterPro,
   useHypo = useHypo
 )
@@ -23,8 +22,6 @@ neighborCatalog(
 
 \item{neighborThreshold}{Abundance of protein family required to include it in further analysis. Number (0-1)}
 
-\item{coreGeneName}{Name of gene of interest as string, without any suffix. Character string, required.}
-
 \item{useInterPro}{Should InterPro families be used for analysis? Boolean, defaults to FALSE.}
 
 \item{useHypo}{Should hypothetical protein families from prepNeighbors be used for analysis? Boolean, defaults to TRUE.}
@@ -36,6 +33,12 @@ List of relevant protein families
 This function identifies and quantifies protein families found in genomic neighborhoods (as defined by IMG metadata)
 }
 \examples{
-neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, neighborNumber=neighborNumber, includeGene=includeGene, geneName=geneName, coreGeneName = coreGeneName)
+\dontrun{
+neighborCatalogOut <- neighborCatalog(imgGenesTrimmed=imgGenesTrimmed, 
+                                      imgNeighborsTrimmed = imgNeighborsTrimmed, 
+                                      neighborNumber=neighborNumber, 
+                                      includeGene=includeGene, 
+                                      geneName=geneName)
+}
 
 }

@@ -19,8 +19,17 @@
 #' @importFrom stats dist end hclust na.omit start
 #' @importFrom grDevices cairo_pdf cairo_ps col2rgb colorRampPalette dev.off hsv pdf rgb2hsv
 #' @examples 
-#' imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData, imgNeighborsData = imgNeighborsData, imgNeighborSeqs=imgNeighborSeqs, geneName = "genE", clustMethod = "tidygraph", pidCutoff = 35, alphaVal = 0.95, bootStrap = 10, sysTerm = "nix", numThreads = 5) 
-#'
+#' \dontrun{
+#' imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData, 
+#'                                          imgNeighborsData = imgNeighborsData, 
+#'                                          imgNeighborSeqs=imgNeighborSeqs, 
+#'                                          geneName = "genE", 
+#'                                          clustMethod = "tidygraph", 
+#'                                          pidCutoff = 35, 
+#'                                          sysTerm = "nix", 
+#'                                          numThreads = 5) 
+#' }
+#' 
 neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData = imgNeighborsData, imgNeighborSeqs=imgNeighborSeqs, geneName = geneName, clustMethod = clustMethod, pidCutoff = pidCutoff, alphaVal = alphaVal, bootStrap = bootStrap, sysTerm = sysTerm, numThreads = numThreads) { 
                                         #              first step: flag hypothetical proteins  in the neighbordata file
                                         # have some variables and stuff

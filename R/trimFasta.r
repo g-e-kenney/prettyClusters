@@ -10,8 +10,12 @@
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%   
 #' @examples
-#' trimFastaOut <- trimFasta(seqInput = "seqInput.fa", trimInput="trimInput.txt", seqName = "genE")
-#'
+#' \dontrun{
+#' trimFastaOut <- trimFasta(seqInput = "seqInput.fa", 
+#'                           trimInput="trimInput.txt", 
+#'                           seqName = "genE")
+#' }
+#' 
 trimFasta <- function(seqInput = seqInput, trimInput=trimInput, seqName = seqName) {
   fileDate <- format(Sys.Date(),format="%Y%m%d")
   outputSeqsFile <- paste(fileDate,"_trimmed_",seqName,".fa",sep="")

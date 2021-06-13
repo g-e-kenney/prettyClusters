@@ -30,6 +30,11 @@ Lists of neighboring genes to upload to your IMG Gene Cart
 This function uses IMG metadatasets to generate relatively attractive gene cluster/genomic neighborhood diagrams that are scaled and that generate vector graphics
 }
 \examples{
-generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", imgGeneSeqs="geneSeqs.fa", neighborNumber=10, geneName="genE")
+\dontrun{
+generateNeighborsOutput <- generateNeighbors(imgGenes="geneFile.txt", 
+                                             imgGeneSeqs="geneSeqs.fa", 
+                                             neighborNumber=10, 
+                                             geneName="genE")
+}
 
 }

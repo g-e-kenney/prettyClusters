@@ -5,7 +5,7 @@
 \title{Subfunction to identify subgroups of hypothetical proteins in larger IMG datasets}
 \usage{
 neighborHypothetical(
-  imgGenesData,
+  imgGenesData = imgGenesData,
   imgNeighborsData = imgNeighborsData,
   imgNeighborSeqs = imgNeighborSeqs,
   geneName = geneName,
@@ -45,6 +45,15 @@ Updated metadata for neighboring genes (additional files generated en route)
 Given a desired genome neighborhood and lists of genes of interest and their neighbors, along with their protein sequences, this program uses all-by-all-blast & a clustering method of choice to identify subsets of hypothetical proteins that may represent meaningfully associated proteins.
 }
 \examples{
-imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData, imgNeighborsData = imgNeighborsData, imgNeighborSeqs=imgNeighborSeqs, geneName = "genE", clustMethod = "tidygraph", pidCutoff = 35, alphaVal = 0.95, bootStrap = 10, sysTerm = "nix", numThreads = 5) 
+\dontrun{
+imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData, 
+                                         imgNeighborsData = imgNeighborsData, 
+                                         imgNeighborSeqs=imgNeighborSeqs, 
+                                         geneName = "genE", 
+                                         clustMethod = "tidygraph", 
+                                         pidCutoff = 35, 
+                                         sysTerm = "nix", 
+                                         numThreads = 5) 
+}
 
 }

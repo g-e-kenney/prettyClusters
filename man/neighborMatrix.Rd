@@ -8,8 +8,7 @@ neighborMatrix(
   imgGenesTrimmed = imgGenesTrimmed,
   neighborBinary = neighborBinary,
   familyList = familyList,
-  geneName = geneName,
-  coreGeneName = coreGeneName
+  geneName = geneName
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ neighborMatrix(
 \item{familyList}{Data from analyzeNeighbors/neighborCatalog listing common nearby protein families}
 
 \item{geneName}{Name of gene of interest as string}
-
-\item{coreGeneName}{Name of gene of interest as string, without any suffix.}
 }
 \value{
 Matrix object
@@ -30,6 +27,11 @@ Matrix object
 This function uses binary present/absent data for various protein families in the proximity of a set of genes of interest and matrixifies it.
 }
 \examples{
-neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, neighborBinary = neighborBinary, familyList = familyList, geneName = geneName, coreGeneName = coreGeneName) 
+\dontrun{
+neighborMatrixOut <- neighborMatrix(imgGenesTrimmed=imgGenesTrimmed, 
+                                    neighborBinary = neighborBinary, 
+                                    familyList = familyList, 
+                                    geneName = "genE")
+}
 
 }

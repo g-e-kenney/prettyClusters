@@ -45,6 +45,15 @@ List with matrix object and updated metadata, with misc. files output along the 
 This function cluster-based methods to identify subgroups of gene clusters containing genes of interest that have similar genomic neighborhoods.
 }
 \examples{
-neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, imgNeighborsTrimmed = imgNeighborsTrimmed, geneName = geneName, neighborMatrixData = neighborMatrixData, autoClust = autoClust, clustMethod = clustMethod, alphaVal = alphaVal, bootStrap = bootStrap, coreGeneName = coreGeneName, tgCutoff=tgCutoff)
+\dontrun{
+neighborClustersOut <- neighborClusters(imgGenesTrimmed = imgGenesTrimmed, 
+                                        imgNeighborsTrimmed = imgNeighborsTrimmed, 
+                                        geneName = "genE", 
+                                        neighborMatrixData = neighborMatrixData, 
+                                        autoClust = TRUE, 
+                                        clustMethod = "tidygraph", 
+                                        coreGeneName = "genE", 
+                                        tgCutoff=.6)
+}
 
 }
