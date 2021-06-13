@@ -18,7 +18,7 @@
 #' 
 trimFasta <- function(seqInput = seqInput, trimInput=trimInput, seqName = seqName) {
   fileDate <- format(Sys.Date(),format="%Y%m%d")
-  outputSeqsFile <- paste(fileDate,"_trimmed_",seqName,".fa",sep="")
+  outputSeqsFile <- paste(fileDate,"_trimFasta_",seqName,".fa",sep="")
   proteinSeqs <- seqinr::read.fasta(file=seqInput, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
   trimList <- read.csv(file=trimInput, header=TRUE, sep=",", stringsAsFactors=FALSE)
   seqNames <- names(proteinSeqs)
