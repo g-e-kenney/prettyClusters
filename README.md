@@ -6,13 +6,13 @@ This is very much a work in progress, and I'm a biochemist doing terrible things
 
 ## Why?
 I spend a lot of time working with bacterial gene clusters.  I wanted some sort of tool that could:
-- Export diagrams of gene clusters as a vector (not bitmap!) file suitable for figure layout.
+- Export diagrams of gene clusters as vector files for figures.
 - Export diagrams with multiple gene clusters in the same relative scale.
 - Import gene metadata from the JGI's [IMG database](https://img.jgi.doe.gov/index.html), which has many genomes, metagenomes, and so on that are absent from NCBI's NR database (and UniProt), or that are present but poorly annotated in databases like NCBI/WGS.  
 - Handle hypothetical and predicted proteins helpfully (i.e. by identifying new groups of hypothetical proteins that frequently appear in the genomic neighborhoods of interest).
 - Integrate into workflows using sequence similarity networks generated via the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).
 - Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
-I haven't encountered anything that quite handles all of those things, so...
+I haven't encountered anything that quite handles all of those things in one go, so...
 
 ## The `prettyClusters` toolset
 The Wiki entries contain a more detailed description of the use of specific functions.
@@ -24,8 +24,10 @@ The Wiki entries contain a more detailed description of the use of specific func
 
 ### Accessory components
 - [`gbToIMG`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-gbToIMG)
+- [`identifySubgroups`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-identifySubgroups)
 - [`incorpIprScan`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-incorpIprScan)
 - [`repnodeTrim`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-repnodeTrim)
+- [`trimFasta`](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-trimFasta)
 
 ### Using `prettyClusters`
 - A [basic installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) is the best starting point.
@@ -34,7 +36,7 @@ The Wiki entries contain a more detailed description of the use of specific func
 
 ### `prettyClusters` output
 Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
-<img src="https://github.com/g-e-kenney/prettyClusters/raw/master/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
+<img src="https://github.com/g-e-kenney/prettyClusters/raw/master/data/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
 Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 
 ## Development
@@ -44,11 +46,11 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - Automatic generation of genome neighborhood diagrams for specific clusters (or for random representatives of a cluster) in `prettyClusterDiagrams`, since the diagrams get unwieldy with very large datasets...
 - Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
 - Generation of HMMs for hypothetical protein families identified in `analyzeNeighbors`
-- User-supplied HMMs for annotation of predefined custom protein (sub)families in `analyzeNeighbors`
+- User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`
 ### Known issues
 - Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding) was poor!  This is doubly the case for GenBank-derived files (use of `incorpIprScan` can improve annotation, but not ORF-finding).
-- Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs and distance/clustering methods. No way around this.
+- Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs, to distance/clustering methods, to overrepresentation of closely related gene clusters, and to the conservation of genes outside of the gene cluster limits. There are limited ways around these problems, and they come with their own compromises.  (Overrepresentation at least can be dealt with using representative sequences chosen via [EFI-EST](https://efi.igb.illinois.edu/efi-est/) (repnodes) or [CD-HIT](https://github.com/weizhongli/cdhit).)
 - Forward- and reverse-facing genes are on the same vertical level in `prettyClusterDiagrams`. I personally find it visually clearer to have forward genes above the line and reverse genes below, but will need to probably do a bunch more digging into [gggenes](https://github.com/wilkox/gggenes) and [ggplot2](https://github.com/tidyverse/ggplot2) to figure out if/how I can make it happen.
 - Distance between genes of interest and their neighbors is not taken into account.  I have done a few initial analyses using weighted distances rather than binary present/absent values; it is not clear they've added much more info than the binary value-based analyses, and they're more complicated to run.  Could revisit?
 - Use of non-WSL `mafft` and `blast` installs on Windows isn't built-in at the moment; it's a low priority, given how easy WSL is to get up and running.
