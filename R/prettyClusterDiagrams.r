@@ -33,13 +33,12 @@
 #'                                              neighborNumber = 10)
 #' }
 #'  
-prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile = imgNeighborsFile, annotationGuideFile = annotationGuideFile, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE, subclusterDiagrams = FALSE) { 
+prettyClusterDiagrams2 <- function(imgGenesFile = imgGenesFile, imgNeighborsFile = imgNeighborsFile, annotationGuideFile = annotationGuideFile, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE, subclusterDiagrams = FALSE) { 
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     if (efiRepnodes == TRUE) {
         coreGeneName <- geneName
         geneName <- paste(geneName, "_repnodes",sep="")
     } else {
-        geneName <- geneName
         coreGeneName <- geneName
     }
     fileName <- paste(fileDate,"_prettyClusters_",geneName,sep="")
@@ -767,12 +766,15 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     ## these are generated in analyzeNeighbors (order is, at least; cluster number can be generated manually too)
     ## so it's also gonna sort the sequences by cluster order, making it easy to match with the heatmap
     if (markClusters == TRUE) {
-        clustActualColors <- viridis::viridis(length(unique(processed$clustNum)))
         clustNumTemp <- unique(processed$clustNum)
-        clustNumTemp[which(is.na(clustNumTemp))] <- 0
-        clustNumTemp <- sort(clustNumTemp)
+        if (length(which(is.na(clustNumTemp)))>0) {
+            clustNumTemp <- sort(clustNumTemp[-which(is.na(clustNumTemp))])
+        } else {
+            clustNumTemp <- sort(clustNumTemp)
+        }    
+        clustActualColors <- viridis::viridis(length(clustNumTemp))
         clustColors <- as.data.frame(list("clustNum"=clustNumTemp, "clustColors"=clustActualColors))
-        processed$clustNum[processed$clustNum==""]<-"(none)"
+        processed$clustNum[which(is.na(processed$clustNum))]<-"none"
         mcGenes <- unique(processed$source_gene_oid)
         for (i in 1:length(mcGenes)) {
             tempSpeciesLoc <- grep(mcGenes[i], processed$source_gene_oid)
@@ -784,7 +786,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             tempSeqID <- as.character(tempSeqID)
             tempClustID <- processed$clustNum[tempSpeciesLoc[1]]
             tempColorID <- clustColors$clustColor[which(clustColors$clustNum %in% tempClustID)]
-            if (grepl("none",tempClustID) == TRUE)  {
+            if (any(grepl("none",tempClustID),is.na(tempClustID)) == TRUE)  {
                 extName <- paste("<span style = 'font-size:9pt; color:#9F9F9F'>sequence ",
                                  tempSeqID,
                                  "</span><br>",

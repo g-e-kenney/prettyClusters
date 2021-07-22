@@ -266,27 +266,28 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
         fauxIMG$Add.Date <- ""
         fauxIMG$Is.Public <- ""
         ## Transmembrane Helices - just in case, probably via TMHMM
+        ## Semi-unrelated note: 
         fauxIMG$Transmembrane.Helices <- ""
-        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("TMHMM", neighborSubset$inference)))  {
+        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("TMHMM", as.vector(neighborSubset$inference))))  {
             fauxIMG$Transmembrane.Helices <- ""
-            sigLoc <- grep("TMHMM", neighborSubset$inference)
+            sigLoc <- grep("TMHMM", as.vector(neighborSubset$inference))
             fauxIMG$Transmembrane.Helices[sigLoc] <- "yes"
-        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("TMHMM", neighborSubset$note)))  {
+        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("TMHMM", as.vector(neighborSubset$note))))  {
             fauxIMG$Transmembrane.Helices <- ""
-            sigLoc <- grep("TMHMM", neighborSubset$note)
+            sigLoc <- as.vector(grep("TMHMM", neighborSubset$note))
             fauxIMG$Transmembrane.Helices[sigLoc] <- "yes"
-        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="db_xref"))!=0 && any(grepl("TMHMM", neighborSubset$db_xref)))  {
+        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="db_xref"))!=0 && any(grepl("TMHMM", as.vector(neighborSubset$db_xref))))  {
             fauxIMG$Transmembrane.Helices <- ""
-            sigLoc <- grep("TMHMM", neighborSubset$db_xref)
+            sigLoc <- grep("TMHMM", as.vector(neighborSubset$db_xref))
             fauxIMG$Transmembrane.Helices[sigLoc] <- "yes"
         } else {
             fauxIMG$Transmembrane.Helices <- ""
         }             
         ## Signal Peptides - just in case, probably via SignalP if they exist
         fauxIMG$Signal.Peptides <- ""
-        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("SignalP", neighborSubset$inference))) {
+        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("SignalP", as.vector(neighborSubset$inference)))) {
             fauxIMG$Signal.Peptides <- ""
-            sigLoc <- grep("SignalP", neighborSubset$inference)
+            sigLoc <- grep("SignalP", as.vector(neighborSubset$inference))
             fauxIMG$Signal.Peptides[sigLoc] <- "yes"
         } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("SignalP", neighborSubset$note)))  {
             fauxIMG$Signal.Peptides <- ""
@@ -316,10 +317,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
         ## Pfam. N.b. requiring digits to avoid "prediction via PFAM" or whatever hits, and making the name format more IMG-like
         fauxIMG$Pfam <- ""
         if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0) {
-            if (any(grepl("PF[[:digit:]]", neighborSubset$inference)) || any(grepl("PFAM[[:digit:]]", neighborSubset$inference)) || any(grepl("pfam[[:digit:]]", neighborSubset$inference)))  {
+            if (any(grepl("PF[[:digit:]]", as.vector(neighborSubset$inference))) || any(grepl("PFAM[[:digit:]]", as.vector(neighborSubset$inference))) || any(grepl("pfam[[:digit:]]", as.vector(neighborSubset$inference))))  {
                 for (j in length(fauxIMG$Locus.Tag)) {
-                    if (any(grepl("PF[[:digit:]]", neighborSubset$inference[j])) || any(grepl("PFAM[[:digit:]]", neighborSubset$inference[j])) || any(grepl("pfam[[:digit:]]", neighborSubset$inference[j])))  {
-                        fauxIMG$Pfam[j] <- neighborSubset$inference[j]
+                    if (any(grepl("PF[[:digit:]]", as.vector(neighborSubset$inference[j]))) || any(grepl("PFAM[[:digit:]]", as.vector(neighborSubset$inference[j]))) || any(grepl("pfam[[:digit:]]", as.vector(neighborSubset$inference[j]))))  {
+                        fauxIMG$Pfam[j] <- unlist(neighborSubset$inference[j])
                         fauxIMG$Pfam[j] <- gsub("PF"," pfam", fauxIMG$Pfam[j])
                         fauxIMG$Pfam[j] <- gsub("PFAM"," pfam", fauxIMG$Pfam[j])
                         fauxIMG$Pfam[j] <- gsub("\\.[[:digit:]][[:digit:]]", " ", fauxIMG$Pfam[j])
@@ -362,19 +363,22 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
         }
         ## Tigrfam - these generally have a standard ID format
         fauxIMG$Tigrfam <- ""
-        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$inference)))  {
+        if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0 && any(grepl("TIGR[[:digit:]]",
+                                                                                                       as.vector(neighborSubset$inference))))  {
             for (j in length(fauxIMG$Locus.Tag)) {
-                if (any(grepl("TIGR[[:digit:]]", neighborSubset$inference[j]))) {
-                    fauxIMG$Tigrfam[j] <- neighborSubset$inference[j]
+                if (any(grepl("TIGR[[:digit:]]", as.vector(neighborSubset$inference[j])))) {
+                    fauxIMG$Tigrfam[j] <- unlist(neighborSubset$inference[j])
                 }
             }       
-        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$note))) {
+        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="note"))!=0 && any(grepl("TIGR[[:digit:]]",
+                                                                                                         neighborSubset$note))) {
             for (j in length(fauxIMG$Locus.Tag)) {
                 if (any(grepl("TIGR[[:digit:]]", neighborSubset$note[j]))) {
                     fauxIMG$Tigrfam[j] <- neighborSubset$note[j]
                 }
             }  
-        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="db_xref"))!=0 && any(grepl("TIGR[[:digit:]]", neighborSubset$db_xref))) {
+        } else if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="db_xref"))!=0 && any(grepl("TIGR[[:digit:]]",
+                                                                                                            neighborSubset$db_xref))) {
             for (j in length(fauxIMG$Locus.Tag)) {
                 if (any(grepl("TIGR[[:digit:]]", neighborSubset$db_xref[j]))) {
                     fauxIMG$Tigrfam[j] <- neighborSubset$db_xref[j]
@@ -397,10 +401,10 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
         ## InterPro - these almost always have the right IPR-based code but just in case
         fauxIMG$InterPro <- ""
         if (length(which(colnames(GenomicRanges::mcols(neighborSubset))=="inference"))!=0) {
-            if (any(grepl("InterPro", neighborSubset$inference)) || any(grepl("IPR[[:digit:]]", neighborSubset$inference)))  {
+            if (any(grepl("InterPro", as.vector(neighborSubset$inference))) || any(grepl("IPR[[:digit:]]", as.vector(neighborSubset$inference))))  {
                 for (j in length(fauxIMG$Locus.Tag)) {
-                    if (any(grepl("InterPro", neighborSubset$inference[j])) || any(grepl("IPR[[:digit:]]", neighborSubset$inference[j])))  {
-                        fauxIMG$InterPro[j] <- neighborSubset$inference[j]
+                    if (any(grepl("InterPro", as.vector(neighborSubset$inference[j]))) || any(grepl("IPR[[:digit:]]", as.vector(neighborSubset$inference[j]))))  {
+                        fauxIMG$InterPro[j] <- unlist(neighborSubset$inference[j])
                     }       
                 }
             }  
@@ -448,6 +452,8 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
                 fauxNeighborSeqs <- rbind(fauxNeighborSeqs, fauxSeqIMG)
             }
         }
+        tempWarning <- paste("Processed: ", fileList[i],". Moving on.", sep="")
+        print(tempWarning)
         rm(neighborSubset)
     }
     ## outputting the faux-IMG-formatted metadata file for the neighborhoods
@@ -463,6 +469,8 @@ gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiL
     write.table(fullContext, file=fauxContextFile, row.names=FALSE, col.names = TRUE, sep="\t")
     ## and the .fa file for the neighbor protein sequences
     fauxNeighborSeqList <- list()
+    emptyNeighbors <- which(fauxNeighborSeqs[[2]]=="")
+    fauxNeighborSeqs[[1]][emptyNeighbors] <- "No sequence found"
     for (j in 1:length(fauxNeighborSeqs[,2])) {
         fauxNeighborSeqList[[fauxNeighborSeqs[j,1]]] <- fauxNeighborSeqs[j,2]
     }
