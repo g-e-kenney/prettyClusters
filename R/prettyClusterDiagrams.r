@@ -33,7 +33,7 @@
 #'                                              neighborNumber = 10)
 #' }
 #'  
-prettyClusterDiagrams2 <- function(imgGenesFile = imgGenesFile, imgNeighborsFile = imgNeighborsFile, annotationGuideFile = annotationGuideFile, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE, subclusterDiagrams = FALSE) { 
+prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile = imgNeighborsFile, annotationGuideFile = annotationGuideFile, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE, subclusterDiagrams = FALSE) { 
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     if (efiRepnodes == TRUE) {
         coreGeneName <- geneName
