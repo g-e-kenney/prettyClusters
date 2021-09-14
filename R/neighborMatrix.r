@@ -22,37 +22,45 @@ neighborMatrix <- function(imgGenesTrimmed = imgGenesTrimmed,
                            neighborBinary = neighborBinary,
                            familyList = familyList,
                            geneName = geneName) {
-  fileDate <- format(Sys.Date(),format="%Y%m%d")
-  fileName <- paste(fileDate,"_neighborMatrix_",geneName,sep="")
-  finalCSV <- paste(fileName,".csv",sep="")
-  allFalse <- list()
-  familyNum <- length(familyList)
-  for (i in 1:familyNum) {
-    allFalse <- list(c(allFalse, FALSE))
-  }
-  matrixColNames <- c("gene_oid", familyList)
-  matrixColNum <- length(matrixColNames)
-  ## getting the list of ids for the gene of interest
-  centralGenes <- unique(imgGenesTrimmed$gene_oid)
-  centralGeneNum <- length(centralGenes)
-  neighborMatrixData <- data.frame(matrix(NA, nrow=centralGeneNum, ncol=matrixColNum))
-  colnames(neighborMatrixData) <- matrixColNames
-  ## going through the gene ids and connecting the binary there/not there values for families of interests from the neighboring genes to the gene of interest
-  colTally <- matrixColNum -1
-  for (i in 1:centralGeneNum) {
-    neighborMatrixData$gene_oid[i] <- centralGenes[i]
-    ## getting the mini-set of neighbors of that source gene id
-    nearestBinary <- neighborBinary %>% dplyr::filter(.data$source_gene_oid == centralGenes[i])
-    for (j in 1:colTally) {
-      if(any(grepl(1,nearestBinary[[matrixColNames[j+1]]])) == TRUE) {
-        neighborMatrixData[[matrixColNames[j+1]]][i] <- 1
-      } else {    
-        neighborMatrixData[[matrixColNames[j+1]]][i] <- 0
-      }
+    fileDate <- format(Sys.Date(),format="%Y%m%d")
+    fileName <- paste(fileDate,"_neighborMatrix_",geneName,sep="")
+    fileName2 <- paste(fileDate,"_neighborMatrix_",geneName,"_tally",sep="")
+    finalCSV <- paste(fileName,".csv",sep="")
+    finalCSV2 <- paste(fileName2,".csv",sep="")
+    allFalse <- list()
+    familyNum <- length(familyList)
+    for (i in 1:familyNum) {
+        allFalse <- list(c(allFalse, FALSE))
     }
-  }
-  write.csv(neighborMatrixData, finalCSV)
-  print("Matrix of binary family values per gene of interest created.")
-  return(neighborMatrixData)
+    matrixColNames <- c("gene_oid", familyList)
+    matrixColNum <- length(matrixColNames)
+    ## getting the list of ids for the gene of interest
+    centralGenes <- unique(imgGenesTrimmed$gene_oid)
+    centralGeneNum <- length(centralGenes)
+    neighborMatrixData <- data.frame(matrix(NA, nrow=centralGeneNum, ncol=matrixColNum))
+    colnames(neighborMatrixData) <- matrixColNames
+    neighborTally <- neighborMatrixData
+    ## going through the gene ids and connecting the binary there/not there values for families of interests from the neighboring genes to the gene of interest
+    colTally <- matrixColNum -1
+    for (i in 1:centralGeneNum) {
+        neighborMatrixData$gene_oid[i] <- centralGenes[i]
+        neighborTally$gene_oid[i] <- centralGenes[i]
+        ## getting the mini-set of neighbors of that source gene id
+        nearestBinary <- neighborBinary %>% dplyr::filter(.data$source_gene_oid == centralGenes[i])
+        for (j in 1:colTally) {
+            ## this tally file counts how many times a given family shows up in the neighborhood
+            neighborTally[[matrixColNames[j+1]]][i] <- sum(nearestBinary[[matrixColNames[j+1]]])
+            ## this main file just keeps track of whether they show up at all
+            if(any(grepl(1,nearestBinary[[matrixColNames[j+1]]])) == TRUE) {
+                neighborMatrixData[[matrixColNames[j+1]]][i] <- 1
+            } else {    
+                neighborMatrixData[[matrixColNames[j+1]]][i] <- 0
+            }
+        }
+    }
+    write.csv(neighborMatrixData, finalCSV)
+    write.csv(neighborTally, finalCSV2)
+    print("Matrix of binary family values per gene of interest created.")
+    return(neighborMatrixData)
 }
 
