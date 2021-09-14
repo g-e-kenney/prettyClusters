@@ -116,6 +116,61 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     } else {
         geneSets$source_gene_oid <- "none"
     }
+    geneSets <- geneSets[order(gene_oid),]
+    ## if this is being run as a standalone figure generator, there possibly aren't any source gene IDs
+    if (standAlone == TRUE) {
+        ## if labels are manually added, let's respect them
+        coreGeneList <- imgGenes$gene_oid
+        coreGeneList <- sort(coreGeneList)
+        for (m in 1:length(coreGeneList)) {
+                ## we need to figure out what GOIs have overlapping neighborhoods - if any
+            multiCore <- coreGeneList %>% dplyr::between(coreGeneList[m]-neighborNumber, coreGeneList[m]+neighborNumber) %>% which()
+            realMultis <- coreGeneList[multiCore]
+            if (length(multiCore) == 1) {
+                ## if we have only one GOI locally we can handle this easily
+                neighborSubset <- geneSets %>% dplyr::filter(.data$gene_oid >= coreGeneList[m] - neighborNumber & .data$gene_oid <= coreGeneList[m] + neighborNumber)
+                neighborList <- neighborSubset$gene_oid
+                neighborSubset$source_gene_oid[neighborSubset$gene_oid %in% neighborList] <- coreGeneList[m]
+                if (exists(x="fixGeneSets") == FALSE) {
+                    fixGeneSets <- data.frame(neighborSubset, stringsAsFactors = FALSE)
+                } else {
+                    fixGeneSets <- rbind(fixGeneSets, neighborSubset)
+                } 
+            } else {
+                ## if we have 3+ GOIs locally this is gonna be hideous and algorithmic fixes might break in a truncated gene cluster
+                ## let's bail and make the user fix it
+                if (length(realMultis) > 2)  {
+                    goiError <- paste("There are 3 or more GOIs sharing a neighborhood with ",
+                                      coreGeneList[m],
+                                      ". Please address this manually in the source_gene_oid column of the neighborMetadata."
+                                     ,sep="")
+                    print(goiError)
+                    next
+                }                             
+                ## if we have 2 GOIs in one area and this is the first time we've hit this area, let's handle it
+                if (length(multiCore) > 1 && coreGeneList[m] == coreGeneList[multiCore[1]]) {
+                    neighborSubset <- geneSets %>% dplyr::filter(.data$gene_oid >= coreGeneList[multiCore[1]] - neighborNumber & .data$gene_oid <= coreGeneList[multiCore[length(multiCore)]] + neighborNumber)
+                    neighborList <- neighborSubset$gene_oid
+                    neighborSubset$index <- seq_len(nrow(neighborSubset)) %% 2
+                    neighborSubset$index[1] <- 0
+                    neighborSubset$index[length(neighborList)] <- 1
+                    neighborSubset$source_gene_oid[neighborSubset$index == 0] <- coreGeneList[multiCore[1]]
+                    neighborSubset$source_gene_oid[neighborSubset$index == 1] <- coreGeneList[multiCore[2]]
+                    neighborSubset <- neighborSubset[,-"index"]
+                    if (exists(x="fixGeneSets") == FALSE) {
+                        fixGeneSets <- data.frame(neighborSubset, stringsAsFactors = FALSE)
+                    } else {
+                        fixGeneSets <- rbind(fixGeneSets, neighborSubset)
+                    } 
+                } else if (length(multiCore) > 1 && coreGeneList[m] != coreGeneList[multiCore[1]]) {
+                    ## in this case we should have already handled the area
+                    next
+                }
+            }
+        }
+        geneSets <- fixGeneSets
+        print("Source gene IDs added to neighbor metadata.")
+    }
     ## dealing with blank cells & misc metadata processing
     geneSets$Pfam[geneSets$Pfam==""]<-"none"
     geneSets$Tigrfam[geneSets$Tigrfam==""]<-"none"
@@ -203,14 +258,17 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                     tempList3 <- list()
                     ## first list has IMGfam and Hypofam families - both are specific and singular, so any non-none match is legit
                     tempList1 <- strsplit(namedGenes$IMGfam[j], " ")
-                    tempList1 <- append(tempList1, strsplit(namedGenes$Hypofam[j], " "))
+                    ## adding the dollar sign here makes the regex work, ugh what a kludge
+                    ## this is only an issue for Hypofams due to the way the family names/numbers are generated
+                    ## might be possible to fix that back in neighborHypothetical?
+                    tempList1 <- append(tempList1, paste(strsplit(namedGenes$Hypofam[j], " "),"$",sep=""))
                     ## second list is Pfam and TIGRfam and InterPro - here you can have multiple hits, and we may or may not consider the absence of a family meaningful
                     tempList2 <- strsplit(namedGenes$Pfam[j], " ")
                     tempList2 <- append(tempList2, strsplit(namedGenes$Tigrfam[j], " "))
                     tempList2 <- append(tempList2, strsplit(namedGenes$InterPro[j], " "))
                     ## we do not want "none" to be a possible match when looking at annotation rules for which "any" is an option (thus tempList3), or for commonly absent annotations (IMG.Term, Hypofam)
                     ## but we do want to be able to look for it in some situations (e.g. members of a superfamily but not a subfamily), thus tempList2 retains it
-                    tempList1 <- unlist(tempList1[tempList1!="none"])
+                    tempList1 <- unlist(tempList1[tempList1!="none$"&&tempList1!="none"])
                     tempList2 <- unlist(tempList2) 
                     tempList3 <- unlist(tempList2[tempList2!="none"])
                     ## matches between data and criteria
@@ -223,7 +281,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is a strong match and generally should not be overwritten
                         foundIn <- "exact"
-                                        #print("exit A")
+                                  #      print("exit A")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector2) && length(tempList1) != 0 && any(tempVector1) != FALSE) {
                         ## all annotations had to match the requirements and all did (including requirements for the absence of a specific annotation AND HypoFam and/or IMG.Term)
@@ -231,7 +289,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is a strong match and generally should not be ovewritten
                         foundIn <- "exact"
-                                        #print("exit B")
+                                 #      print("exit B")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector2) && length(tempList1) == 0) {
                         ## all annotations had to match the requirements and all did (including requirements for the absence of a specific annotation)
@@ -240,7 +298,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is still a strong match and generally should not be ovewritten
                         foundIn <- "exact"
-                                        #print("exit C")
+                                #       print("exit C")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector3)  && namedGenes$RequireNone[j] == "no") {
                         ## all annotations had to match the requirement, and all listed annotations were found, but there may have been extra annotations
@@ -252,7 +310,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             geneSets$gene[i] <- namedGenes$geneSymbol[j]
                             foundMe <- "yes"
                             foundIn <- "exact"
-                                        # print("exit D1")
+                               #          print("exit D1")
                             next
                         } else if (foundMe != "yes" || foundIn != "exact") {
                             ## this is a strong match, and we don't think we already have one
@@ -271,7 +329,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             ## but we still want to flag it for the searcher because we did care about "none"
                             geneSets$gene[i] <- paste(namedGenes$geneSymbol[j],"*",sep="")
                             foundMe <- "maybe"
-                                        # print("exit E1")
+                                         # print("exit E1")
                             next
                         } else if (foundMe != "yes" || foundIn != "exact") {
                             ## we don't have a better answer yet and this is a decent match  
@@ -290,7 +348,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                 geneSets$gene[i] <- paste(namedGenes$geneSymbol[j]," \u2020",sep="")
                                 ## this is a weaker match and it's possible we could overwrite it
                                 foundMe <- "maybe"
-                                        # print("exit F")
+                                       #  print("exit F")
                                 next
                             }
                         }
@@ -298,13 +356,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         ## there were annotations that matched (and any match was allowed)
                         if (foundIn == "exact") {
                             ## an exact match was already found, this is probably not better, move on
-                                        #print("exit G1")
+                                      # print("exit G1")
                             next
                         } else {
                             geneSets$gene[i] <- namedGenes$geneSymbol[j]
                             ## probably we found it? (we weren't being too picky)
                             foundMe <- "maybe"
-                                        #print("exit G2")
+                                      #  print("exit G2")
                             next
                         }
                     } else {
@@ -313,13 +371,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             ## note that this is by default overwriteable  
                             geneSets$gene[i] <- "other"
                             foundMe <- "maybe"
-                                        #print("exit H1")
+                                      # print("exit H1")
                             next
                         } else if (j == length(annotList) && foundMe == "no") {
                             ## no matches were found and this is the last chance, so let's finalize on other
                             geneSets$gene[i] <- "other"
                             foundMe <- "yes"
-                                        #print("exit H2")
+                                      #  print("exit H2")
                             next
                         }
                     } 
@@ -402,7 +460,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     }
     ## dealing with species that have multiple BGCs with your gene type of interest
     ## initially it looks for places where the max and min coords are < 50kb apart
-    ## if they are within 50 kb, they're considered contiguous (might be huge NRPS megagenes or something)
+    ## if they are within 50 kb, they're considered contiguous gene clusters, with multiple copies and/or pseudogenes as the likely explanation
+    ## (why 50 kb? might be huge NRPS megagenes or something)
     ## if they are further, they get more analysis
     ## unless a big jump comes between 2 genes (25k!), a bgc end/beginning is not registered
     ## names are adjusted as necessary to add multiple BGCs and thus not break gggenes
@@ -573,38 +632,85 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     }
     uniqueBGCs <- unique(finalGeneSets$bgc)
     ## aligning gene clusters to your gene of interest
-    ## without this, expect all clusters to be left-aligned, and in many situations, this is not preferred 
+    ## without alignToCore selected, expect all clusters to be left-aligned, and in many situations, this is not preferred
+    ## also without this they won't necessarily all point the same direction
     if (alignToCore == TRUE) {
-                                        # dirGeneSets <- NULL
-        for (i in 1:length(uniqueBGCs)) {
-            aligningGenes <- data.frame()
-            aligningGenes <- dplyr::filter(finalGeneSets, .data$bgc == uniqueBGCs[i])
-            core <- which(aligningGenes$gene == coreGeneName)
-            if (length(core)==0) {next}
-            if (aligningGenes$direction[core] == 1) {
-                if (exists(x="dirGeneSets") == FALSE) {
-                    dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
-                } else {
-                    dirGeneSets <- rbind(dirGeneSets, aligningGenes)
-                }
-            } else {
-                last <- length(aligningGenes$end)
-                endgene <- aligningGenes$end[last]
-                newend <- abs(endgene - aligningGenes$start)
-                aligningGenes$start <- abs(endgene - aligningGenes$end)
-                aligningGenes$end <- newend
-                aligningGenes$direction <- aligningGenes$direction * -1
-                if (exists(x="dirGeneSets") == FALSE) {
-                    dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
-                } else {
-                    dirGeneSets <- rbind(dirGeneSets, aligningGenes)
-                }
+        if (standAlone == FALSE) {
+            uniqueGOIs <- unique(finalGeneSets$source_gene_oid)
+            for (i in 1:length(uniqueGOIs)) {
+                aligningGenes <- data.frame()
+                aligningGenes <- dplyr::filter(finalGeneSets, .data$source_gene_oid == uniqueGOIs[i])
+                core <- which(aligningGenes$gene_oid == uniqueGOIs[i])
+                ## neither of these failure cases should be likely since we are the source_gene_oid
+                ## so even pseudogenes shouldn't screw this up
+                ## case:  gene is missing???
+                if (length(core)==0) {next}
+                ## case: the gene appears twice as a GOI (shouldn't happen, though it could occur twice in a neighborhood
+                ## we can combine this with case: one gene copy
+                ## because for the purposes of fixing directions, we can deal easily as long as both copies point the same way
+                ## and just choose the first if not
+                if (length(core)>=1) {
+                    if (all(aligningGenes$direction[core]==1 || aligningGenes$direction[core[1]] == 1)) {
+                        if (exists(x="dirGeneSets") == FALSE) {
+                            dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
+                        } else {
+                            dirGeneSets <- rbind(dirGeneSets, aligningGenes)
+                        }                    
+                    } else if (all(aligningGenes$direction[core]==-1 || aligningGenes$direction[core[1]] == -1)) {
+                        last <- length(aligningGenes$end)
+                        endgene <- aligningGenes$end[last]
+                        newend <- abs(endgene - aligningGenes$start)
+                        aligningGenes$start <- abs(endgene - aligningGenes$end)
+                        aligningGenes$end <- newend
+                        aligningGenes$direction <- aligningGenes$direction * -1
+                        if (exists(x="dirGeneSets") == FALSE) {
+                            dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
+                        } else {
+                            dirGeneSets <- rbind(dirGeneSets, aligningGenes)
+                        }
+                    }
+                } 
+                rm(aligningGenes)
             }
-            rm(aligningGenes)
-        }
-        processed <- dirGeneSets
-        print("Gene clusters aligned around the family of genes of interest.")
+            processed <- dirGeneSets
+            print("Gene clusters aligned around the genes of interest.")
+        } else if (standAlone == TRUE) {
+        ## i.e. we cannot rely on having source_gene_oid
+            for (i in 1:length(uniqueBGCs)) {
+                aligningGenes <- data.frame()
+                aligningGenes <- dplyr::filter(finalGeneSets, .data$bgc == uniqueBGCs[i])
+                core <- which(aligningGenes$gene == coreGeneName)
+                ## see above section for notes - note that we have to fall back into sorting things by BGC here
+                ## which makes the "more than one core gene" thing more likely, annoyingly
+                if (length(core)==0) {next}
+                if (length(core)>=1) {
+                    if (all(aligningGenes$direction[core]==1 || aligningGenes$direction[core[1]] == 1)) {
+                        if (exists(x="dirGeneSets") == FALSE) {
+                            dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
+                        } else {
+                            dirGeneSets <- rbind(dirGeneSets, aligningGenes)
+                        }                    
+                    } else if (all(aligningGenes$direction[core]==-1 || aligningGenes$direction[core[1]] == -1)) {
+                        last <- length(aligningGenes$end)
+                        endgene <- aligningGenes$end[last]
+                        newend <- abs(endgene - aligningGenes$start)
+                        aligningGenes$start <- abs(endgene - aligningGenes$end)
+                        aligningGenes$end <- newend
+                        aligningGenes$direction <- aligningGenes$direction * -1
+                        if (exists(x="dirGeneSets") == FALSE) {
+                            dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
+                        } else {
+                            dirGeneSets <- rbind(dirGeneSets, aligningGenes)
+                        }
+                    }
+                } 
+                rm(aligningGenes)
+            }
+            processed <- dirGeneSets
+            print("Gene clusters aligned around the family of genes of interest.")                     
+        } 
     } else {
+        ## no aligning to core
         processed <- finalGeneSets
     }
     ## palette generation - needed or not?
@@ -757,15 +863,14 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                           'fill', 
                           values = setNames(tempColors, allGeneTypes), 
                           ...)
-        }
-        
+        }      
         print("Palettes generated.")
     }
     ## if markclusters is chosen, this will add cluster numbers to the sequence IDs
     ## note that this adds the sequence number (ordered by clustering) and the cluster number
     ## these are generated in analyzeNeighbors (order is, at least; cluster number can be generated manually too)
     ## so it's also gonna sort the sequences by cluster order, making it easy to match with the heatmap
-    if (markClusters == TRUE) {
+    if (markClusters == TRUE && standAlone == FALSE) {
         clustNumTemp <- unique(processed$clustNum)
         if (length(which(is.na(clustNumTemp)))>0) {
             clustNumTemp <- sort(clustNumTemp[-which(is.na(clustNumTemp))])
@@ -847,6 +952,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     ## so a version with and without the axes for all clusters is also generated as a .pdf so that you can have a properly scaled vector scale
     ## anyway starting with the barebones diagrams
     if (alignToCore == TRUE) {
+        ## note that where there are 2+ GOIs, this just centers them (it's looking for coreGeneName)
         dummies <- gggenes::make_alignment_dummies(processed, ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, id = .data$gene), on = coreGeneName)
     }
     if (labelGenes == TRUE ) {
