@@ -43,11 +43,11 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 ### Planned additions
 - Additional tools or instructions for import from UniProt metadata and from GFF/GFF-3 formatted files - haven't decided whether to keep guiding people towards GenBank as an input format (making `gbToIMG` the entry for non-IMG data), or whether to develop dedicated tools for one or two other common formats.  If so, this will likely be a separate function that can also replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity (and lack of gene family annotations) that that `gbToIMG` does.  Supplementation with `incorpIprScan` is likely still going to be advisable.
 - Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
-- Generation of HMMs for hypothetical protein families identified in `analyzeNeighbors` and `identifySubgroups* 
+- Generation of HMMs for hypothetical protein families identified in `analyzeNeighbors` and `identifySubgroups`.
 - User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`
 - Maybe another sort of per-cluster diagram - one with a "typical" genome neighborhood, illustrating order and abundance of neighbors?  Unclear whether this is likely to automate well.
-- A vignette!  
+- A vignette?  Might be redundant given [the wiki](https://github.com/g-e-kenney/prettyClusters/wiki).  
 ### Known issues
 - There may be complications for people on newer M1 Macs.  I've highlighted a few in the [installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) as people have reported them, but I don't have a Mac new enough to test this myself.  I don't anticipate quite the same level of problems for Windows 10 vs. Windows 11, but I also don't have a PC new enough to test any Windows 11-specific issues.
 - Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding, particularly for small genes like RiPP precursors) was poor!  This is doubly the case for GenBank-derived files (use of `incorpIprScan` can improve annotation, but not ORF-finding).  If this is a big problem for your genome neighborhoods, you can consider manually updating problem genes (adding metadata lines and amino acid sequences) or re-annotating your sequences ([reannotated data](https://github.com/g-e-kenney/prettyClusters/wiki/Preparing-data-from-non-IMG-sources-for-prettyClusters#re-annotating-nucleic-acid-sequences) can be reintegrated into a `prettyClusters` workflow.)
