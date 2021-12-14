@@ -30,9 +30,18 @@
 #'                                          numThreads = 5) 
 #' }
 #' 
-neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData = imgNeighborsData, imgNeighborSeqs=imgNeighborSeqs, geneName = geneName, clustMethod = clustMethod, pidCutoff = pidCutoff, alphaVal = alphaVal, bootStrap = bootStrap, sysTerm = sysTerm, numThreads = numThreads) { 
-                                        #              first step: flag hypothetical proteins  in the neighbordata file
-                                        # have some variables and stuff
+neighborHypothetical <- function(imgGenesData = imgGenesData,
+                                 imgNeighborsData = imgNeighborsData,
+                                 imgNeighborSeqs=imgNeighborSeqs,
+                                 geneName = geneName,
+                                 clustMethod = clustMethod,
+                                 pidCutoff = pidCutoff,
+                                 alphaVal = alphaVal,
+                                 bootStrap = bootStrap,
+                                 sysTerm = sysTerm,
+                                 numThreads = numThreads) { 
+                                        # first step: flag hypothetical proteins  in the neighbordata file
+    ## have some variables and stuff
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     fileName <- paste(fileDate,"_neighborHypothetical_",geneName,sep="")
     hypoSeqsFile <- paste(fileName, "_hypoSeqs.fa",sep="")
@@ -54,7 +63,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
                                         # making sure we have the external tools for this
     ## note:  on windows, the easiest way to Deal is to install blast and mafft via Windows Subsystem for Linux
     ## FIIK how to deal with them as full windows installs.
-    ## let's assume something non-nuts 
+    ## let's assume users went with the wsl-based installation options as suggested
     print("Analyzing hypothetical proteins.")
     if(exists(x="blastp") == FALSE || exists(x="makeblastdb") == FALSE) {
         if (sysTerm == "wsl") {
@@ -94,14 +103,15 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
         }
     }
                                         # looking for things with no pfam or tigrfam IDs
-                                        # eventually this will probably need an interpro update too
     ## this is flagging probable hypothetical proteins.  
     ## COG, EC, etc. are all too vague/sketchy to count as helpful annotation for these purposes
     ## gene products and symbols are worse
     ## and interpro is sadly not yet a default in IMG data exports
     imgNeighborsData$Pfam <- as.character(imgNeighborsData$Pfam)
     imgNeighborsData$Tigrfam <- as.character(imgNeighborsData$Tigrfam)
-    ## currently EXCLUDING InterPro listings here, since those include some things that are vague enough (superfamilies) that we may still want to run hypothetical protein analysis.   
+    ## intentionally EXCLUDING InterPro listings here, since those include some things that are vague pretty vague (superfamilies)
+    ## and for those we may still want to run hypothetical protein analysis.
+    ## but there's no good way to sort vague from specific interpro families by number (?)
     for (i in 1:nLength) {
         if(imgNeighborsData$Pfam[i] == "" && imgNeighborsData$Tigrfam[i] == "") {
             hypoIndex[[counter]] <-  imgNeighborsData$gene_oid[i]    
@@ -110,21 +120,23 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
             hypoIndex <- hypoIndex
         }
     }
-                                        # we only want metadata for hypothetical proteins only
+    ## we only want metadata for hypothetical proteins only
     hypoNeighbors <- imgNeighborsData[imgNeighborsData$gene_oid %in% hypoIndex, ]
-                                        # make a data frame with amino acid sequences for all the hypothetical proteins
+    ## make a data frame with amino acid sequences for all the hypothetical proteins
     hSeqNames <- names(imgNeighborSeqs)
     for (i in 1:length(hSeqNames)) {
         hSeqTable[i,1] <- hSeqNames[i]
         hSeqTable[i,2] <- imgNeighborSeqs[[i]]
     }
     colnames(hSeqTable) <- c("gene_oid", "sequence")
-                                        # sometimes neighbors are rRNA or tRNA or whatever
+    ## sometimes neighbors are rRNA or tRNA or whatever
+    ## and this is what IMG will have as a "sequence" for them
+    ## NOTE: gb2img & incorpIprScan should fake this adequately, but might need a quick visualcheck...
     badSeq <- "No sequence found"
     goodSeqs <- hSeqTable %>% dplyr::filter(.data$sequence != badSeq)
     hypoSeqs <- goodSeqs %>% dplyr::filter(.data$gene_oid %in% hypoIndex)
     hsReList <- list()
-                                        # export the hypothetical sequences separately after re-fasta-ifying
+    ## export the hypothetical sequences separately after re-fasta-ifying
     for (i in 1:length(hypoSeqs[,1])) {
         hsReList[[hypoSeqs[i,1]]] <- hypoSeqs[i,2] 
     }
@@ -156,6 +168,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
                          "-out",  "temporary/dbblast/hypoSeqsDb"),
                 stdout=FALSE)
         ## times out while waiting for stdout sometimes on very large datasets - let's see if stderr works better?
+        ## ...it seems to.
         blast_err <- system2(command = "wsl", 
                              args = c(blastp, 
                                       "-db", "temporary/dbblast/hypoSeqsDb",
@@ -191,8 +204,8 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
         blast_out <- as.data.frame(read.csv(blastFile, header=FALSE, sep="\t" , stringsAsFactors=FALSE))
         colnames(blast_out) <- blastColNames
         tidyBlast <- tibble::as_tibble(blast_out)
-                                        #   write.table(blast_out, blastFile, sep="\t", quote=FALSE)
-                                        #   tidyBlast <- blast_out %>% tibble::as_tibble() %>% tidyr::separate(col = value, into = blastColNames, sep = "\t", convert = TRUE)
+        ##   write.table(blast_out, blastFile, sep="\t", quote=FALSE)
+        ##   tidyBlast <- blast_out %>% tibble::as_tibble() %>% tidyr::separate(col = value, into = blastColNames, sep = "\t", convert = TRUE)
     }
     ## moving the pairwise results into a matrix form
     ## and removing things other than evalue and gene_oid interactions
@@ -269,11 +282,11 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
         print("hypothetical proteins clustered via pvclust")
         pvBlastPick <- pvclust::pvpick(pvBlast, alphaVal)
         clusterNum <- length(pvBlastPick$clusters)
-        ## post-clustering, generates aligned and unaligned .fa files and a gene_oid/cluster concordance, and cuts out hypoFams present in under 
-                                        # once clusters have been picked, sets up .fa files for the sequences, as-is and aligned
-                                        # it also creates a table matching gene_oids and clusters for input to the later metadata file
-                                        # adding a floor so that if a gene is present in <1% of neighborhoods we don't report the cluster
-                                        # 2-gene clusters and so on are meh
+        ## post-clustering, generates aligned and unaligned .fa files and a gene_oid/cluster concordance
+        ## adding a floor so that if a gene is present in <1% of neighborhoods we don't report the cluster
+        ## (2-gene clusters and so on are... very rarely gonna be useful)
+        ## once clusters have been picked, sets up .fa files for the sequences, as-is and aligned
+        ## it also creates a table matching gene_oids and clusters for input to the later metadata file
         atLeastGenes <- floor(.005*length(tbRnames))
         clustSeqs <- list()
         for (i in 1:clusterNum) {
@@ -354,7 +367,8 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
             ggraph::geom_edge_link0(ggplot2::aes(edge_alpha=.data$pident/100), edge_colour="black", edge_width=.5) + 
             ggraph::geom_node_point(ggplot2::aes(color=.data$isGene), size=3) + 
             ggplot2::labs(title=titleText, subtitle=subtitleText) + 
-            ggplot2::theme(plot.title=ggplot2::element_text(color="black", size=18, margin=ggplot2::margin(10,0,10,0)), plot.subtitle=ggplot2::element_text(color="grey", size=12, margin=ggplot2::margin(10,0,10,0))) +
+            ggplot2::theme(plot.title=ggplot2::element_text(color="black", size=18, margin=ggplot2::margin(10,0,10,0)),
+                           plot.subtitle=ggplot2::element_text(color="grey", size=12, margin=ggplot2::margin(10,0,10,0))) +
             ggraph::theme_graph(base_family="sans") + 
             ggplot2::scale_color_manual(values=c("yes"="firebrick","no"="steelblue")) + 
             ggplot2::theme(legend.position="none", plot.margin=ggplot2::unit(c(.2,.2,.2,.2), "cm"))  
@@ -375,6 +389,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
             ggplot2::theme(legend.position="bottom", plot.margin=ggplot2::unit(c(.2,.2,.2,.2), "cm")) 
         ggplot2::ggsave(filename=clustNetworkFileName, tidyBlastClusterPic, height=10, width=20, dpi=75, units="in", device="pdf")
         ## and now to get that data exported
+        ## once we get it out of some awkward list formats
         clustSeqs <- list()
         clusterOutput <- data.frame(igraph::V(tidyBlastClusters)$name, igraph::V(tidyBlastClusters)$cluster)
         colnames(clusterOutput) <- list("gene_oid", "cluster")
@@ -401,7 +416,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
                 dir.create(dirname)
             }
             colnames(clustListings) <- c("gene_oid","hypoClust")
-                                        # write plain .fa files and mafft-aligned files for cluster members
+            ## writing plain .fa files and (in a sec) mafft-aligned files for cluster members
             clusterFile <- paste(dirname,"/",fileName,"_tgCluster_",i,".fa",sep="")
             seqinr::write.fasta(clustSeqs, names=names(clustSeqs),file.out=clusterFile)
                                         # let's align members of a given cluster wheeee
@@ -428,7 +443,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
                                                       mafftOutput),
                                              wait = TRUE,
                                              stdout = TRUE)
-                ## stdout change here too?
+                ## stdout change here too?  possibly not necessary.
                                         #        system2(command = "mafft", 
                                         #          args = c("--auto",
                                         #            "--quiet",
@@ -439,9 +454,11 @@ neighborHypothetical <- function(imgGenesData = imgGenesData, imgNeighborsData =
             }
             inClustLength <- 0
             clustSeqs <- list()
+            ## NOTE:  add HMM making here, if desired???
+            ## or maybe within the sysTerm if/else bit.
         }
     }
-                                        # write out the cluster info separately, just in case
+    ## write out the cluster info separately, just in case
     write.table(clustListings, file=clustListFile, row.names=FALSE, sep="\t")
     ## add the hypo cluster IDs to the neighbor metadata table, under the column name Hypofam. 
     for (i in 1:length(imgNeighborsData$gene_oid)) {
