@@ -5,7 +5,7 @@ A set of tools analyze and make non-hideous publication-friendly diagrams of gen
 - Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
-- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates and a to-do list
+- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20211214) and a to-do list
 
 ## Important note
 This is very much a work in progress, and I'm a biochemist doing terrible things to code. There will be bugs. I'll do what I can to address them; if you've come up with a fix, I'm happy to try to incorporate it!
@@ -47,10 +47,11 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
+- `prepNeighbors` got some updates (20211214) that correct handling of smaller gene neighborhoods.
 - `gbToIMG` got some big fixes (20211129) that improve stability when it encounters problems (a GenBank file with no gene of interest, an AntiSmash-formatted GenBank file, a GenBank file with no annotations, etc.) and that improve output annotations, including both the metadata format and the content (particularly organism and scaffold info.)
 ### Up next
 - Some fixes to `prettyClusterDiagrams` that will make the coloring parameters more compatible with very short scaffolds (e.g. from metagenomes or MAGs) and that will fix one or two dumb errors that happen with user-specified colors.
-- Some updates to the suggested workflow when starting with user-annotated genomes. 
+- Some updates to the suggested workflow when starting with user-annotated genomes (improved scripts and annotation recommendations.)
 ### Planned additions
 - Additional tools or instructions for import from UniProt metadata and from GFF/GFF-3 formatted files - haven't decided whether to keep guiding people towards GenBank as an input format (making `gbToIMG` the entry for non-IMG data), or whether to develop dedicated tools for one or two other common formats.  If so, this will likely be a separate function that can also replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity (and lack of gene family annotations) that that `gbToIMG` does.  Supplementation with `incorpIprScan` is likely still going to be advisable.
 - Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
