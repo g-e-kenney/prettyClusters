@@ -459,7 +459,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
         }
     }
     ## write out the cluster info separately, just in case
-    write.table(clustListings, file=clustListFile, row.names=FALSE, sep="\t")
+    write.table(clustListings, file=clustListFile, row.names=FALSE, sep="\t", quote=FALSE)
     ## add the hypo cluster IDs to the neighbor metadata table, under the column name Hypofam. 
     for (i in 1:length(imgNeighborsData$gene_oid)) {
         findHypo <- grepl(imgNeighborsData$gene_oid[i], clustListings$gene_oid)

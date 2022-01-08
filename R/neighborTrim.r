@@ -145,9 +145,12 @@ neighborTrim <- function(imgNeighborsData = imgNeighborsData,
         print("Truncated neighborhoods trimmed.")
     }
     ## exporting metadata tables
-    ##    imgNeighborsContextTrimmed <- as.character(imgNeighborsContextTrimmed)
+    ## note: note keeping quote=FALSE on the metadata, since that can have weird punctuation
+    ## and since we handled quotation marks on input
+    ## the punctuation can stay marked as strings
     write.table(imgNeighborsTrimmed, file=fileNameiNT, row.names=FALSE, col.names = TRUE, sep="\t")
-    write.table(imgNeighborsContextTrimmed, file=fileNameiNCT, row.names=FALSE, col.names = TRUE, sep="\t")
+    ##    imgNeighborsContextTrimmed <- as.character(imgNeighborsContextTrimmed)
+    write.table(imgNeighborsContextTrimmed, file=fileNameiNCT, row.names=FALSE, col.names = TRUE, sep="\t", quote=FALSE)
     write.table(imgGenesTrimmed, file=fileNameiGT, row.names=FALSE, col.names = TRUE, sep="\t")
     ## fasta un-wrangling & export
     for (i in 1:length(nSeqTable[,1])) {

@@ -99,7 +99,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                         # decided it's easier just to explicitly re-import at this stage
     if (typeof(imgGenes) == "character" && typeof(neighborsContext) == "character") {
         ## by default, 
-        imgGenesFull <-as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t" ))
+        imgGenesFull <- as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t", stringsAsFactors=FALSE))
         imgGenesFull <- imgGenesFull %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
         imgGenesData <- imgGenesFull[names(imgGenesFull) %in% imgCols]
         ## if interpro exists add it
@@ -108,7 +108,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
         } else {
             imgGenesData$InterPro <- ""
         }  
-        imgNeighborsContext <-as.data.frame(read.csv(neighborsContext, header=TRUE, sep="\t" , stringsAsFactors=FALSE))
+        imgNeighborsContext <-as.data.frame(read.csv(neighborsContext, header=TRUE, sep="\t", stringsAsFactors=FALSE))
     } else {
         print("Please load an imgGenesData textfile (can be a raw IMG file) and an imgNeighborsContext file.")
         return(0)
@@ -126,19 +126,29 @@ prepNeighbors <- function(imgGenes = imgGenes,
         print("Please load an imgNeighborsTemp textfile (can be a raw IMG metadata textfile).")
         return(0)
     }
-    ## make sure the neighbors metadata is un-annoying, i.e. sorted
-    ndVector <- imgNeighborsData$gene_oid
-    ndVector <- as.vector(ndVector)
+    ## let's take a minute and get rid of quotation marks in the metadata that can break things later
+    ## Thank you annotations for streptomycin 3''-kinase aka streptomycin 3"-kinase
+    ## Why must you make everything terrible
+    imgGenesData <- imgGenesData %>% dplyr::mutate_all(stringr::str_replace_all, "\"", "\'\'")
+    imgNeighborsData <- imgNeighborsData  %>% dplyr::mutate_all(stringr::str_replace_all, "\"", "\'\'")
+    ## make sure the metadata is un-annoying, i.e. sorted
+    imgNeighborsData$gene_oid <- as.numeric(imgNeighborsData$gene_oid)
+    ndVector <- as.vector(imgNeighborsData$gene_oid)
     rowidx <- order(ndVector,decreasing=FALSE,na.last=TRUE)
     imgNeighborsData <- imgNeighborsData[rowidx,,drop=TRUE]
+    ## sorting the context data
     imgNeighborsContext$gene_oid <- as.numeric(imgNeighborsContext$gene_oid)
     imgNeighborsContext$source_gene_oid <- as.numeric(imgNeighborsContext$source_gene_oid)
     imgNeighborsContext$source_scaffold_id <- as.numeric(imgNeighborsContext$source_scaffold_id)
-    ncVector <-imgNeighborsContext$gene_oid
-    ncVector <- as.vector(ncVector)
+    ncVector <- as.vector(imgNeighborsContext$gene_oid)
     rowidx2 <- order(ncVector,decreasing=FALSE,na.last=TRUE)
     imgNeighborsContext <- imgNeighborsContext[rowidx2,,drop=TRUE]
     imgNeighborsContext$gene_oid <- as.list(imgNeighborsContext$gene_oid)
+    ## sorting the gene data
+    imgGenesData$gene_oid <- as.numeric(imgGenesData$gene_oid)
+    gdVector <- as.vector(imgGenesData$gene_oid)
+    rowidx3 <- order(gdVector,decreasing=FALSE,na.last=TRUE)
+    imgGenesData <- imgGenesData[rowidx3,,drop=TRUE]  
     ## import amino acid sequences
     imgNeighborSeqs <- seqinr::read.fasta(file=neighborSeqs, seqtyp="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
     imgGeneSeqs <- seqinr::read.fasta(file=geneSeqs, seqtyp="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)

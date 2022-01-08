@@ -29,7 +29,7 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     source_scaffold_id <- list()
     ## input is a standard IMG file for your genes of interest
     ## can be generated via blast or families or whatever
-    inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE)
+    inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE, quote="")
     imgSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
     ## let's quickly just save that fasta file with simplified headers for EFI use
     seqinr::write.fasta(imgSeqs, names=names(imgSeqs),file.out=fileNameSeqs)

@@ -52,6 +52,8 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   }
   imgNeighborSeqs <- seqinr::read.fasta(file=imgNeighborSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
   imgGeneSeqs <- seqinr::read.fasta(file=imgGeneSeqs, seqtype="AA", whole.header=FALSE, as.string=TRUE, set.attributes=FALSE)
+  ## note:  making the assumption here that EFI-EST isn't adding too many additional annotation components
+  ## if they take on full annotation from IMG someday, will need to add handling for " vs ''
   efiFullNodes <- read.csv(efiFullMetadata, header=TRUE, stringsAsFactors=FALSE)
   efiFinalNodes <- read.csv(efiFinalMetadata, header=TRUE, stringsAsFactors=FALSE)
   ## starting to reformat
