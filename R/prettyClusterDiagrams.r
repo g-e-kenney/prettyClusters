@@ -268,7 +268,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                     tempList2 <- append(tempList2, strsplit(namedGenes$InterPro[j], " "))
                     ## we do not want "none" to be a possible match when looking at annotation rules for which "any" is an option (thus tempList3), or for commonly absent annotations (IMG.Term, Hypofam)
                     ## but we do want to be able to look for it in some situations (e.g. members of a superfamily but not a subfamily), thus tempList2 retains it
-                    tempList1 <- unlist(tempList1[tempList1!="none$"&&tempList1!="none"])
+                    tempList1 <- unlist(tempList1[tempList1 != "none$" & tempList1 != "none"])
                     tempList2 <- unlist(tempList2) 
                     tempList3 <- unlist(tempList2[tempList2!="none"])
                     ## matches between data and criteria
@@ -281,7 +281,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is a strong match and generally should not be overwritten
                         foundIn <- "exact"
-                                  #      print("exit A")
+                                     #   print("exit A")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector2) && length(tempList1) != 0 && any(tempVector1) != FALSE) {
                         ## all annotations had to match the requirements and all did (including requirements for the absence of a specific annotation AND HypoFam and/or IMG.Term)
@@ -289,7 +289,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is a strong match and generally should not be ovewritten
                         foundIn <- "exact"
-                                 #      print("exit B")
+                                     #  print("exit B")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector2) && length(tempList1) == 0) {
                         ## all annotations had to match the requirements and all did (including requirements for the absence of a specific annotation)
@@ -298,7 +298,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         foundMe <- "yes"
                         ## this is still a strong match and generally should not be ovewritten
                         foundIn <- "exact"
-                                #       print("exit C")
+                                    #   print("exit C")
                         next
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector3)  && namedGenes$RequireNone[j] == "no") {
                         ## all annotations had to match the requirement, and all listed annotations were found, but there may have been extra annotations
@@ -310,14 +310,14 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             geneSets$gene[i] <- namedGenes$geneSymbol[j]
                             foundMe <- "yes"
                             foundIn <- "exact"
-                               #          print("exit D1")
+                                     #   print("exit D1")
                             next
                         } else if (foundMe != "yes" || foundIn != "exact") {
                             ## this is a strong match, and we don't think we already have one
                             geneSets$gene[i] <- namedGenes$geneSymbol[j]
                             foundMe <- "yes"
                             foundIn <- "exact"
-                                        # print("exit D2")
+                                     #    print("exit D2")
                             next
                         }  
                     } else if (namedGenes$Requirement[j]=="all" && all(tempVector3)   && namedGenes$RequireNone[j] == "yes") {
@@ -329,14 +329,14 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             ## but we still want to flag it for the searcher because we did care about "none"
                             geneSets$gene[i] <- paste(namedGenes$geneSymbol[j],"*",sep="")
                             foundMe <- "maybe"
-                                         # print("exit E1")
+                                     #     print("exit E1")
                             next
                         } else if (foundMe != "yes" || foundIn != "exact") {
                             ## we don't have a better answer yet and this is a decent match  
                             ## let's flag this for the end-user so that they can investigate if necessary
                             geneSets$gene[i] <- paste(namedGenes$geneSymbol[j]," \u2020",sep="")
                             foundMe <- "maybe"
-                                        # print("exit E2")
+                                     #    print("exit E2")
                             next
                         }  
                     } else if (namedGenes$Requirement[j]=="all" && any(tempVector3)) {
@@ -348,7 +348,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                 geneSets$gene[i] <- paste(namedGenes$geneSymbol[j]," \u2020",sep="")
                                 ## this is a weaker match and it's possible we could overwrite it
                                 foundMe <- "maybe"
-                                       #  print("exit F")
+                                     #    print("exit F")
                                 next
                             }
                         }
@@ -356,13 +356,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                         ## there were annotations that matched (and any match was allowed)
                         if (foundIn == "exact") {
                             ## an exact match was already found, this is probably not better, move on
-                                      # print("exit G1")
+                                     #  print("exit G1")
                             next
                         } else {
                             geneSets$gene[i] <- namedGenes$geneSymbol[j]
                             ## probably we found it? (we weren't being too picky)
                             foundMe <- "maybe"
-                                      #  print("exit G2")
+                                     #   print("exit G2")
                             next
                         }
                     } else {
@@ -371,13 +371,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             ## note that this is by default overwriteable  
                             geneSets$gene[i] <- "other"
                             foundMe <- "maybe"
-                                      # print("exit H1")
+                                    #   print("exit H1")
                             next
                         } else if (j == length(annotList) && foundMe == "no") {
                             ## no matches were found and this is the last chance, so let's finalize on other
                             geneSets$gene[i] <- "other"
                             foundMe <- "yes"
-                                      #  print("exit H2")
+                                     #   print("exit H2")
                             next
                         }
                     } 
@@ -641,7 +641,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                 aligningGenes <- data.frame()
                 aligningGenes <- dplyr::filter(finalGeneSets, .data$source_gene_oid == uniqueGOIs[i])
                 core <- which(aligningGenes$gene_oid == uniqueGOIs[i])
-                ## neither of these failure cases should be likely since we are the source_gene_oid
+                ## neither of these failure cases should be likely since we have the source_gene_oid
                 ## so even pseudogenes shouldn't screw this up
                 ## case:  gene is missing???
                 if (length(core)==0) {next}
@@ -715,7 +715,11 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     }
     ## palette generation - needed or not?
     if (autoColor == FALSE) {
+        ## add bit to sort annotationGuide by geneSymbol
+        ## then export finalColors and allGeneTypes
         finalColors <- annotationGuide$Color
+        allGeneTypes <- annotationGuide$geneSymbol    
+        print("Palettes generated.")
     } else {
         ## this will color genes according the the genes you specified
         ## in its default form it has distinct colors for hypothetical proteins, unspecified proteins, and mobile genetic elements
@@ -787,7 +791,9 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
         notMe <- which(geneTypes =="hyp")
         notMeEither <- which(geneTypes == "mge")
         norMe <- which(geneTypes == "other")
-        geneTypes <- geneTypes[-c(notMe,notMeEither,norMe)]
+        if (any(notMe>0, notMeEither>0, norMe>0)) {
+            geneTypes <- geneTypes[-c(notMe,notMeEither,norMe)]
+        }
         numGeneTypes <- length(geneTypes)
         halfGeneTypes <- numGeneTypes
         if(numGeneTypes >= 10) {
@@ -823,49 +829,181 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
         }       
         ## this specifically codes (unidentified) hypothetical proteins, mobile genetic elements, and known proteins not on the annotation list
         ## and reinserts them into the palette, so now it doesn't sacrifice pretty colors for them either
-        tempColors <- geneColors[1:(notMe-1)]
-        tempColors <- append(tempColors, "#FFFFFF")
-        if (length(notMeEither)>=1) {
-            if (notMe == (notMeEither-1))  {
-                tempColors <- append(tempColors, "#888888")
-            } else {
-                temp2Colors <- geneColors[(notMe):(notMeEither-2)]
-                tempColors <- append(tempColors, temp2Colors)
-                tempColors <- append(tempColors, "#888888")
+        ## as a default: hyp. = white, MGE = dark grey, other = middle gray
+        if (length(notMe)>=1) {
+            ## if we have hypothetical proteins
+            if (notMe == 1) {
+                tempColors <- "#FFFFFF"
+            } else  {
+                tempColors <- geneColors[1:(notMe-1)]
+                tempColors <- append(tempColors, "#FFFFFF")
             }
-            if (notMeEither == (norMe-1)) {
-                tempColors <- append(tempColors, "#DEDEDE")
+            ## ok if we have mge & other as well
+            if ((length(notMeEither)>=1) && (length(norMe)>=1)) {
+                ## print("case A")
+                ## if the mge is right after hyp vs. if it's further down
+                if (notMe == (notMeEither-1))  {
+                    tempColors <- append(tempColors, "#858585")
+                } else {
+                    temp2Colors <- geneColors[(notMe):(notMeEither-2)]
+                    tempColors <- append(tempColors, temp2Colors)
+                    tempColors <- append(tempColors, "#858585")
+                }
+                ## if "other" is right after MGE, vs. if its further down
+                if (notMeEither == (norMe-1)) {
+                    tempColors <- append(tempColors, "#DEDEDE")
+                } else {
+                    temp3Colors <- geneColors[(notMeEither-1):(norMe-3)]
+                    tempColors <- append(tempColors, temp3Colors)            
+                    tempColors <- append(tempColors, "#DEDEDE")
+                }
+                if (geneColors[(norMe-3)] != geneColors[length(geneColors)] && length(geneColors > 1)) {
+                    temp4Colors <-geneColors[(norMe-2):length(geneColors)]
+                    tempColors <- append(tempColors, temp4Colors)
+                } else if (length(geneColors) == 1 && notMe == 1 && length(geneColors)>0) {
+                    ## if we hit this point, we already assigned hyp, mge, and other, and we didn't assign a color, let's add it
+                    if (length(tempColors) < 4) {
+                        tempColors <- append(tempColors, geneColors)  
+                    }  
+                }
+            } else if (length(notMeEither)>=1) {
+                ## print("case B")
+                ## if there is an MGE (and a hyp) but not an other
+                ## if it's right after hyp vs. if it's further down
+                if (notMe == (notMeEither-1)) {
+                    tempColors <- append(tempColors, "#858585")
+                } else {
+                    temp5Colors <- geneColors[(notMe):(notMeEither-2)]
+                    tempColors <- append(tempColors, temp5Colors)            
+                    tempColors <- append(tempColors, "#858585")
+                }
+                if (geneColors[(notMeEither-2)] != geneColors[length(geneColors)] && length(geneColors) > 1) {
+                    temp6Colors <-geneColors[(notMeEither-1):length(geneColors)]
+                    tempColors <- append(tempColors, temp6Colors)
+                } else if (length(geneColors) == 1 && notMe == 1 && length(geneColors)>0) {
+                    ## if we hit this point, we assigned hyp and mge and not the one color
+                    if (length(tempColors) < 3) {
+                        tempColors <- append(tempColors, geneColors)  
+                    }    
+                }             
+            } else if (length(norMe)>=1) {
+                ## print("case C")
+                ## if there is an MGE (and a hyp) but not an other
+                ## if it's right after hyp vs. if it's further down
+                if (notMe == (norMe-1)) {
+                    tempColors <- append(tempColors, "#DEDEDE")
+                } else {
+                    temp7Colors <- geneColors[(notMe):(norMe-2)]
+                    tempColors <- append(tempColors, temp7Colors)            
+                    tempColors <- append(tempColors, "#DEDEDE")
+                }
+                if (geneColors[(norMe-2)] != geneColors[length(geneColors)] && length(geneColors) > 1) {
+                    temp8Colors <-geneColors[(norMe-1):length(geneColors)]
+                    tempColors <- append(tempColors, temp8Colors)
+                } else if (length(geneColors) == 1 && notMe == 1 && length(geneColors)>0) {
+                    ## if we hit this point, we assigned hyp and other and not the one color
+                    if (length(tempColors) < 3) {
+                        tempColors <- append(tempColors, geneColors)  
+                    }  
+                }                 
             } else {
-                temp3Colors <- geneColors[(notMeEither-1):(norMe-3)]
-                tempColors <- append(tempColors, temp3Colors)            
-                tempColors <- append(tempColors, "#EEEEEE")
-            }
-            if (geneColors[(norMe-3)] != geneColors[length(geneColors)]) {
-                temp4Colors <-geneColors[(norMe-2):length(geneColors)]
-                tempColors <- append(tempColors, temp4Colors)
+                ## print("case D")
+                        ## we've only got hypotheticals
+                if (notMe == 1) {
+                    ## we can only have assigned hyp so far
+                    if (length(geneColors)>0) {
+                        tempColors <- append(tempColors, geneColors)
+                    }
+                } else {
+                ## we have already assigned a color + hyp
+                    if (length(geneColors)>1) {
+                        temp9Colors <-geneColors[(notMe):length(geneColors)]
+                        tempColors <- append(tempColors, temp9Colors)
+                    }
+                }    
             }
         } else {
-            if (notMe == (norMe-1)) {
-                tempColors <- append(tempColors, "#DEDEDE")
+            ## if we have entered a brave new world where there are no hypothetical proteins
+            ## if we have both mge + other
+            if ((length(notMeEither)>=1 && length(norMe)>=1)) {
+                ## print("case E")
+                ## if MGE is first
+                if (notMeEither == 1) {
+                    tempColors <- "#858585"
+                } else  {
+                    tempColors <- geneColors[1:(notMeEither-1)]
+                    tempColors <- append(tempColors, "#858585")
+                }
+                ## if MGE is immediately followed by other
+                if (notMeEither == (norMe-1)) {
+                    tempColors <- append(tempColors, "#DEDEDE")
+                } else {
+                    temp2Colors <- geneColors[(notMeEither):(norMe-2)]
+                    tempColors <- append(tempColors, temp2Colors)            
+                    tempColors <- append(tempColors, "#DEDEDE")
+                }
+                if (geneColors[(norMe-2)] != geneColors[length(geneColors)] && length(geneColors)>1) {
+                    temp3Colors <- geneColors[(norMe-1):length(geneColors)]
+                    tempColors <- append(tempColors, temp3Colors)
+                } else if (length(geneColors) == 1 && notMeEither == 1) {
+                    ## if we hit this point, we assigned mge and other and not the one color
+                    if (length(tempColors) < 3) {
+                        tempColors <- append(tempColors, geneColors)  
+                    }    
+                }   
+            } else if (length(notMeEither)>=1) {
+                ## print("case F")
+                ## if there is an MGE but no other
+                if (notMeEither == 1) {
+                    tempColors <- "#858585"
+                    tempColors <- append(tempColors, geneColors)
+                } else  {
+                    tempColors <- geneColors[1:(notMeEither-1)]
+                    tempColors <- append(tempColors, "#858585")
+                    if (geneColors[(notMeEither-1)] != geneColors[length(geneColors)] && length(geneColors)>1) {
+                        temp3Colors <- geneColors[(notMeEither):length(geneColors)]
+                        tempColors <- append(tempColors, temp3Colors)
+                    } else if (length(geneColors) == 1 && notMeEither == 1) {
+                    ## if we hit this point, we assigned mge and other and not the one color
+                        if (length(tempColors) < 2) {
+                            tempColors <- append(tempColors, geneColors)  
+                        }    
+                    }   
+                }              
+            } else if (length(norMe)>=1) {
+                ## print("case G")
+                ## if there is not an MGE or hyp, but there is still "other"
+                if (norMe == 1) {
+                    tempColors <- "#DEDEDE"
+                    tempColors <- append(tempColors, geneColors)
+                } else  {
+                    tempColors <- geneColors[1:(norMe-1)]
+                    tempColors <- append(tempColors, "#DEDEDE")
+                    if (geneColors[(norMe-1)] != geneColors[length(geneColors)] && length(geneColors)>1) {
+                        temp3Colors <- geneColors[(norMe):length(geneColors)]
+                        tempColors <- append(tempColors, temp3Colors)
+                    } else if (length(geneColors) == 1 && norMe == 1) {
+                    ## if we hit this point, we assigned mge and other and not the one color
+                        if (length(tempColors) < 2) {
+                            tempColors <- append(tempColors, geneColors)  
+                        }    
+                    }   
+                }              
             } else {
-                temp5Colors <- geneColors[(notMe):(norMe-2)]
-                tempColors <- append(tempColors, temp5Colors)            
-                tempColors <- append(tempColors, "#EEEEEE")
+                ## print("case H")
+                ## if literally everything is annotated somehow
+                tempColors <- geneColors
             }
-            if (geneColors[(norMe-2)] != geneColors[length(geneColors)]) {
-                temp6Colors <-geneColors[(norMe-1):length(geneColors)]
-                tempColors <- append(tempColors, temp6Colors)
-            }              
-        }   
+        }
         finalColors <- tempColors
-        scale_fill_genes <- function(...){
-            ggplot2:::manual_scale(
-                          'fill', 
-                          values = setNames(tempColors, allGeneTypes), 
-                          ...)
-        }      
         print("Palettes generated.")
     }
+    scale_fill_genes <- function(...) {
+            ggplot2:::manual_scale(
+                          'fill', 
+                          values = setNames(finalColors, allGeneTypes), 
+                          ...)
+    }  
     ## if markclusters is chosen, this will add cluster numbers to the sequence IDs
     ## note that this adds the sequence number (ordered by clustering) and the cluster number
     ## these are generated in analyzeNeighbors (order is, at least; cluster number can be generated manually too)
@@ -1007,7 +1145,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                    r=ggplot2::unit(8,"pt"),
                                                                    fill="#EEEEEE",
                                                                    halign=0.5,
-                                                                   valign=0.5),
+                                                                   valign=0.5,
+                                                                   width = grid::unit(0.75, "npc")),
                        plot.title.position = "plot",
                        axis.title.y = ggtext::element_markdown(size=12),
                        axis.text.y = ggtext::element_markdown(size=9),
@@ -1018,8 +1157,14 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                      r=ggplot2::unit(8,"pt"),
                                                                      fill="#D9D9D9",
                                                                      halign=0.5,
-                                                                     valign=0.5),
+                                                                     valign=0.5,
+                                                                     width = grid::unit(0.75, "npc")),
                        plot.caption.position = "plot")
+    if (length(unique(processed$bgc))/length(finalColors) >= 0.5) {
+        xPlusDiagram <- xPlusDiagram + guides(fill=guide_legend(ncol=1, bycol=TRUE)) 
+    } else {
+        xPlusDiagram <- xPlusDiagram + guides(fill=guide_legend(ncol=2, bycol=TRUE)) 
+    }
     ## get rid of the extra axes (but means no scale on-figure, for now)
     xMinusDiagram <- xPlusDiagram + ggplot2::theme(axis.line.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),  axis.ticks.x=ggplot2::element_blank())
     ## this gets rid of that ggplot2 grid error by scaling sizing to the number of gene clusters being visualized
@@ -1085,10 +1230,17 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                             subCaptionText <- paste(subCaptionText,"*",tempGeneSymbol,"* (",printPercent,"%).",sep="")
                         }
                     }
-                }
-                
+                }    
             } else {
                 subCaptionText <- "No automated annotation and gene quantification for these diagrams."
+            }
+            someGeneTypes <- allGeneTypes[which(allGeneTypes %in% processedCluster$gene)]
+            someColors <- finalColors[which(allGeneTypes %in% processedCluster$gene)]
+            scale_fill_genes2 <- function(...) {
+                ggplot2:::manual_scale(
+                          'fill', 
+                          values = setNames(someColors, someGeneTypes), 
+                          ...)
             }
             if (alignToCore == TRUE) {      
                 subDummies <- gggenes::make_alignment_dummies(processedCluster,
@@ -1104,16 +1256,43 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             }
             subclusterDiagram <- subclusterDiagram +
                 ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
-                scale_fill_genes() +
+                scale_fill_genes2() +
                 ggplot2::labs(title=subFigureTitle, caption=subCaptionText, y="**genomic neighborhoods**", x=NULL) +
                 gggenes::theme_genes() +
-                ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,
+                ggplot2::theme(axis.line.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),  axis.ticks.x=ggplot2::element_blank())
+            subModHeight <- (length(unique(processedCluster$bgc)) + 2)/2
+            if (length(unique(processedCluster$bgc)) > 10) {
+                subclusterDiagram <- subclusterDiagram + ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,
+                                                                           padding=ggplot2::margin(10,10,10,10),
+                                                                           margin=ggplot2::margin(5,0,5,0),
+                                                                           r=ggplot2::unit(8,"pt"),
+                                                                           fill="#EEEEEE",
+                                                                           halign =0.5,
+                                                                           valign =0.5,
+                                                                           width = grid::unit(0.75, "npc")),
+                               plot.title.position = "plot",
+                               axis.title.y = ggplot2::element_blank(),
+                               axis.text.y = ggtext::element_markdown(size=9),
+                               plot.caption = ggtext::element_textbox_simple(lineheight=1.2,
+                                                                             size=11,
+                                                                             padding=ggplot2::margin(10,10,10,10),
+                                                                             margin=ggplot2::margin(5,0,5,0),
+                                                                             r=ggplot2::unit(8,"pt"),
+                                                                             fill="#D9D9D9",
+                                                                             halign=0.5,
+                                                                             valign=0.5,
+                                                                             width=grid::unit(0.75, "npc")),
+                               plot.caption.position = "plot") +
+                               guides(fill=guide_legend(ncol=1, bycol=TRUE)) 
+                } else {
+                    subclusterDiagram <- subclusterDiagram + ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,
                                                                            padding=ggplot2::margin(10,10,10,10),
                                                                            margin=ggplot2::margin(5,0,5,0),
                                                                            r=ggplot2::unit(8,"pt"),
                                                                            fill="#EEEEEE",
                                                                            halign=0.5,
-                                                                           valign=0.5),
+                                                                           valign=0.5,
+                                                                           width=grid::unit(0.75, "npc")),
                                plot.title.position = "plot",
                                axis.title.y = ggtext::element_markdown(size=12),
                                axis.text.y = ggtext::element_markdown(size=9),
@@ -1124,23 +1303,16 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                              r=ggplot2::unit(8,"pt"),
                                                                              fill="#D9D9D9",
                                                                              halign=0.5,
-                                                                             valign=0.5),
+                                                                             valign=0.5,
+                                                                             width=grid::unit(0.75, "npc")),
                                plot.caption.position = "plot") +
-                ggplot2::theme(axis.line.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),  axis.ticks.x=ggplot2::element_blank())
-            subModHeight <- length(unique(processedCluster$bgc))/2
-#            if (subModHeight <=10) {     
-#                subModHeight <- subModHeight*2
-#                subModWidth <- subModHeight*2
-#            } else if (subModHeight <=20) {     
-#                subModWidth <- subModHeight*2
-#            } else {
-#                subModWidth <- subModHeight
-#            }
+                               guides(fill=guide_legend(ncol=2, bycol=TRUE)) 
+                }
             ggplot2::ggsave(file=clustFileNamePDF, plot=subclusterDiagram, device="pdf", height=subModHeight, width=modwidth, limitsize=FALSE)
         }
         print("Diagrams for individual subgroups of gene clusters generated.")
     }   
     print("Pretty gene clusters illustrated.")
-    ## they'd better be after all of this
+    ## they'd better be pretty after all of this
     return(processed)
 }
