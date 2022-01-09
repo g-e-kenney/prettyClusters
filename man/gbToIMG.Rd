@@ -11,7 +11,8 @@ gbToIMG(
   geneName = geneName,
   removeDupes = TRUE,
   scaffoldGenBase = 3e+09,
-  genomeGenBase = 4e+09
+  genomeGenBase = 4e+09,
+  includeIPR = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ gbToIMG(
 \item{scaffoldGenBase}{Starting faux scaffold ID number. Integer, defaults to 3000000000.}
 
 \item{genomeGenBase}{Starting faux genome ID number. Integer, defaults to 4000000000.}
+
+\item{includeIPR}{Dictates whether or not InterPro annotations should be included. Boolean, defaults to FALSE.}
 }
 \value{
 List containing IMG-style metadata for genes of interest, their neighbors, and a generateNeighbors-like neighborsContext file
