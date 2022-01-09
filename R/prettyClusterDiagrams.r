@@ -62,13 +62,11 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     } else {
         imgGenes <- imgGenesFile
     }
-                                        #  colnames(imgGenes)[1] <- "gene_oid"
     if(typeof(imgNeighborsFile) == "character")  {
         imgNeighbors <- read.csv(imgNeighborsFile, header=TRUE, sep="\t", stringsAsFactors=FALSE )
     } else {
         imgNeighbors <- imgNeighborsFile
     }
-                                        #  colnames(imgNeighbors)[1] <- "gene_oid"
     print("Opening data files.")
     ## img metadata conversion - filters out things other than the core info because why do we need it
     inputColNames <- colnames(imgNeighbors)
@@ -116,7 +114,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     } else {
         geneSets$source_gene_oid <- "none"
     }
-    geneSets <- geneSets[order(gene_oid),]
+    geneSets <- geneSets[order(geneSets$gene_oid),]
     ## if this is being run as a standalone figure generator, there possibly aren't any source gene IDs
     if (standAlone == TRUE) {
         ## if labels are manually added, let's respect them
@@ -1160,10 +1158,11 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                      valign=0.5,
                                                                      width = grid::unit(0.75, "npc")),
                        plot.caption.position = "plot")
+    ## if the ratio of BGCs to gene types is lower than a cutoff, we probably need to make sure the legend has columns for legibility
     if (length(unique(processed$bgc))/length(finalColors) >= 0.5) {
-        xPlusDiagram <- xPlusDiagram + guides(fill=guide_legend(ncol=1, bycol=TRUE)) 
+        xPlusDiagram <- xPlusDiagram + ggplot2::guides(fill=ggplot2::guide_legend(ncol=1, bycol=TRUE)) 
     } else {
-        xPlusDiagram <- xPlusDiagram + guides(fill=guide_legend(ncol=2, bycol=TRUE)) 
+        xPlusDiagram <- xPlusDiagram + ggplot2::guides(fill=ggplot2::guide_legend(ncol=2, bycol=TRUE)) 
     }
     ## get rid of the extra axes (but means no scale on-figure, for now)
     xMinusDiagram <- xPlusDiagram + ggplot2::theme(axis.line.x=ggplot2::element_blank(), axis.text.x=ggplot2::element_blank(),  axis.ticks.x=ggplot2::element_blank())
@@ -1234,6 +1233,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             } else {
                 subCaptionText <- "No automated annotation and gene quantification for these diagrams."
             }
+            ## let's trim the palette for what actually ends up being visualized here 
+            ## not trimming has weird consequences
             someGeneTypes <- allGeneTypes[which(allGeneTypes %in% processedCluster$gene)]
             someColors <- finalColors[which(allGeneTypes %in% processedCluster$gene)]
             scale_fill_genes2 <- function(...) {
@@ -1283,7 +1284,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                              valign=0.5,
                                                                              width=grid::unit(0.75, "npc")),
                                plot.caption.position = "plot") +
-                               guides(fill=guide_legend(ncol=1, bycol=TRUE)) 
+                               ggplot2::guides(fill=ggplot2::guide_legend(ncol=1, bycol=TRUE)) 
                 } else {
                     subclusterDiagram <- subclusterDiagram + ggplot2::theme(plot.title = ggtext::element_textbox_simple(size=14,
                                                                            padding=ggplot2::margin(10,10,10,10),
@@ -1306,7 +1307,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                                                                              valign=0.5,
                                                                              width=grid::unit(0.75, "npc")),
                                plot.caption.position = "plot") +
-                               guides(fill=guide_legend(ncol=2, bycol=TRUE)) 
+                               ggplot2::guides(fill=ggplot2::guide_legend(ncol=2, bycol=TRUE)) 
                 }
             ggplot2::ggsave(file=clustFileNamePDF, plot=subclusterDiagram, device="pdf", height=subModHeight, width=modwidth, limitsize=FALSE)
         }
