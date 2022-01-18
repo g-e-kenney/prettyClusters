@@ -175,7 +175,7 @@ neighborClusters <- function(imgGenesTrimmed = imgGenesTrimmed,
                 eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center_dist = tidygraph::node_distance_to(tidygraph::node_is_center()))
                 nodeNum <- length(unique(eucDistPairs$node1))
                 kNum <- ceiling(nodeNum/20)
-                eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center = tidygraph::node_is_center(), keyplayer = tidygraph::node_is_keyplayer(k = kNum))
+                eucNetwork <- eucNetwork %>% tidygraph::activate(nodes) %>% dplyr::mutate(center = tidygraph::node_is_center(), keyplayer = tidygraph::node_is_keyplayer(k = kNum, maxsec = 1200))
                 titleText <- paste("Identifying genome neighborhood clusters for ", coreGeneName," via tidygraph",sep="")
                 subtitleText <- paste("Edge values represent euclidean distance between neighborhoods, with a cutoff of ",
                                       tgCutoff,
