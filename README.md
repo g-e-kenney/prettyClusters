@@ -54,6 +54,9 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - `gbToIMG` got some big fixes (20211129) that improve stability when it encounters problems (a GenBank file with no gene of interest, an AntiSmash-formatted GenBank file, a GenBank file with no annotations, etc.) and that improve output annotations, including both the metadata format and the content (particularly organism and scaffold info.)
 ### Up next
 - Some updates to the suggested workflow when starting with user-annotated genomes (improved scripts and annotation recommendations.)
+- Single scale bar in `prettyClusterDiagrams`, via a mock gene cluster.  Crude but functional - just doing some tests.
+- `prepNeighbors` update that adds an optional peptide annotation step (RiPP ORFs are often not IDed, and when IDed may be particularly patchily annotated; this lets users merge annotated and unannotated peptides that belong to one family.  This involves some knock-on tweaks in downstream tools.
+- Also in `prepNeighbors`, generation of HMMs for hypothetical protein families identified in `prepNeighbors` and `identifySubgroups` (and with it the ability to turn on and off MSA and HMM generation in both tools.)
 ### Planned additions
 #### Writeup as a paper?
 - I may try to write this up as a paper (despite the shame of publicizing my hideous code).  This toolset has been useful in enough projects that it might be nice to have something legit to cite.
@@ -63,11 +66,9 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - For use when working with really large families, `repnodePreTrim`- using the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/) before even generating neighborhoods, as a way of getting a more manageable dataset.  
 - A vignette?  Might be redundant given [the wiki](https://github.com/g-e-kenney/prettyClusters/wiki).  
 #### Smaller tweaks
-- Generation of HMMs for hypothetical protein families identified in `prepNeighbors` and `identifySubgroups` (and with it the ability to turn on and off MSA and HMM generation in both tools.)
 - User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`.
 - Additional tools or instructions for import from UniProt metadata and from GFF/GFF-3 formatted files - haven't decided whether to keep guiding people towards GenBank as an input format (making `gbToIMG` the entry for non-IMG data), or whether to develop dedicated tools for one or two other common formats.  If so, this will likely be a separate function that can also replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity (and lack of gene family annotations) that that `gbToIMG` does.  Supplementation with `incorpIprScan` is likely still going to be advisable.
-- Single scale bar in `prettyClusterDiagrams`.  Probably will try generating a final fake "gene cluster" with single-nt "genes" every kb or something?
 ### Known issues
 - There may be complications for people on newer M1 Macs.  I've highlighted a few in the [installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) as people have reported them, but I don't have a Mac new enough to test this myself.  I don't anticipate quite the same level of problems for Windows 10 vs. Windows 11, but I also don't have a PC new enough to test any Windows 11-specific issues.
 - Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding, particularly for small genes like RiPP precursors) was poor!  This is doubly the case for GenBank-derived files (use of `incorpIprScan` can improve annotation, but not ORF-finding).  If this is a big problem for your genome neighborhoods, you can consider manually updating problem genes (adding metadata lines and amino acid sequences, which I know is terrible) or re-annotating your sequences ([reannotated data](https://github.com/g-e-kenney/prettyClusters/wiki/Preparing-data-from-non-IMG-sources-for-prettyClusters#re-annotating-nucleic-acid-sequences) can be reintegrated into a `prettyClusters` workflow.)
