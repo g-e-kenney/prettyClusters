@@ -21,7 +21,10 @@ prepNeighbors(
   alphaVal = 0.95,
   bootStrap = 10,
   pidCutoff = 35,
-  trimShortClusters = TRUE
+  trimShortClusters = TRUE,
+  pepScreen = FALSE,
+  alnClust = FALSE,
+  hmmClust = FALSE
 )
 }
 \arguments{
@@ -58,6 +61,12 @@ prepNeighbors(
 \item{pidCutoff}{Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.}
 
 \item{trimShortClusters}{Should gene clusters with fewer than the minimum gene number be visualized? T/F value.}
+
+\item{pepScreen}{Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE}
+
+\item{alnClust}{Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.}
+
+\item{hmmClust}{Should HMM models be made for a given hypothetical protein cluster? T/F, defaults to FALSE.}
 }
 \value{
 List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)

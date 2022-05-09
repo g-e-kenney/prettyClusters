@@ -18,6 +18,9 @@
 #' @param bootStrap How many bootstrap rounds does pvclust get? Integer, defaults to 10.
 #' @param pidCutoff Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.
 #' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? T/F value.
+#' @param pepScreen Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE
+#' @param alnClust Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.
+#' @param hmmClust Should HMM models be made for a given hypothetical protein cluster? T/F, defaults to FALSE.
 #' @return List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)
 #' @export
 #' @importFrom utils read.csv write.csv write.table read.table
@@ -51,7 +54,10 @@ prepNeighbors <- function(imgGenes = imgGenes,
                           alphaVal = 0.95,
                           bootStrap = 10,
                           pidCutoff = 35,
-                          trimShortClusters = TRUE)  {
+                          trimShortClusters = TRUE,
+                          pepScreen = FALSE,
+                          alnClust = FALSE,
+                          hmmClust = FALSE)  {
                                         # starting stuff
     if(exists(x="imgGenes") == FALSE | exists(x="imgNeighbors") == FALSE | exists(x="geneSeqs") == FALSE | exists(x="neighborSeqs") == FALSE | exists(x="neighborNumber") == FALSE | exists(x="geneName") == FALSE | exists(x="sysTerm") == FALSE) {
         print("Missing a required term (gene and neighbor metadata and sequence files, context file from generateNeighbors, name of gene of interest, number of neighbors, and system terminal)")
@@ -100,8 +106,8 @@ prepNeighbors <- function(imgGenes = imgGenes,
     if (typeof(imgGenes) == "character" && typeof(neighborsContext) == "character") {
         ## by default, 
         imgGenesFull <- as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t", stringsAsFactors=FALSE))
-        imgGenesFull <- imgGenesFull %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
         imgGenesData <- imgGenesFull[names(imgGenesFull) %in% imgCols]
+        imgGenesData <- imgGenesData %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
         ## if interpro exists add it
         if (any(grepl("InterPro", colnames(imgGenesFull)))) {
             imgGenesData$InterPro <- imgGenesFull$InterPro
@@ -115,12 +121,20 @@ prepNeighbors <- function(imgGenes = imgGenes,
     }
     if(typeof(imgNeighbors) == "character")  {
         imgNeighborsFull <- as.data.frame(read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE))
-        imgNeighborsFull <- imgNeighborsFull %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
         imgNeighborsData <- imgNeighborsFull[names(imgNeighborsFull) %in% imgCols]
+        imgNeighborsData <- imgNeighborsData %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
+        ## adding InterPro and Hypofam columns if we don't have them
+        ## if we don't run hypothetical protein or peptide detection the latter will just be blank
+        ## if we don't run incorpIprScan and/or the IMG doesn't start more consistently adding InterPro values the former will be blank
         if (any(grepl("InterPro", colnames(imgNeighborsFull)))) {
             imgNeighborsData$InterPro <- imgNeighborsFull$InterPro
         } else {
             imgNeighborsData$InterPro <- ""
+        }
+        if (any(grepl("Hypofam", colnames(imgNeighborsFull)))) {
+            imgNeighborsData$Hypofam <- imgNeighborsFull$Hypofam
+        } else {
+            imgNeighborsData$Hypofam <- ""
         }
     } else {
         print("Please load an imgNeighborsTemp textfile (can be a raw IMG metadata textfile).")
@@ -163,27 +177,38 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                                  sysTerm = sysTerm,
                                                  numThreads = numThreads,
                                                  clustMethod = clustMethod,
-                                                 pidCutoff = pidCutoff)
-        ## output: imgNeighborsData (updated), hypoClusters.txt, hypoClusterX.fa (per cluster), hypoClusterXaln.fa (per cluster), hypoSettings.txt
+                                                 pidCutoff = pidCutoff,
+                                                 screenPep = FALSE,
+                                                 alnClust = alnClust,
+                                                 hmmClust = hmmClust)
+    }
+    ## output: imgNeighborsData (updated), hypoClusters.txt, hypoClusterX.fa (per cluster), hypoClusterXaln.fa (per cluster), hypoSettings.txt
+    if (pepScreen == TRUE)  {
+        imgNeighborsData <- neighborHypothetical(imgGenesData = imgGenesData,
+                                                 imgNeighborsData = imgNeighborsData,
+                                                 imgNeighborSeqs=imgNeighborSeqs,
+                                                 geneName = geneName,
+                                                 alphaVal = alphaVal,
+                                                 bootStrap = bootStrap,
+                                                 sysTerm = sysTerm,
+                                                 numThreads = numThreads,
+                                                 clustMethod = clustMethod,
+                                                 pidCutoff = pidCutoff,
+                                                 screenPep = TRUE,
+                                                 alnClust = alnClust,
+                                                 hmmClust = hmmClust)
+    }
+    ## output: imgNeighborsData (updated), pepClusters.txt, pepClusterX.fa (per cluster), pepClusterXaln.fa (per cluster), pepSettings.txt
+    if (trimShortClusters == TRUE) {
         neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData,
-                                           imgGenesData = imgGenesData,
-                                           imgNeighborsContext = imgNeighborsContext,
-                                           trimShortClusters = trimShortClusters,
-                                           neighborNumber = neighborNumber,
-                                           geneName = geneName,
-                                           imgNeighborSeqs=imgNeighborSeqs,
-                                           imgGeneSeqs=imgGeneSeqs)
-        ## output: imgNeighborsTrimmed (includes source_gene_oid column), imgGenesTrimmed
-    } else {
-        neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData,
-                                           imgGenesData = imgGenesData,
-                                           imgNeighborsContext = imgNeighborsContext,
-                                           trimShortClusters = trimShortClusters,
-                                           neighborNumber = neighborNumber,
-                                           geneName = geneName,
-                                           imgNeighborSeqs=imgNeighborSeqs,
-                                           imgGeneSeqs=imgGeneSeqs)
-        ## output: imgNeighborsTrimmed (includes source_gene_oid column), imgGenesTrimmed
+                                            imgGenesData = imgGenesData,
+                                            imgNeighborsContext = imgNeighborsContext,
+                                            trimShortClusters = trimShortClusters,
+                                            neighborNumber = neighborNumber,
+                                            geneName = geneName,
+                                            imgNeighborSeqs=imgNeighborSeqs,
+                                            imgGeneSeqs=imgGeneSeqs)
+    ## output: imgNeighborsTrimmed (includes source_gene_oid column), imgGenesTrimmed
     }
     imgGenesTrimmed <- neighborTrimOutput$imgGenesTrimmed
     imgNeighborsTrimmed <- neighborTrimOutput$imgNeighborsTrimmed

@@ -10,9 +10,11 @@
 #' @param cutoffValue The percent ID or evalue cutoff after which edges are not formed when using tidygraph.  Number.
 #' @param sysTerm The type of terminal (wsl vs linux/unix/macos) from which blastp and other commands will be run.  Character.
 #' @param numThreads The number of processor threads to be devoted to certain steps. Number, defaults to 1.
-#' @param alignSubgroups Indicates whether or not MAFFT alignments should be produced for specific subgroups.  Boolean, defaults to FALSE.
 #' @param defFamNum Starting number for families. Useful when running several consecutive protein types. Number, defaults to 0.
 #' @param lightExport Indicates whether a simplified export format - gene name and family only - should be used. Boolean, defaults to FALSE.
+#' @param screenPep Should peptide-friendly settings be used? T/F, defaults to FALSE.
+#' @param alnClust Should we make MAFFT alignments for clusters?  T/F, defaults to FALSE.
+#' @param hmmClust Should we make HMM models for clusters? T/F, defaults to FALSE.
 #' @return Updated metadata for neighboring genes (additional files generated en route)
 #' @export
 #' @importFrom rlang .data
@@ -37,14 +39,16 @@ identifySubgroups <- function(geneList = geneList,
                               imgNeighbors = imgNeighbors,
                               imgNeighborSeqs = imgNeighborSeqs,
                               geneName = geneName,
-                              subgroupDesc=subgroupDesc,
+                              subgroupDesc = subgroupDesc,
                               cutoffType = cutoffType,
                               cutoffValue = cutoffValue,
                               sysTerm = sysTerm,
                               numThreads = 1,
-                              alignSubgroups = FALSE,
+                              alnClust = FALSE,
+                              hmmClust = FALSE,
                               defFamNum = 0,
-                              lightExport = FALSE) { 
+                              lightExport = FALSE,
+                              screenPep = FALSE) { 
     ## if key things are missing
     if(exists(x="imgNeighbors") == FALSE | exists(x="imgNeighborSeqs") == FALSE | exists(x="geneName") == FALSE | exists(x="geneList") == FALSE | exists(x="subgroupDesc") == FALSE | exists(x="cutoffType") == FALSE | exists(x="cutoffValue") == FALSE | exists(x="sysTerm") == FALSE) {
         print("Missing a required term")
@@ -94,24 +98,87 @@ identifySubgroups <- function(geneList = geneList,
             return(0)
         }
     }
-    ## checking on mafft
-    if(exists(x="mafft") == FALSE) {
-        if (sysTerm == "wsl") {
-            mafft <- system2(command = "wsl",
-                             args = c("which",
-                                      "mafft"),
-                             stdout = TRUE)
-        } else if (sysTerm == "nix") {
-            mafft <- system2(command = "which",
-                             args = c("mafft"),
-                             stdout=TRUE)
-        } else {
-            print("mafft path absent or unrecognized")
-            return(0)
+    ## checking on mafft IF we've decided to align
+    if (alnClust == TRUE) {
+        if(exists(x="mafft") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "mafft"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("mafft"),
+                                 stdout=TRUE)
+            } else {
+                print("mafft path absent or unrecognized")
+                return(0)
+            }
+        }
+    }
+    ## checking on hmmer tools IF we've decided to make and use HMMs
+    if (hmmClust == TRUE) {
+        if(exists(x="hmmalign") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "hmmalign"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("hmmalign"),
+                                 stdout=TRUE)
+            } else {
+                print("hmmalign path absent or unrecognized")
+                return(0)
+            }
+        }
+        if(exists(x="hmmbuild") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "hmmbuild"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("hmmbuild"),
+                                 stdout=TRUE)
+            } else {
+                print("hmmbuild path absent or unrecognized")
+                return(0)
+            }
         }
     }
     ## file input, starting with the expected IMG columns
-    imgCols <- list("gene_oid", "source_gene_oid", "Locus.Tag", "Gene.Product.Name", "Genome.ID", "Genome.Name", "Gene.Symbol", "GenBank.Accession", "Chromosome", "Start.Coord", "End.Coord", "Strand", "DNA.Sequence.Length..bp.", "Amino.Acid.Sequence.Length..aa.", "Transmembrane.Helices", "Signal.Peptides", "Scaffold.ID", "Scaffold.External.Accession", "Scaffold.Name", "Scaffold.GC..", "COG", "Pfam", "Tigrfam", "SMART.ID", "SUPERFam.ID", "CATH.FunFam.ID", "Enzyme", "KO", "IMG.Term")
+    imgCols <- list("gene_oid",
+                    "source_gene_oid",
+                    "Locus.Tag",
+                    "Gene.Product.Name",
+                    "Genome.ID",
+                    "Genome.Name",
+                    "Gene.Symbol",
+                    "GenBank.Accession",
+                    "Chromosome",
+                    "Start.Coord",
+                    "End.Coord",
+                    "Strand",
+                    "DNA.Sequence.Length..bp.",
+                    "Amino.Acid.Sequence.Length..aa.",
+                    "Transmembrane.Helices",
+                    "Signal.Peptides",
+                    "Scaffold.ID",
+                    "Scaffold.External.Accession",
+                    "Scaffold.Name",
+                    "Scaffold.GC..",
+                    "COG",
+                    "Pfam",
+                    "Tigrfam",
+                    "SMART.ID",
+                    "SUPERFam.ID",
+                    "CATH.FunFam.ID",
+                    "Enzyme",
+                    "KO",
+                    "IMG.Term")
     if(typeof(imgNeighbors) == "character")  {
         imgNeighborsTemp <- read.csv(imgNeighbors, header=TRUE, sep="\t", stringsAsFactors=FALSE )
     } else {
@@ -190,8 +257,8 @@ identifySubgroups <- function(geneList = geneList,
     dbtype <- "prot"
     blast_db <- "subSeqsDb"
     input <- subSeqsFile
-    ## easier to cut down later than rerun
-    evalue <- "1"
+    ## easier to cut down later than rerun - note altered settings for peptides
+    if (screenPep == TRUE) {evalue <- "10"} else {evalue <- "1"}
     format <- "6"
     output <- "subSeqsDb"
     query <- subSeqsFile
@@ -275,7 +342,12 @@ identifySubgroups <- function(geneList = geneList,
     yetTidierBlast <- yetTidierBlast %>% dplyr::rowwise() %>% dplyr::mutate(maxSeqLength = max(.data$qseqLength, .data$sseqLength))
     ## imposing a length cutoff (match is % of whichever is larger) for matches
     ## to avoid high-identity but short-length matches
-    tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
+    ## note modded values for peptides
+    if (screenPep == TRUE) {
+        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.45*.data$maxSeqLength)   
+    } else {
+        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
+    }
     ## keeping only names and percent id or evalue now that we are done with length and bitscore, then reshaping it
     rm(yetTidierBlast)
     if (cutoffType == "identity")  {
@@ -305,6 +377,7 @@ identifySubgroups <- function(geneList = geneList,
     tidyBlastClusters <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::filter(.data$cluster %in% keepCluster)
     print("Singletons not shown.")
     ## a few things need to be done differently for e-value vs. %id data presentation
+    if (screenPep == TRUE) {matchLength <- "45"} else {matchLength <- "65"}
     if (cutoffType == "identity")  {
         titleText <- paste("Cluster-based identification of protein subgroups, (",
                            subgroupDesc,
@@ -314,7 +387,9 @@ identifySubgroups <- function(geneList = geneList,
                            sep="")
         subtitleText <- paste("Edge values represent %ID, with a cutoff of ",
                               cutoffValue,
-                              " and a 65% match length used for edges. Analyzed on ",
+                              " and a ",
+                              matchLength,
+                              "% match length used for edges. Analyzed on ",
                               fileDate,
                               ".",
                               sep="")
@@ -335,7 +410,9 @@ identifySubgroups <- function(geneList = geneList,
                            sep="")
         subtitleText <- paste("Edge values represent expectation value, with a cutoff of ",
                               cutoffValue,
-                              " and a 65% match length used for edges. Analyzed on ",
+                              " and a ",
+                              matchLength,
+                              "% match length used for edges. Analyzed on ",
                               fileDate,
                               ".",
                               sep="")
@@ -364,7 +441,7 @@ identifySubgroups <- function(geneList = geneList,
         ggplot2::theme(legend.position="bottom", plot.margin=ggplot2::unit(c(.2,.2,.2,.2), "cm")) +
         ggplot2::scale_color_viridis_d()
     ## pic of the full-sized cluster
-                ggplot2::ggsave(filename=networkFileName, tidyBlastNetworkPic, height=10, width=20, dpi=75, units="in", device="pdf")
+    ggplot2::ggsave(filename=networkFileName, tidyBlastNetworkPic, height=10, width=20, dpi=75, units="in", device="pdf")
     ##let's export that as a Cytoscape-friendly file too
     ## igraph - could try saveXGMML in GeneNetworkBuilder?
     igraph::write_graph(tidyBlastNetworkTrimmed, file = gmlFileName, format="gml")
@@ -373,10 +450,15 @@ identifySubgroups <- function(geneList = geneList,
     clusterOutput <- data.frame(igraph::V(tidyBlastNetworkTrimmed)$name, igraph::V(tidyBlastNetworkTrimmed)$cluster)
     colnames(clusterOutput) <- list("gene_oid", "cluster")
     clusterNum <- sort(unique(clusterOutput$cluster))
+    ## in case the defined family starting number pushes us into a new order of magnitude above the cluster numbers
+    totClust <- length(clusterNum) + defFamNum
+    padNum <- nchar(totClust)
     for (i in 1:length(clusterNum)) {
+        k <- i + defFamNum
         clustSubset <- clusterOutput[which(clusterOutput$cluster == clusterNum[i]),]
         inClustLength <- length(clustSubset$gene_oid)
-        inClustNum <- paste("subfam_",i + defFamNum,sep="")
+        ## note: this should fix hypofam numbering (hypofam_01 not hypofam_1)
+        inClustNum <- paste("subfam_",stringr::str_pad(k, padNum, "left", "0"),sep="")
         ## for each protein in the cluster, getting the sequences
         for (j in 1:inClustLength) {
             inClustGene <- clustSubset$gene_oid[j]
@@ -396,12 +478,12 @@ identifySubgroups <- function(geneList = geneList,
         }
         colnames(clustListings) <- c("gene_oid","subClust")
                                         # write plain .fa files and mafft-aligned files for cluster members
-        clusterFile <- paste(dirname,"/",fileName,"_tgCluster_",i + defFamNum,".fa",sep="")
+        clusterFile <- paste(dirname,"/",fileName,"_tgCluster_",stringr::str_pad(k, padNum, "left", "0"),".fa",sep="")
         seqinr::write.fasta(clustSeqs, names=names(clustSeqs),file.out=clusterFile)
         ## let's align members of a given cluster wheeee
-        if (alignSubgroups == TRUE) {
+        if (alnClust == TRUE) {
             mafftInput <- clusterFile
-            clusterAlnFile <- paste(dirname,"/",fileName,"_tgCluster_",i,"_mafft.fa",sep="")
+            clusterAlnFile <- paste(dirname,"/",fileName,"_tgCluster_",stringr::str_pad(k, padNum, "left", "0"),"_mafft.fa",sep="")
             mafftOutput <- clusterAlnFile
             ## see previous note re: running with --quiet
             if (sysTerm == "wsl") {
@@ -432,6 +514,12 @@ identifySubgroups <- function(geneList = geneList,
                                         #            mafftOutput),
                                         #          stdout = mafftOutput)
             }
+            ## NOTE:  add HMM making here, if desired???
+            ## or maybe within the sysTerm if/else bit.
+            ## if hmmClust == TRUE
+            ## get 5% of the seqs or 5 seqs, whichever is more
+            ## hmmbuild a model
+            ## hmmalign all seqs against it
         }
         inClustLength <- 0
         clustSeqs <- list()

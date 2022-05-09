@@ -17,6 +17,8 @@
 #' @param alignToCore Should the core gene be centered in the diagrams? T/F, defaults to TRUE
 #' @param labelGenes Should all genes be labeled in the diagrams? T/F, defaults to FALSE
 #' @param subclusterDiagrams Should additional figures be made for each group of gene clusters? T/F, defaults to FALSE. 
+#' @param everyScale Should every single gene cluster have a scale added? T/F, defaults to FALSE.
+#' @param makeScale Should a 1 kb-delineated scale be included in the figures? T/F, defaults to TRUE.
 #' @return Gene diagrams as .png and .pdf files.
 #' @export
 #' @importFrom rlang .data
@@ -33,7 +35,24 @@
 #'                                              neighborNumber = 10)
 #' }
 #'  
-prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile = imgNeighborsFile, annotationGuideFile = annotationGuideFile, geneName = geneName, efiRepnodes = FALSE, neighborNumber = neighborNumber, annotateGenes = TRUE, standAlone = FALSE, markClusters = FALSE, autoColor = TRUE, colorType = "viridis", paletteInput = "plasma", showScaffold = FALSE, alignToCore=TRUE, labelGenes = FALSE, subclusterDiagrams = FALSE) { 
+prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
+                                  imgNeighborsFile = imgNeighborsFile,
+                                  annotationGuideFile = annotationGuideFile,
+                                  geneName = geneName,
+                                  efiRepnodes = FALSE,
+                                  neighborNumber = neighborNumber,
+                                  annotateGenes = TRUE,
+                                  standAlone = FALSE,
+                                  markClusters = FALSE,
+                                  autoColor = TRUE,
+                                  colorType = "viridis",
+                                  paletteInput = "plasma",
+                                  showScaffold = FALSE,
+                                  alignToCore=TRUE,
+                                  labelGenes = FALSE,
+                                  subclusterDiagrams = FALSE,
+                                  everyScale = FALSE,
+                                  makeScale = TRUE) { 
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     if (efiRepnodes == TRUE) {
         coreGeneName <- geneName
@@ -255,11 +274,20 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                     tempList2 <- list()
                     tempList3 <- list()
                     ## first list has IMGfam and Hypofam families - both are specific and singular, so any non-none match is legit
+                    ## we may eventually want to change this for hypofam since there could be different subgroups
+                    ## in the interim just use the most specific
                     tempList1 <- strsplit(namedGenes$IMGfam[j], " ")
                     ## adding the dollar sign here makes the regex work, ugh what a kludge
                     ## this is only an issue for Hypofams due to the way the family names/numbers are generated
+                    ## i.e. we don't want hypofam_2 to dredge up hypofam_20
                     ## might be possible to fix that back in neighborHypothetical?
-                    tempList1 <- append(tempList1, paste(strsplit(namedGenes$Hypofam[j], " "),"$",sep=""))
+                    if (grepl(" ",namedGenes$Hypofam[j])==FALSE) {
+                        ## this is for a case where we have only one hypofam term
+                        tempList1 <- append(tempList1, paste(strsplit(namedGenes$Hypofam[j], " "),"$",sep=""))
+                    } else {
+                        ## in this case, we listed multiple hypofam terms
+                        tempList1 <- append(tempList1, paste(unlist(strsplit(namedGenes$Hypofam[j], " ")),"$",sep=""))
+                    }
                     ## second list is Pfam and TIGRfam and InterPro - here you can have multiple hits, and we may or may not consider the absence of a family meaningful
                     tempList2 <- strsplit(namedGenes$Pfam[j], " ")
                     tempList2 <- append(tempList2, strsplit(namedGenes$Tigrfam[j], " "))
@@ -534,7 +562,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             }  
         }
     }    
-    bgcScaffolds <- unique(multiBGC$scaffoldID)    
+    uniBGCs <- unique(multiBGC$bgc)    
     print("Gene cluster naming fixed in species with multiple clusters.")
     ## this normalizes positioning. 
     ## we do not fundamentally care that much about absolute genome position as a default here
@@ -542,8 +570,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
     ## so let's make every cluster start at the beginning
     ## some of this may end up in flux as i try to nuke the extra x-axes.
     maxval <- 0
-    for (i in 1:length(bgcScaffolds)) {
-        tempPositioning <- dplyr::filter(multiBGC, .data$scaffoldID == bgcScaffolds[i])
+    for (i in 1:length(uniBGCs)) {
+        tempPositioning <- dplyr::filter(multiBGC, .data$bgc == uniBGCs[i])
         ## JUST IN CASE
         tempPositioning <- tempPositioning[order(tempPositioning$start),]
         zeroval <- tempPositioning$start[1]
@@ -672,6 +700,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             }
             processed <- dirGeneSets
             print("Gene clusters aligned around the genes of interest.")
+            rm(dirGeneSets)
         } else if (standAlone == TRUE) {
         ## i.e. we cannot rely on having source_gene_oid
             for (i in 1:length(uniqueBGCs)) {
@@ -705,7 +734,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
                 rm(aligningGenes)
             }
             processed <- dirGeneSets
-            print("Gene clusters aligned around the family of genes of interest.")                     
+            print("Gene clusters aligned around the family of genes of interest.")
+            rm(dirGeneSets)
         } 
     } else {
         ## no aligning to core
@@ -1075,11 +1105,46 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
         }
         ## while we're at it, let's make sure we're sorted for export
         ## in this case, we're going by BGC (i.e. display order) and then gene_oid
-        processed <- processed[order(processed$bgc, processed$gene_oid)]
+        processed <- processed[order(processed$bgc, processed$gene_oid),]
                                         #      genomeNames <- unique(processed$genome)
                                         #      genomeNames <- genomeNames[order(genomeNames)]
                                         #      processed$fact <- factor(processed$genome, levels=genomeNames))
         print("Diagrams ordered by species name.")
+    }
+    ## let's save our data
+    write.table(processed, annotationFileName, row.names=FALSE,sep="\t", quote=FALSE)  
+    ## this function defaults to making a single scale (with 1 kb tickmarks)
+    ## by dint of making a fake BGC
+    ## there has to be a better way to do this, but messing with facets is screwing up gene alignment
+    if (makeScale == TRUE) {
+        num1k <- floor(max(as.double(processed$end))/1000)
+        fakeSource <- as.character(9000000000 + num1k/2)
+        fakeOrd <- as.character(max(as.numeric(processed$clustOrd))+1)
+        fakeClust <- "0"
+        ## assuming that a given dataset has a gene type has caused problems before
+        ## this is overkill but ensures that we don't do that
+        ## but starts with the color schemes least likely to cause surprising random problems
+        ## this shouldn't even be visible since these are faux-tick marks, not legit genes, but.
+        if (grep("other",unique(processed$gene))==TRUE) {
+            fakeType <- "other"
+        } else if (grep("hyp",unique(processed$gene))==TRUE) {  
+            fakeType <- "hyp"
+        } else if (grep("mge",unique(processed$gene))==TRUE) {  
+            fakeType <- "mge"
+        } else {
+            fakeType <- unique(processed$gene)[1]
+        }
+        for (m in 1:num1k) {
+            fakeNum <- as.double(9000000000 + m - 1)
+            fakeStart <- as.double(0 + (m-1)*1000)
+            fakeStop <- as.double(1 + (m-1)*1000)
+            tempRow <- c(fakeNum, "","","scale (kb)",fakeType,fakeStart, fakeStop,"+","","","","","","","",fakeOrd, fakeClust, fakeSource, "1", "scale (kb)")
+            processed <- rbind(processed, tempRow)
+        }
+        processed$gene_oid <- as.double(processed$gene_oid)
+        processed$start <- as.double(processed$start)
+        processed$end <- as.double(processed$end)
+        processed$direction <- as.double(processed$direction)
     }
     ## actually making pretty gene clusters
     ## labelGenes establishes whether genes are, well, labeled (can get busy on big sets of clusters)
@@ -1179,19 +1244,22 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
         modwidth <- modheight/3
     }
     ## exports a .pdf and a .png version
-    write.table(processed, annotationFileName, row.names=FALSE,sep="\t", quote=FALSE)  
-    ggplot2::ggsave(file=finalpdfname, plot=xPlusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
-    ggplot2::ggsave(file=finalpngname, plot=xMinusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE)
+    if (everyScale == TRUE) {
+        ggplot2::ggsave(file=finalpdfname, plot=xPlusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
+        ggplot2::ggsave(file=finalpngname, plot=xPlusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE)
+    }
     ggplot2::ggsave(file=finalpdfnameX, plot=xMinusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
     ggplot2::ggsave(file=finalpngnameX, plot=xMinusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE)
     print("Diagrams for complete set of gene clusters generated.")
     ## this way you have a copy of the annotated dataset and can skip auto-annotation if desired 
     if (subclusterDiagrams == TRUE)   {
-        clustList <- unique(processed$clustNum)
+        scaleBar <- processed %>% dplyr::filter(.data$bgc == "scale (kb)")
+        forClusters <- processed %>% dplyr::filter(.data$bgc != "scale (kb)")
+        clustList <- unique(forClusters$clustNum)
         ## taking it one cluster at a time
         for (i in 1:length(clustList))  {
             clustFileNamePDF <- paste(fileName, "_cluster_",clustList[i],".pdf",sep="")
-            processedCluster <- processed %>% dplyr::filter(.data$clustNum == clustList[i])
+            processedCluster <- forClusters %>% dplyr::filter(.data$clustNum == clustList[i])         
             ## let's update the title and annotations to apply only to this cluster
             subFigureTitle <- paste("<b>genomic neighborhood diagrams for *",coreGeneName,"*, cluster ",clustList[i],"</b> (\u00b1", neighborNumber," genes displayed)",sep="")
             if (annotateGenes == TRUE)  {
@@ -1233,8 +1301,11 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile, imgNeighborsFile 
             } else {
                 subCaptionText <- "No automated annotation and gene quantification for these diagrams."
             }
+            ## appending the scale bar?
+            processedCluster <- rbind(processedCluster,scaleBar)
             ## let's trim the palette for what actually ends up being visualized here 
             ## not trimming has weird consequences
+            ## (this is incidentally why we had to add the scalebar back now)
             someGeneTypes <- allGeneTypes[which(allGeneTypes %in% processedCluster$gene)]
             someColors <- finalColors[which(allGeneTypes %in% processedCluster$gene)]
             scale_fill_genes2 <- function(...) {

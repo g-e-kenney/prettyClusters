@@ -1,18 +1,18 @@
 Package: prettyClusters
 Title: Makes Scaled and Vector-Compatible Genome Neighborhood Diagrams from IMG Metadata
-Version: 0.0.0.781
+Version: 0.0.0.785
 Authors@R: 
     person(given = "G.",
            family = "Kenney",
            role = c("aut", "cre"),
            email = "gkenney@fas.harvard.edu",
            comment = c(ORCID = "0000-0002-9579-3351"))
-Description: This package currently relies on metadata generated from the IMG database at the DOE's Joint Genome Institute.  A set of functions generate predicted genomic neighbors, do some QC, identify hypothetical protein subgroups, cluster the genomic neighborhoods according to the similarity of the sets of protein families they contain, and output the data in the form of pretty gene cluster diagrams.  There are an excessive number of color options because these genome neighborhood diagrams are, in fact, supposed to be pretty.  Integration with analyses based on protein sequence similarity (via the EFI-EST toolset) is explicitly enabled.  Import of GenBank-formatted files and extended InterProScan is also provisionally enabled.
+Description: This package currently relies on metadata generated from the IMG database at the DOE's Joint Genome Institute.  A set of functions generate predicted genomic neighbors, do some QC, identify hypothetical protein subgroups, cluster the genomic neighborhoods according to the similarity of the sets of protein families they contain, and output the data in the form of pretty gene cluster diagrams.  There are an excessive number of color options because these genome neighborhood diagrams are, in fact, supposed to be pretty.  Integration with analyses based on protein sequence similarity (via the EFI-EST toolset) is explicitly enabled.  Import of GenBank-formatted files and extended InterProScan annotation is also provisionally enabled.
 License: use_mit_license()
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports:
 	data.table,
 	dplyr,

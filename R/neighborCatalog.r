@@ -21,105 +21,107 @@
 #' }
 #' 
 neighborCatalog <- function(imgGenesTrimmed = imgGenesTrimmed,
-                             imgNeighborsTrimmed = imgNeighborsTrimmed,
-                             geneName = geneName,
-                             neighborThreshold = neighborThreshold,
-                             useInterPro = useInterPro,
-                             useHypo = useHypo) { 
-  fileDate <- format(Sys.Date(),format="%Y%m%d")
-  fileName <- paste(fileDate,"_neighborCatalog_",geneName,sep="")
-  fileSummary <- paste(fileName,"_familySummary.txt",sep="")
-  fileList <- paste(fileName,"_familyList.txt",sep="")
+                            imgNeighborsTrimmed = imgNeighborsTrimmed,
+                            geneName = geneName,
+                            neighborThreshold = neighborThreshold,
+                            useInterPro = useInterPro,
+                            useHypo = useHypo) { 
+    fileDate <- format(Sys.Date(),format="%Y%m%d")
+    fileName <- paste(fileDate,"_neighborCatalog_",geneName,sep="")
+    fileSummary <- paste(fileName,"_familySummary.txt",sep="")
+    fileList <- paste(fileName,"_familyList.txt",sep="")
     ## identifying extant families
-  numGenes <- length(unique(imgNeighborsTrimmed$source_gene_oid))
-  pfamFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Pfam, "pfam")==TRUE)
-  pfamFams <- pfamFams$Pfam
-  uniquePfam <- unique(pfamFams)
-  allFams <- pfamFams
-  tigrFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Tigrfam, "TIGR")==TRUE)
-  tigrFams <- tigrFams$Tigrfam
-  uniqueTigrfam <- unique(tigrFams)
-  allFams <- append(allFams, tigrFams)
-  if (useInterPro == TRUE) {
-      iprFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$InterPro, "IPR")==TRUE)
-      iprFams <- iprFams$InterPro
-      uniqueIprfam <- unique(iprFams)
-      allFams <- append(allFams, iprFams)
-  }
-  if (useHypo == TRUE) {
-      hypoFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Hypofam, "hypo")==TRUE)
-      hypoFams <- hypoFams$Hypofam
-      uniqueHypofam <- unique(hypoFams)
-      allFams <- append(allFams, hypoFams)
-  }
-  ## to implement: IMG fams
-  ## using the stupid XML traces since the IDs are number-only
-  ##imgFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$IMG.Term, "br")==TRUE)
-  ##imgFams <- imgFams$IMG.Term
-  ##allFams <- append(allFams, imgFams)
-  ##uniqueIMGfam <- unique(imgFams)
-  uniqueFams <- list()
-  ## finding unique pfams and dealing with the punctuation
-  for (i in 1:length(uniquePfam)) {
-    tempSplit <- unlist(strsplit(uniquePfam[i],"[[:punct:][:space:]]+"))
-    tempSplit <- tempSplit[stringr::str_detect(tempSplit, "pfam")]
-    uniqueFams <- append(uniqueFams, tempSplit)
-  }
+    numGenes <- length(unique(imgNeighborsTrimmed$source_gene_oid))
+    pfamFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Pfam, "pfam")==TRUE)
+    pfamFams <- pfamFams$Pfam
+    uniquePfam <- unique(pfamFams)
+    allFams <- pfamFams
+    tigrFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Tigrfam, "TIGR")==TRUE)
+    tigrFams <- tigrFams$Tigrfam
+    uniqueTigrfam <- unique(tigrFams)
+    allFams <- append(allFams, tigrFams)
+    if (useInterPro == TRUE) {
+        iprFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$InterPro, "IPR")==TRUE)
+        iprFams <- iprFams$InterPro
+        uniqueIprfam <- unique(iprFams)
+        allFams <- append(allFams, iprFams)
+    }
+    if (useHypo == TRUE) {
+        ## we want to make sure we catch hypofams, pepfams, and subfams from our various annotating schemes here
+        hypoFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$Hypofam, "hypofam|pepfam|subfam")==TRUE)
+        hypoFams <- hypoFams$Hypofam
+        uniqueHypofam <- unique(hypoFams)
+        allFams <- append(allFams, hypoFams)
+    }
+    ## to implement: IMG fams
+    ## using the stupid XML traces since the IDs are number-only
+    ##imgFams <- imgNeighborsTrimmed %>% dplyr::filter(stringr::str_detect(imgNeighborsTrimmed$IMG.Term, "br")==TRUE)
+    ##imgFams <- imgFams$IMG.Term
+    ##allFams <- append(allFams, imgFams)
+    ##uniqueIMGfam <- unique(imgFams)
+    uniqueFams <- list()
+    ## finding unique pfams and dealing with the punctuation
+    for (i in 1:length(uniquePfam)) {
+        tempSplit <- unlist(strsplit(uniquePfam[i],"[[:punct:][:space:]]+"))
+        tempSplit <- tempSplit[stringr::str_detect(tempSplit, "pfam")]
+        uniqueFams <- append(uniqueFams, tempSplit)
+    }
     ## finding unique tigrfams and dealing with the punctuation
-  for (i in 1:length(uniqueTigrfam)) {
-    tempSplit <- unlist(strsplit(uniqueTigrfam[i],"[[:punct:][:space:]]+"))
-    tempSplit <- tempSplit[stringr::str_detect(tempSplit, "TIGR") ]
-    uniqueFams <- append(uniqueFams, tempSplit)
-  }
-  if (useInterPro == TRUE) {
-      ## finding unique InterPro fams and dealing with the punctuation
-      for (i in 1:length(uniqueIprfam)) {
-          tempSplit <- unlist(strsplit(uniqueIprfam[i],"[[:punct:][:space:]]+"))
-          tempSplit <- tempSplit[stringr::str_detect(tempSplit, "IPR") ]
-          uniqueFams <- append(uniqueFams, tempSplit)
-      }
-  }
-  if (useHypo == TRUE) {
-      ## finding unique hypofams, if any
-      for (i in 1:length(uniqueHypofam)) {
-          ## no weirdo punctuation here!
-          tempSplit <- unlist(strsplit(uniqueHypofam[i],"[[:space:]]+"))
-          tempSplit <- tempSplit[stringr::str_detect(tempSplit, "hypo") ]
-          uniqueFams <- append(uniqueFams, tempSplit)
-      }
-  }
-  ## finding unique IMGfams, if any
-  ##for (i in 1:length(uniqueIMGfam)) {
+    for (i in 1:length(uniqueTigrfam)) {
+        tempSplit <- unlist(strsplit(uniqueTigrfam[i],"[[:punct:][:space:]]+"))
+        tempSplit <- tempSplit[stringr::str_detect(tempSplit, "TIGR") ]
+        uniqueFams <- append(uniqueFams, tempSplit)
+    }
+    if (useInterPro == TRUE) {
+        ## finding unique InterPro fams and dealing with the punctuation
+        for (i in 1:length(uniqueIprfam)) {
+            tempSplit <- unlist(strsplit(uniqueIprfam[i],"[[:punct:][:space:]]+"))
+            tempSplit <- tempSplit[stringr::str_detect(tempSplit, "IPR") ]
+            uniqueFams <- append(uniqueFams, tempSplit)
+        }
+    }
+    if (useHypo == TRUE) {
+        ## finding unique hypofams, if any
+        for (i in 1:length(uniqueHypofam)) {
+            ## no weirdo punctuation here!  but we do wanna catch all annotation types again
+            ## note this should handle multiple annotations via the splitting bit
+            tempSplit <- unlist(strsplit(uniqueHypofam[i],"[[:space:]]+"))
+            tempSplit <- tempSplit[stringr::str_detect(tempSplit, "hypofam|pepfam|subfam") ]
+            uniqueFams <- append(uniqueFams, tempSplit)
+        }
+    }
+    ## finding unique IMGfams, if any
+    ##for (i in 1:length(uniqueIMGfam)) {
     ## haven't seen multi-annotations for this yet, but....
     ##tempSplit <- unlist(strsplit(uniqueIMGfam[i],"[[:punct:][:space:]]+"))
     ##tempSplit <- tempSplit[stringr::str_detect(tempSplit, "[[:digit:]][[:digit:]][[:digit:]][[:digit:]]") ]
     ##uniqueFams <- append(uniqueFams, tempSplit)
-  ##}
-  uniqueFams <- unlist(unique(uniqueFams))
-  uniqueFamNum <- length(uniqueFams)
-  tempFamList <- list(fams=unlist(uniqueFams), abund=vector(mode = "character", length = uniqueFamNum))
-  uDataFams <- data.frame(tempFamList, stringsAsFactors=FALSE)
-  trimmedFams <- list()
+    ##}
+    uniqueFams <- unlist(unique(uniqueFams))
+    uniqueFamNum <- length(uniqueFams)
+    tempFamList <- list(fams=unlist(uniqueFams), abund=vector(mode = "character", length = uniqueFamNum))
+    uDataFams <- data.frame(tempFamList, stringsAsFactors=FALSE)
+    trimmedFams <- list()
     ## calculating abundance
     ## and adding families that pass to the list
-  for (j in 1:length(uDataFams[,1]))  {
-    tempAbund <- grep(uDataFams[j,1], allFams)
-    uDataFams[j,2] <- length(tempAbund)
-  }
-  if (any(is.na(uDataFams))) {
-    ## we don't want to include 
-    uDataFams <- uDataFams[-which(is.na(uDataFams)),]
-  }
-  uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
-  commonFams <- uDataFams %>% dplyr::filter(.data$pAbund >= neighborThreshold)
-  colnames(commonFams) <- c("imgNames", "abund", "pAbund")
-  data(famInfoList)
-  commonFams <- dplyr::left_join(commonFams, famInfoList)
-  commonFams[which(!(commonFams$imgNames %in% famInfoList$imgNames)),4:6] <- ""
-  familyList <- commonFams$imgNames
-  write.table(commonFams, file=fileSummary, row.names=FALSE, sep="\t", quote=FALSE)
-  write.table(uniqueFams, file=fileList, row.names=FALSE, sep="\t", quote=FALSE)
-  print("Protein families in neighboring genes catalogued.")
-  return(familyList)
+    for (j in 1:length(uDataFams[,1]))  {
+        tempAbund <- grep(uDataFams[j,1], allFams)
+        uDataFams[j,2] <- length(tempAbund)
+    }
+    if (any(is.na(uDataFams))) {
+        ## we don't want to include NAs...
+        uDataFams <- uDataFams[-which(is.na(uDataFams)),]
+    }
+    uDataFams$pAbund <- as.numeric(uDataFams$abund) / numGenes
+    commonFams <- uDataFams %>% dplyr::filter(.data$pAbund >= neighborThreshold)
+    colnames(commonFams) <- c("imgNames", "abund", "pAbund")
+    data(famInfoList)
+    commonFams <- dplyr::left_join(commonFams, famInfoList)
+    commonFams[which(!(commonFams$imgNames %in% famInfoList$imgNames)),4:6] <- ""
+    familyList <- commonFams$imgNames
+    write.table(commonFams, file=fileSummary, row.names=FALSE, sep="\t", quote=FALSE)
+    write.table(uniqueFams, file=fileList, row.names=FALSE, sep="\t", quote=FALSE)
+    print("Protein families in neighboring genes catalogued.")
+    return(familyList)
 }
 

@@ -14,9 +14,11 @@ identifySubgroups(
   cutoffValue = cutoffValue,
   sysTerm = sysTerm,
   numThreads = 1,
-  alignSubgroups = FALSE,
+  alnClust = FALSE,
+  hmmClust = FALSE,
   defFamNum = 0,
-  lightExport = FALSE
+  lightExport = FALSE,
+  screenPep = FALSE
 )
 }
 \arguments{
@@ -38,11 +40,15 @@ identifySubgroups(
 
 \item{numThreads}{The number of processor threads to be devoted to certain steps. Number, defaults to 1.}
 
-\item{alignSubgroups}{Indicates whether or not MAFFT alignments should be produced for specific subgroups.  Boolean, defaults to FALSE.}
+\item{alnClust}{Should we make MAFFT alignments for clusters?  T/F, defaults to FALSE.}
+
+\item{hmmClust}{Should we make HMM models for clusters? T/F, defaults to FALSE.}
 
 \item{defFamNum}{Starting number for families. Useful when running several consecutive protein types. Number, defaults to 0.}
 
 \item{lightExport}{Indicates whether a simplified export format - gene name and family only - should be used. Boolean, defaults to FALSE.}
+
+\item{screenPep}{Should peptide-friendly settings be used? T/F, defaults to FALSE.}
 }
 \value{
 Updated metadata for neighboring genes (additional files generated en route)

@@ -20,7 +20,9 @@ prettyClusterDiagrams(
   showScaffold = FALSE,
   alignToCore = TRUE,
   labelGenes = FALSE,
-  subclusterDiagrams = FALSE
+  subclusterDiagrams = FALSE,
+  everyScale = FALSE,
+  makeScale = TRUE
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ prettyClusterDiagrams(
 \item{labelGenes}{Should all genes be labeled in the diagrams? T/F, defaults to FALSE}
 
 \item{subclusterDiagrams}{Should additional figures be made for each group of gene clusters? T/F, defaults to FALSE.}
+
+\item{everyScale}{Should every single gene cluster have a scale added? T/F, defaults to FALSE.}
+
+\item{makeScale}{Should a 1 kb-delineated scale be included in the figures? T/F, defaults to TRUE.}
 }
 \value{
 Gene diagrams as .png and .pdf files.

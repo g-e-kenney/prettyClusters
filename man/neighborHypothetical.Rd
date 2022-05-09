@@ -14,7 +14,10 @@ neighborHypothetical(
   alphaVal = alphaVal,
   bootStrap = bootStrap,
   sysTerm = sysTerm,
-  numThreads = numThreads
+  numThreads = numThreads,
+  screenPep = screenPep,
+  alnClust = alnClust,
+  hmmClust = hmmClust
 )
 }
 \arguments{
@@ -37,6 +40,12 @@ neighborHypothetical(
 \item{sysTerm}{The type of terminal (wsl vs linux/unix/macos) from which blastp and other commands will be run}
 
 \item{numThreads}{The number of processor threads to be devoted to certain steps}
+
+\item{screenPep}{Should we use peptide-friendly defaults in this run?}
+
+\item{alnClust}{Should we make MAFFT alignments of all clusters?}
+
+\item{hmmClust}{Should we make HMM models of all clusters?}
 }
 \value{
 Updated metadata for neighboring genes (additional files generated en route)

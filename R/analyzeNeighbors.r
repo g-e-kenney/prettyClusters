@@ -60,7 +60,7 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
     ## some cleanup for the input files, JUST IN CASE
     ## even though they should be fine if coming out of prepNeighbors or repnodeTrim
     ## nevertheless, adds the two columns that may not be in standard IMG metadata files
-    imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
+    imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
     imgNeighborsTrimmed <- imgNeighborsTemp[names(imgNeighborsTemp) %in% imgCols]
     ## add in source_gene_oid
     imgNeighborsTrimmed$source_gene_oid <- imgNeighborsTemp$source_gene_oid
@@ -76,7 +76,7 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
     } else {
         imgNeighborsTrimmed$Hypofam <- ""
     }     
-    imgGenesTemp <- imgGenesTemp %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
+    imgGenesTemp <- imgGenesTemp %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
     imgGenesTrimmed <- imgGenesTemp[names(imgGenesTemp) %in% imgCols]
     ## if interpro exists add it
     if (any(grepl("InterPro", colnames(imgGenesTemp)))) {

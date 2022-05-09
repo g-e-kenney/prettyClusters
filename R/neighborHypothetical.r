@@ -11,6 +11,9 @@
 #' @param bootStrap The bootstrap number used for pvclust
 #' @param sysTerm The type of terminal (wsl vs linux/unix/macos) from which blastp and other commands will be run
 #' @param numThreads The number of processor threads to be devoted to certain steps
+#' @param screenPep Should we use peptide-friendly defaults in this run? 
+#' @param alnClust Should we make MAFFT alignments of all clusters?
+#' @param hmmClust Should we make HMM models of all clusters?
 #' @return Updated metadata for neighboring genes (additional files generated en route)
 #' @export
 #' @importFrom rlang .data
@@ -39,19 +42,34 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                                  alphaVal = alphaVal,
                                  bootStrap = bootStrap,
                                  sysTerm = sysTerm,
-                                 numThreads = numThreads) { 
+                                 numThreads = numThreads,
+                                 screenPep = screenPep,
+                                 alnClust = alnClust,
+                                 hmmClust = hmmClust) { 
                                         # first step: flag hypothetical proteins  in the neighbordata file
     ## have some variables and stuff
     fileDate <- format(Sys.Date(),format="%Y%m%d")
-    fileName <- paste(fileDate,"_neighborHypothetical_",geneName,sep="")
-    hypoSeqsFile <- paste(fileName, "_hypoSeqs.fa",sep="")
-    blastFile <- paste(fileName, "_Blast.txt",sep="")
-    blastError <- paste(fileName, "_BlastError.txt",sep="")
-    pvClustFile <- paste(fileName,"_pvClust.txt",sep="")
-    pvClustTree <- paste(fileName,"_pvClustTree.pdf",sep="")
-    clustListFile <- paste(fileName, "_clusterList.txt",sep="")
-    networkFileName <- paste(fileName, "_networkFull_pid_",pidCutoff,".pdf",sep="")
-    clustNetworkFileName <- paste(fileName, "_networkClusters_pid_",pidCutoff,".pdf",sep="")
+    if (screenPep == TRUE) {
+        fileName <- paste(fileDate,"_neighborHypothetical_",geneName,sep="")
+        hypoSeqsFile <- paste(fileName, "_pepSeqs.fa",sep="")
+        blastFile <- paste(fileName, "_pepBlast.txt",sep="")
+        blastError <- paste(fileName, "_pepBlastError.txt",sep="")
+        pvClustFile <- paste(fileName,"_pepPvClust.txt",sep="")
+        pvClustTree <- paste(fileName,"_pepPvClustTree.pdf",sep="")
+        clustListFile <- paste(fileName, "_pepClusterList.txt",sep="")
+        networkFileName <- paste(fileName, "_pepNetworkFull_pid_",pidCutoff,".pdf",sep="")
+        clustNetworkFileName <- paste(fileName, "_pepNetworkClusters_pid_",pidCutoff,".pdf",sep="")
+    } else {
+        fileName <- paste(fileDate,"_neighborHypothetical_",geneName,sep="")
+        hypoSeqsFile <- paste(fileName, "_hypoSeqs.fa",sep="")
+        blastFile <- paste(fileName, "_hypoBlast.txt",sep="")
+        blastError <- paste(fileName, "_hypoBlastError.txt",sep="")
+        pvClustFile <- paste(fileName,"_hypoPvClust.txt",sep="")
+        pvClustTree <- paste(fileName,"_hypoPvClustTree.pdf",sep="")
+        clustListFile <- paste(fileName, "_hypoClusterList.txt",sep="")
+        networkFileName <- paste(fileName, "_hypoNetworkFull_pid_",pidCutoff,".pdf",sep="")
+        clustNetworkFileName <- paste(fileName, "_hypoNetworkClusters_pid_",pidCutoff,".pdf",sep="")
+    }
     nLength <- length(imgNeighborsData$gene_oid)
     hypoIndex <- list()
     counter <- 1
@@ -87,19 +105,53 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
             return(0)
         }
     }
-    if(exists(x="mafft") == FALSE) {
-        if (sysTerm == "wsl") {
-            mafft <- system2(command = "wsl",
-                             args = c("which",
-                                      "mafft"),
-                             stdout = TRUE)
-        } else if (sysTerm == "nix") {
-            mafft <- system2(command = "which",
-                             args = c("mafft"),
-                             stdout=TRUE)
-        } else {
-            print("mafft path absent or unrecognized")
-            return(0)
+    if (alnClust == TRUE) {
+        if(exists(x="mafft") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "mafft"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("mafft"),
+                                 stdout=TRUE)
+            } else {
+                print("mafft path absent or unrecognized")
+                return(0)
+            }
+        }
+    }
+    if (hmmClust == TRUE) {
+        if(exists(x="hmmalign") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "hmmalign"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("hmmalign"),
+                                 stdout=TRUE)
+            } else {
+                print("hmmalign path absent or unrecognized")
+                return(0)
+            }
+        }
+        if(exists(x="hmmbuild") == FALSE) {
+            if (sysTerm == "wsl") {
+                mafft <- system2(command = "wsl",
+                                 args = c("which",
+                                          "hmmbuild"),
+                                 stdout = TRUE)
+            } else if (sysTerm == "nix") {
+                mafft <- system2(command = "which",
+                                 args = c("hmmbuild"),
+                                 stdout=TRUE)
+            } else {
+                print("hmmbuild path absent or unrecognized")
+                return(0)
+            }
         }
     }
                                         # looking for things with no pfam or tigrfam IDs
@@ -112,15 +164,22 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     ## intentionally EXCLUDING InterPro listings here, since those include some things that are vague pretty vague (superfamilies)
     ## and for those we may still want to run hypothetical protein analysis.
     ## but there's no good way to sort vague from specific interpro families by number (?)
-    for (i in 1:nLength) {
-        if(imgNeighborsData$Pfam[i] == "" && imgNeighborsData$Tigrfam[i] == "") {
-            hypoIndex[[counter]] <-  imgNeighborsData$gene_oid[i]    
-            counter <- counter + 1    
-        } else {
-            hypoIndex <- hypoIndex
+    ## IF we are doing peptide screening, we are assuming that annotations might be extra-crappy
+    if (screenPep == TRUE) {
+        hypoTemp <- imgNeighborsData %>% dplyr::filter(.data$Amino.Acid.Sequence.Length..aa. <= 150)
+        hypoIndex <- hypoTemp$gene_oid
+        rm(hypoTemp)
+    } else if (screenPep == FALSE) {     
+        ## we only want metadata for hypothetical proteins only
+        for (i in 1:nLength) {
+            if(imgNeighborsData$Pfam[i] == "" && imgNeighborsData$Tigrfam[i] == "") {
+                hypoIndex[[counter]] <-  imgNeighborsData$gene_oid[i]    
+                counter <- counter + 1    
+            } else {
+                hypoIndex <- hypoIndex
+            }
         }
     }
-    ## we only want metadata for hypothetical proteins only
     hypoNeighbors <- imgNeighborsData[imgNeighborsData$gene_oid %in% hypoIndex, ]
     ## make a data frame with amino acid sequences for all the hypothetical proteins
     hSeqNames <- names(imgNeighborSeqs)
@@ -131,9 +190,14 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     colnames(hSeqTable) <- c("gene_oid", "sequence")
     ## sometimes neighbors are rRNA or tRNA or whatever
     ## and this is what IMG will have as a "sequence" for them
-    ## NOTE: gb2img & incorpIprScan should fake this adequately, but might need a quick visualcheck...
+    ## NOTE: gb2img & incorpIprScan should fake this adequately, but might need a quick visual check...
     badSeq <- "No sequence found"
+    ## NOTE: as of may 2022 IMG seems to have been tweaking what happens with RNA; this is adjusted to suit
+    badSeq2 <- "not found"
+    badSeq3 <- ""
     goodSeqs <- hSeqTable %>% dplyr::filter(.data$sequence != badSeq)
+    goodSeqs <- goodSeqs %>% dplyr::filter(.data$sequence != badSeq2)
+    goodSeqs <- goodSeqs %>% dplyr::filter(.data$sequence != badSeq3)
     hypoSeqs <- goodSeqs %>% dplyr::filter(.data$gene_oid %in% hypoIndex)
     hsReList <- list()
     ## export the hypothetical sequences separately after re-fasta-ifying
@@ -153,12 +217,21 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     blast_db <- "hypoSeqsDb"
     input <- hypoSeqsFile
     ## easier to cut latter than rerun
-    evalue <- "1"
+    ## note that for peptide screening we want to be relatively lax (particularly for RiPPs) - %ID will be more useful than e-value
+    if (screenPep == TRUE) {
+        evalue <- "10"
+    } else {
+        evalue <- "1"
+    }
     format <- "6"
     output <- "hypoSeqsDb"
     query <- hypoSeqsFile
     blastColNames <- c("qseqid", "sseqid","pident","length","mismatch","gapopen","qstart","qend","sstart","send","evalue","bitscore")
-    print("Beginning all-by-all blast of hypothetical proteins.")
+    if (screenPep == TRUE) {
+        print("Beginning all-by-all blast of peptides under 150 aa.")
+    } else {
+        print("Beginning all-by-all blast of hypothetical proteins.")
+    }
     ## when running under a wsl or unix/linux environment
     if (sysTerm == "wsl") {
         system2(command = "wsl",
@@ -209,7 +282,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     }
     ## moving the pairwise results into a matrix form
     ## and removing things other than evalue and gene_oid interactions
-    print("All-by-all blast of hypothetical proteins complete.")
+    print("All-by-all blast of proteins complete.")
     rm(blast_out)
     tidyBlast <- as.data.frame(tidyBlast)
     ## for huge datasets, gotta remove the ginormous objects
@@ -232,16 +305,21 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     ## a somewhat stringent length requirement - on the one hand, this may miss a few fusion proteins.  
     ## On the other, this avoids, like, FeS or heme motifs binding a tiny region really well.  
     ## Bitscore is OK for the relative calls, but not great for single matches with crappy length.
-    ## anyway arbitrarily using 2/3s the seq length as a rule-out point
+    ## anyway arbitrarily using 2/3s the seq length as a rule-out point for proteins
     ## and pegging it to the larger protein to prevent 30 aa peptides from nevertheless matching 3000 aa NRPS monsters
+    ## caveat: for peptides we'll be less stringent, since alternate start sites or divergent termini hurt unduly
     yetTidierBlast$qseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
     yetTidierBlast$sseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$sseqid)]))
     ## need to implement this better - is it fast enough with mutate?
     yetTidierBlast <- yetTidierBlast %>% dplyr::rowwise() %>% dplyr::mutate(maxSeqLength = max(.data$qseqLength, .data$sseqLength))
-    ## for (i in 1:length(yetTidierBlast$qseqLength)) {
-    ##   yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
-    ## }
-    tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
+                                        # for (i in 1:length(yetTidierBlast$qseqLength)) {
+                                        #   yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
+                                        # }
+    if (screenPep == TRUE) {
+        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.45*.data$maxSeqLength)   
+    } else {
+        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
+    }
     ## keeping only names and percent id now that we are done with length and bitscore, then reshaping it
     rm(yetTidierBlast)
     tidyMinBlast <- as.data.frame(tidyMonoBlast[,c(1:3)])
@@ -292,6 +370,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
         for (i in 1:clusterNum) {
             inClustLength <- length(pvBlastPick$clusters[[i]])
             if (inClustLength >= atLeastGenes) {
+
                 inClustNum <- paste("hypofam_",i,sep="")
                                         # for each gene in the cluster, getting the sequences
                 for (j in 1:inClustLength) {
@@ -360,7 +439,11 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
         ## highlighting the gene of interest, in case it is a hypothetical protein
         ## not useful if it isn't, but if it is, it provides an easy way to track whether cluster-making is crap
         tidyBlastNetworkTrimmed <- tidyBlastNetworkTrimmed %>% tidygraph::activate(nodes) %>% dplyr::mutate(isGene = ifelse(.data$name %in% imgGenesData$gene_oid, "yes", "no"))
-        titleText <- paste("Cluster-based identification of hypothetical protein subgroups in neighbors of ",geneName, ".",sep="")
+        if (screenPep == TRUE) {
+            titleText <- paste("Cluster-based identification of peptide subgroups in neighbors of ",geneName, ".",sep="")
+        } else {
+            titleText <- paste("Cluster-based identification of hypothetical protein subgroups in neighbors of ",geneName, ".",sep="")
+        }
         subtitleText <- paste(" %ID cutoff of ", pidCutoff, " and a 65% match length used for edges. Analyzed on ", fileDate,".",sep="")
         ## pic of the full-sized cluster
         tidyBlastNetworkPic <- ggraph::ggraph(tidyBlastNetworkTrimmed, layout="stress") + 
@@ -394,10 +477,16 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
         clusterOutput <- data.frame(igraph::V(tidyBlastClusters)$name, igraph::V(tidyBlastClusters)$cluster)
         colnames(clusterOutput) <- list("gene_oid", "cluster")
         clusterNum <- sort(unique(clusterOutput$cluster))
+        totClust <- length(clusterNum)
+        padNum <- nchar(totClust)
         for (i in 1:length(clusterNum)) {
             clustSubset <- clusterOutput[which(clusterOutput$cluster == clusterNum[i]),]
             inClustLength <- length(clustSubset$gene_oid)
-            inClustNum <- paste("hypofam_",i,sep="")
+            if (screenPep == TRUE) {
+                inClustNum <- paste("pepfam_",stringr::str_pad(i, padNum, "left", "0"),sep="")
+            } else {
+                inClustNum <- paste("hypofam_",stringr::str_pad(i, padNum, "left", "0"),sep="")
+            }
                                         # for each gene in the cluster, getting the sequences
             for (j in 1:inClustLength) {
                 inClustGene <- clustSubset$gene_oid[j]
@@ -411,39 +500,48 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                     clustListings <- rbind(clustListings, data.frame(inClustGene, inClustNum), use.names=FALSE)
                 }
             }
-            dirname <- paste(fileName,"_hypoClusters_",geneName,sep="")
-            if(dir.exists(dirname) == FALSE) {
-                dir.create(dirname)
+            if (screenPep == TRUE) {
+                dirname <- paste(fileName,"_pepClusters_",geneName,sep="")
+                if(dir.exists(dirname) == FALSE) {
+                    dir.create(dirname)
+                }
+                colnames(clustListings) <- c("gene_oid","pepClust")
+            } else {
+                dirname <- paste(fileName,"_hypoClusters_",geneName,sep="")
+                if(dir.exists(dirname) == FALSE) {
+                    dir.create(dirname)
+                }
+                colnames(clustListings) <- c("gene_oid","hypoClust")
             }
-            colnames(clustListings) <- c("gene_oid","hypoClust")
             ## writing plain .fa files and (in a sec) mafft-aligned files for cluster members
-            clusterFile <- paste(dirname,"/",fileName,"_tgCluster_",i,".fa",sep="")
+            clusterFile <- paste(dirname,"/",fileName,"_tgCluster_",stringr::str_pad(i, padNum, "left", "0"),".fa",sep="")
             seqinr::write.fasta(clustSeqs, names=names(clustSeqs),file.out=clusterFile)
-                                        # let's align members of a given cluster wheeee
-            mafftInput <- clusterFile
-            clusterAlnFile <- paste(dirname,"/",fileName,"_tgCluster_",i,"_mafft.fa",sep="")
-            mafftOutput <- clusterAlnFile
-            ## see previous note re: running with --quiet
-            if (sysTerm == "wsl") {
-                clustSeqsMafftOut <- system2(command = "wsl", 
-                                             args = c("mafft", 
-                                                      "--quiet",
-                                                      "--auto",
-                                                      mafftInput,
-                                                      ">",
-                                                      mafftOutput),
-                                             wait = TRUE,
-                                             stdout = TRUE)
-            } else { 
-                clustSeqsMafftOut <- system2(command = "mafft", 
-                                             args = c("--auto",
-                                                      "--quiet",
-                                                      mafftInput,
-                                                      ">",
-                                                      mafftOutput),
-                                             wait = TRUE,
-                                             stdout = TRUE)
-                ## stdout change here too?  possibly not necessary.
+            if (alnClust == TRUE) {
+                ## let's align members of a given cluster wheeee
+                mafftInput <- clusterFile
+                clusterAlnFile <- paste(dirname,"/",fileName,"_tgCluster_",stringr::str_pad(i, padNum, "left", "0"),"_mafft.fa",sep="")
+                mafftOutput <- clusterAlnFile
+                ## see previous note re: running with --quiet
+                if (sysTerm == "wsl") {
+                    clustSeqsMafftOut <- system2(command = "wsl", 
+                                                 args = c("mafft", 
+                                                          "--quiet",
+                                                          "--auto",
+                                                          mafftInput,
+                                                          ">",
+                                                          mafftOutput),
+                                                 wait = TRUE,
+                                                 stdout = TRUE)
+                } else { 
+                    clustSeqsMafftOut <- system2(command = "mafft", 
+                                                 args = c("--auto",
+                                                          "--quiet",
+                                                          mafftInput,
+                                                          ">",
+                                                          mafftOutput),
+                                                 wait = TRUE,
+                                                 stdout = TRUE)
+                    ## stdout change here too?  possibly not necessary.
                                         #        system2(command = "mafft", 
                                         #          args = c("--auto",
                                         #            "--quiet",
@@ -451,26 +549,47 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                                         #            ">",
                                         #            mafftOutput),
                                         #          stdout = mafftOutput)
+                }
+                ## NOTE:  add HMM making here, if desired???
+                ## if hmmClust == TRUE
+                ## get 5% of the seqs or 5 seqs, whichever is more
+                ## hmmbuild a model
+                ## hmmalign all seqs against it
             }
             inClustLength <- 0
             clustSeqs <- list()
-            ## NOTE:  add HMM making here, if desired???
-            ## or maybe within the sysTerm if/else bit.
         }
     }
+    if (alnClust == TRUE) {
+        print("Proteins have been clustered and aligned.")    
+    } else {
+        print("Proteins have been clustered.")    
+    }  
     ## write out the cluster info separately, just in case
     write.table(clustListings, file=clustListFile, row.names=FALSE, sep="\t", quote=FALSE)
-    ## add the hypo cluster IDs to the neighbor metadata table, under the column name Hypofam. 
+    ## add the hypo cluster IDs to the neighbor metadata table, under the column name Hypofam.
+    colnames(clustListings) <- c("gene_oid", "subClust")
     for (i in 1:length(imgNeighborsData$gene_oid)) {
-        findHypo <- grepl(imgNeighborsData$gene_oid[i], clustListings$gene_oid)
-        if(any(TRUE %in% findHypo) == TRUE) {
-            clustIdx <- which(findHypo == TRUE)
-            imgNeighborsData$Hypofam[i] <- as.character(clustListings$hypoClust[clustIdx])
-        } else {
-            imgNeighborsData$Hypofam[i] <- ""
+        findHypo <- which(clustListings$gene_oid == imgNeighborsData$gene_oid[i])
+        if(any(findHypo) == TRUE) {
+#        findHypo <- grepl(imgNeighborsData$gene_oid[i], clustListings$gene_oid)
+#        if(any(TRUE %in% findHypo) == TRUE) {
+#            clustIdx <- which(findHypo == TRUE)
+            if (imgNeighborsData$Hypofam[i] == "") {
+                ## if we had no annotations, we can just write this one in
+                imgNeighborsData$Hypofam[i] <- as.character(clustListings$subClust[findHypo])
+            } else {
+                ## since this could be a peptide run OR postdate some other annotation
+                ## let's make sure that we don't overwrite any existing annotations
+                imgNeighborsData$Hypofam[i] <- paste(imgNeighborsData$Hypofam[i],as.character(clustListings$subClust[findHypo]),sep=" ")
+            }
         }
     }
-    print("Hypothetical proteins have been clustered, and members of clusters have been aligned and annotated.")
+    if (screenPep == TRUE) {
+        print("Members of peptide subgroups have been annotated.")    
+    } else {
+        print("Hypothetical protein subgroups have been annotated.")    
+    }  
     return(imgNeighborsData)
     ## everything else is output as .txt files i guess
 }
