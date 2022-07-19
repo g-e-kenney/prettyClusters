@@ -1153,7 +1153,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         fakeSource <- as.character(9000000000 + num1k/2)
         fakeOrd <- as.character(max(as.numeric(processed$clustOrd))+1)
         fakeClust <- "0"
-        ## assuming that a given dataset has a gene type has caused problems before
+
+            ## assuming that a given dataset has a gene type has caused problems before
         ## this is overkill but ensures that we don't do that
         ## but starts with the color schemes least likely to cause surprising random problems
         ## this shouldn't even be visible since these are faux-tick marks, not legit genes, but.
@@ -1166,13 +1167,23 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         } else {
             fakeType <- unique(processed$gene)[1]
         }
-        for (m in 1:num1k) {
-            fakeNum <- as.double(9000000000 + m - 1)
-            fakeStart <- as.double(0 + (m-1)*1000)
-            fakeStop <- as.double(1 + (m-1)*1000)
-            tempRow <- c(fakeNum, "","","scale (kb)",fakeType,fakeStart, fakeStop,"+","","","","","","","",fakeOrd, fakeClust, fakeSource, "1", "scale (kb)")
-            processed <- rbind(processed, tempRow)
-        }
+        if (markClusters == TRUE) {
+            for (m in 1:num1k) {
+                fakeNum <- as.double(9000000000 + m - 1)
+                fakeStart <- as.double(0 + (m-1)*1000)
+                fakeStop <- as.double(1 + (m-1)*1000)
+                tempRow <- c(fakeNum, "","","scale (kb)",fakeType,fakeStart, fakeStop,"+","","","","","","","",fakeOrd, fakeClust, fakeSource, "1", "scale (kb)")
+                processed <- rbind(processed, tempRow)
+            }
+        } else {
+             for (m in 1:num1k) {
+                fakeNum <- as.double(9000000000 + m - 1)
+                fakeStart <- as.double(0 + (m-1)*1000)
+                fakeStop <- as.double(1 + (m-1)*1000)
+                tempRow <- c(fakeNum, "","","scale (kb)",fakeType,fakeStart, fakeStop,"+","","","","","","","",fakeSource, "1", "scale (kb)")
+                processed <- rbind(processed, tempRow)
+            }           
+        }    
         processed$gene_oid <- as.double(processed$gene_oid)
         processed$start <- as.double(processed$start)
         processed$end <- as.double(processed$end)
@@ -1275,6 +1286,12 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     } else {  
         modwidth <- modheight/3
     }
+    ## handling really small genesets that will otherwise cause grid.call errors
+    if (length(uniqueBGCs) < 5) {
+        modwidth <- 15
+        if (modheight < 5) { modheight <- 15 }
+    }
+        
     ## exports a .pdf and a .png version
     if (everyScale == TRUE) {
         ggplot2::ggsave(file=finalpdfname, plot=xPlusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
