@@ -765,7 +765,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
 ##            allGeneTypes <- append(allGeneTypes, "tal")
 ##            finalColors <- append(finalColors, "#000000")
 ##        }
-        alphalGeneTypes <- sort(allGeneTypes)
+        alphaGeneTypes <- sort(allGeneTypes)
         for (k in 1:length(alphaGeneTypes)) {
             geneIdx <- which(allGeneTypes==alphalGeneTypes[k])
             if (k == 1) {
@@ -1157,11 +1157,11 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         ## this is overkill but ensures that we don't do that
         ## but starts with the color schemes least likely to cause surprising random problems
         ## this shouldn't even be visible since these are faux-tick marks, not legit genes, but.
-        if (grep("other",unique(processed$gene))==TRUE) {
+        if (any(grep("other",unique(processed$gene))==TRUE)) {
             fakeType <- "other"
-        } else if (grep("hyp",unique(processed$gene))==TRUE) {  
+        } else if (any(grep("hyp",unique(processed$gene))==TRUE)) {  
             fakeType <- "hyp"
-        } else if (grep("mge",unique(processed$gene))==TRUE) {  
+        } else if (any(grep("mge",unique(processed$gene))==TRUE)) {  
             fakeType <- "mge"
         } else {
             fakeType <- unique(processed$gene)[1]
