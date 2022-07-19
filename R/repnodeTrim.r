@@ -55,7 +55,12 @@ repnodeTrim <- function(imgGenes = imgGenes, imgNeighbors=imgNeighbors, imgGeneS
   ## note:  making the assumption here that EFI-EST isn't adding too many additional annotation components
   ## if they take on full annotation from IMG someday, will need to add handling for " vs ''
   efiFullNodes <- read.csv(efiFullMetadata, header=TRUE, stringsAsFactors=FALSE)
-  efiFinalNodes <- read.csv(efiFinalMetadata, header=TRUE, stringsAsFactors=FALSE)
+    efiFinalNodes <- read.csv(efiFinalMetadata, header=TRUE, stringsAsFactors=FALSE)
+    ## we don't want to get confused if people have added other annotations - particularly ones called gene_oid - to their SSN
+    ## let's stick with a minimal subset of the EFI-EST output
+    minColsEFI <- list("Description", "name", "shared.name", "Sequence","Sequence.Length")
+    efiFullNodes <- efiFullNodes[names(efiFullNodes) %in% minColsEFI]
+    efiFinalNodes <- efiFinalNodes[names(efiFinalNodes) %in% minColsEFI]
   ## starting to reformat
   efiFullNodes <- efiFullNodes %>% dplyr::rename(gene_oid=.data$Description)
   efiFullNodes <- efiFullNodes %>% dplyr::rename(efi_oid=.data$name)
