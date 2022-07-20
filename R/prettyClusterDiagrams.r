@@ -767,7 +767,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
 ##        }
         alphaGeneTypes <- sort(allGeneTypes)
         for (k in 1:length(alphaGeneTypes)) {
-            geneIdx <- which(allGeneTypes==alphalGeneTypes[k])
+            geneIdx <- which(allGeneTypes==alphaGeneTypes[k])
             if (k == 1) {
                 alphaColors <- finalColors[geneIdx]
             } else {
@@ -887,7 +887,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         ## this specifically codes (unidentified) hypothetical proteins, mobile genetic elements, and known proteins not on the annotation list
         ## and reinserts them into the palette, so now it doesn't sacrifice pretty colors for them either
         ## as a default: hyp. = white, MGE = dark grey, other = middle gray
-        ## update, i have done this in a dumb and ludicrously overcomplicated way and should trim it to match the non-automated version, sigh
+        ## update, i have done this in a dumb and ludicrously overcomplicated way and should trim it someday
         if (length(notMe)>=1) {
             ## if we have hypothetical proteins
             if (notMe == 1) {
@@ -1153,8 +1153,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         fakeSource <- as.character(9000000000 + num1k/2)
         fakeOrd <- as.character(max(as.numeric(processed$clustOrd))+1)
         fakeClust <- "0"
-
-            ## assuming that a given dataset has a gene type has caused problems before
+        ## assuming that a given dataset has a gene type has caused problems before
         ## this is overkill but ensures that we don't do that
         ## but starts with the color schemes least likely to cause surprising random problems
         ## this shouldn't even be visible since these are faux-tick marks, not legit genes, but.
