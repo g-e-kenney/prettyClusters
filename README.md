@@ -5,7 +5,7 @@ A set of tools analyze and make non-hideous publication-friendly diagrams of gen
 - Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
-- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20220510) and a to-do list
+- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20220719) and a to-do list
 
 ## Important note
 This is very much a work in progress, and I'm a biochemist doing terrible things to code: there will be bugs. I'll do what I can to address them, and if you've come up with a fix, I'm happy to try to incorporate it!  Also, I want to emphasize that this package is utterly reliant on some excellent R packages (particularly [gggenes](https://github.com/wilkox/gggenes) and [tidygraph](https://github.com/thomasp85/tidygraph)).
@@ -48,6 +48,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
+- `prettyClusterDiagrams` got a bunch of small bugfixes (20220719) that had to do with manually specifying colors or with people visualizing a very small number of gene clusters.
 - `prepNeighbors` and its subfunction `neighborHypothetical` as well as `identifySubgroups` got some updates (20220510) that make identification of peptides (<150 aa) work better; in `prepNeighbors` this means that peptide families can be flagged independently of annotation (since they fail to get annotated at relatively high rates, particularly for things like RiPP precursor peptides).
 - `prettyClusterDiagrams` got an update (20220510) that finally adds in a single scale bar for the entire diagram.
 - Recent changes in IMG export formats are now (20220510) taken into account (a few modules got tweaks for this).
