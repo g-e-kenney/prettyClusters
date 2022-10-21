@@ -48,6 +48,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
+- Small `prepNeighbors` bugfix (20221004) for people who are running without trimming truncated gene clusters!
 - `prettyClusterDiagrams` got a bunch of small bugfixes (20220719) that had to do with manually specifying colors or with people visualizing a very small number of gene clusters.
 - `prepNeighbors` and its subfunction `neighborHypothetical` as well as `identifySubgroups` got some updates (20220510) that make identification of peptides (<150 aa) work better; in `prepNeighbors` this means that peptide families can be flagged independently of annotation (since they fail to get annotated at relatively high rates, particularly for things like RiPP precursor peptides).
 - `prettyClusterDiagrams` got an update (20220510) that finally adds in a single scale bar for the entire diagram.
