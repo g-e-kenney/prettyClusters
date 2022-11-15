@@ -5,7 +5,7 @@ A set of tools analyze and make non-hideous publication-friendly diagrams of gen
 - Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
-- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20220719) and a to-do list
+- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20221004) and a to-do list
 
 ## Important note
 This is very much a work in progress, and I'm a biochemist doing terrible things to code: there will be bugs. I'll do what I can to address them, and if you've come up with a fix, I'm happy to try to incorporate it!  Also, I want to emphasize that this package is utterly reliant on some excellent R packages (particularly [gggenes](https://github.com/wilkox/gggenes) and [tidygraph](https://github.com/thomasp85/tidygraph)).
@@ -17,7 +17,8 @@ I spend a lot of time working with bacterial gene clusters.  I wanted some sort 
 - Import gene metadata from the JGI's [IMG database](https://img.jgi.doe.gov/index.html), which has many genomes, metagenomes, and so on that are absent from NCBI's NR database (and UniProt), or that are present but poorly annotated in databases like NCBI/WGS.  Also, the metadata is more detailed and less obnoxious than GenBank files.
 - Handle hypothetical and predicted proteins helpfully (i.e. by identifying new groups of hypothetical proteins that frequently appear in the genomic neighborhoods of interest).
 - Integrate into workflows using sequence similarity networks generated via the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).
-- Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
+- Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest (a point of differentiation between this tool and [EFI-GNT](https://efi.igb.illinois.edu/efi-gnt/) - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
+- Interrogate similarity of genomic neighborhoods without relying on similarity to known gene clusters or gene cluster components (and tools like antiSMASH) (a point of differentiation between this tool and [BiG-SCAPE](https://github.com/medema-group/BiG-SCAPE), since gene clusters for novel types of natural products are missed by these sorts of tools
 
 I haven't encountered anything that quite handles all of those things in one go, so...
 
