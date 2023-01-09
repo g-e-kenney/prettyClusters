@@ -41,6 +41,7 @@ The Wiki entries contain a more detailed description of the use of specific func
 - A [basic installation guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide) is the best starting point.
 - I've got a simple walkthrough for a [standard run](https://github.com/g-e-kenney/prettyClusters/wiki/a-standard-prettyClusters-run) using the `prettyClusters` toolset.
 - This is very much a work in progress, and doing this is using `prettyClusters` in difficult mode, but I've got a [rough workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Preparing-data-from-non-IMG-sources-for-prettyClusters) for getting data from non-IMG sources, and [another workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Running-prettyClusters-with-GenBank-files) for standardizing it for use in `prettyClusters`.
+- Also check out the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list for cryptic-sounding errors that I've seen pop up enough times to be worth noting.
 
 ### `prettyClusters` output
 Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
@@ -49,6 +50,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
+- Some additions to the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list (20230109).
 - Small `prepNeighbors` bugfix (20221004) for people who are running without trimming truncated gene clusters!
 - `prettyClusterDiagrams` got a bunch of small bugfixes (20220719) that had to do with manually specifying colors or with people visualizing a very small number of gene clusters.
 - `prepNeighbors` and its subfunction `neighborHypothetical` as well as `identifySubgroups` got some updates (20220510) that make identification of peptides (<150 aa) work better; in `prepNeighbors` this means that peptide families can be flagged independently of annotation (since they fail to get annotated at relatively high rates, particularly for things like RiPP precursor peptides).
