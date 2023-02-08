@@ -199,8 +199,10 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                                  hmmClust = hmmClust)
     }
     ## output: imgNeighborsData (updated), pepClusters.txt, pepClusterX.fa (per cluster), pepClusterXaln.fa (per cluster), pepSettings.txt
-    if (trimShortClusters == TRUE) {
-        neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData,
+    ## note: this will always trim scaffold mismatches
+    ## if trimShortClusters is false, it will stop here.
+    ## if true, it will, well, trim short clusters too.
+    neighborTrimOutput <- neighborTrim(imgNeighborsData = imgNeighborsData,
                                             imgGenesData = imgGenesData,
                                             imgNeighborsContext = imgNeighborsContext,
                                             trimShortClusters = trimShortClusters,
@@ -209,12 +211,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                             imgNeighborSeqs=imgNeighborSeqs,
                                             imgGeneSeqs=imgGeneSeqs)
     ## output: imgNeighborsTrimmed (includes source_gene_oid column), imgGenesTrimmed
-        imgGenesTrimmed <- neighborTrimOutput$imgGenesTrimmed
-        imgNeighborsTrimmed <- neighborTrimOutput$imgNeighborsTrimmed
-    } else { 
-        neighborTrimOutput <- imgNeighborsData 
-        imgGenesTrimmed <- neighborTrimOutput$imgGenes
-        imgNeighborsTrimmed <- neighborTrimOutput$imgNeighbors      
-    }
+    imgGenesTrimmed <- neighborTrimOutput$imgGenesTrimmed
+    imgNeighborsTrimmed <- neighborTrimOutput$imgNeighborsTrimmed
     return(list(imgNeighborsTrimmed=imgNeighborsTrimmed,imgGenesTrimmed=imgGenesTrimmed))
 }
