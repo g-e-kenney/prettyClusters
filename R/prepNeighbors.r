@@ -209,13 +209,12 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                             imgNeighborSeqs=imgNeighborSeqs,
                                             imgGeneSeqs=imgGeneSeqs)
     ## output: imgNeighborsTrimmed (includes source_gene_oid column), imgGenesTrimmed
-    imgGenesTrimmed <- neighborTrimOutput$imgGenesTrimmed
-    imgNeighborsTrimmed <- neighborTrimOutput$imgNeighborsTrimmed
+        imgGenesTrimmed <- neighborTrimOutput$imgGenesTrimmed
+        imgNeighborsTrimmed <- neighborTrimOutput$imgNeighborsTrimmed
     } else { 
         neighborTrimOutput <- imgNeighborsData 
         imgGenesTrimmed <- neighborTrimOutput$imgGenes
         imgNeighborsTrimmed <- neighborTrimOutput$imgNeighbors      
     }
-
     return(list(imgNeighborsTrimmed=imgNeighborsTrimmed,imgGenesTrimmed=imgGenesTrimmed))
 }

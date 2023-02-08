@@ -25,7 +25,7 @@ incorpIprScan <- function(iprScanSource = iprScanSource, imgNeighborsSource = im
 ## import the IMG neighbor data
     imgCols <- list("gene_oid", "Locus.Tag", "Gene.Product.Name", "Genome.ID", "Genome.Name", "Gene.Symbol", "GenBank.Accession", "Chromosome", "Start.Coord", "End.Coord", "Strand", "DNA.Sequence.Length..bp.", "Amino.Acid.Sequence.Length..aa.", "Transmembrane.Helices", "Signal.Peptides", "Scaffold.ID", "Scaffold.External.Accession", "Scaffold.Name", "Scaffold.GC..", "COG", "Pfam", "Tigrfam", "SMART.ID", "SUPERFam.ID", "CATH.FunFam.ID", "Enzyme", "KO", "IMG.Term")
     imgNeighborsDataTemp <-as.data.frame(read.csv(imgNeighborsSource, header=TRUE, sep="\t" ))
-    imgNeighborsDataTemp <- imgNeighborsDataTemp %>% dplyr::mutate_all(~ replace_na(.x, ""))
+    imgNeighborsDataTemp <- imgNeighborsDataTemp %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
     imgNeighborsData <- imgNeighborsDataTemp[names(imgNeighborsDataTemp) %in% imgCols]
     if (any(grepl("InterPro", colnames(imgNeighborsDataTemp)))) {
         imgNeighborsData$InterPro <- imgNeighborsDataTemp$InterPro
@@ -38,7 +38,7 @@ incorpIprScan <- function(iprScanSource = iprScanSource, imgNeighborsSource = im
     iprScan <- as.data.frame(read.csv(iprScanSource, header=FALSE, sep="\t" ))[,1:13]
     colnamesIPR <-c("gene_oid", "md5", "aa", "sig.analysis", "sig.accession", "sig.description", "start", "stop", "score", "status", "date", "interpro.accession", "interpro.description")
 #    iprScan <- iprScan %>% dplyr::select(colnamesIPR)
-#    iprScan <- iprScan %>% dplyr::mutate_all(~ replace_na(.x, ""))
+#    iprScan <- iprScan %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
     colnames(iprScan) <- colnamesIPR
     ## if we want to add pfam annotation
     if (addPfam == TRUE) {
