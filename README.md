@@ -51,7 +51,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
-- Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.
+- Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.  Also added a whole bunch of wiki updates for clarity (including updated default runs & clarification of default vs. required input).
 - Minor bugfixes (20230208) to `prepNeighbors` and `incorpIprScan`
 - Some additions to the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list (20230109).
 - Small `prepNeighbors` bugfix (20221004) for people who are running without trimming truncated gene clusters!
