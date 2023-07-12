@@ -7,8 +7,8 @@
 #' @param neighborThreshold In what percentage of neighborhoods must a protein family show up to be of interest?  Number, defaults to 0.025
 #' @param geneName What is the name of your gene? Gene name as string ("genE")
 #' @param useInterPro Should InterPro families be used in neighborhood analyses? Boolean, defaults to FALSE
-#' @param useHypo Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to TRUE
-#' @param autoClust Should clusters be automatically identified? Boolean, defaults to TRUE.
+#' @param useHypo Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to FALSE
+#' @param autoClust Should clusters be automatically identified? Boolean, defaults to FALSE.
 #' @param clustMethod What method should be used to identify these clusters? String ("tidygraph" or "pvclust")
 #' @param alphaVal What alpha value cutoff should be used for pvclust?  Number, defaults to 0.95
 #' @param bootStrap How many bootstrap rounds for pvclust? Integer, defaults to 10
@@ -35,8 +35,8 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
                              neighborThreshold = 0.025,
                              geneName = geneName,
                              useInterPro = FALSE,
-                             useHypo = TRUE,
-                             autoClust = TRUE,
+                             useHypo = FALSE,
+                             autoClust = FALSE,
                              clustMethod = "tidygraph",
                              alphaVal = 0.95,
                              bootStrap= 10,

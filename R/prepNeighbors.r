@@ -9,15 +9,15 @@
 #' @param geneName What is the name of your gene? String ("genE")
 #' @param efiRepnodes Does the input dataset consist of EFI repnodes?  T/F, defaults to FALSE.
 #' @param neighborNumber How many neighbors do you want to look at on each side of the gene? Integer.
-#' @param neighborThreshold What percent of gene clusters should a protein family occur in to be of interest? Number, defaults to 0.05
-#' @param hypoAnalysis Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to TRUE.
-#' @param clustMethod What clustering method should be used? String value ("tidygraph", "pvclust"), defaults to "tidygraph".
-#' @param sysTerm What terminal are you using? String value ("wsl", "nix"), no default.
+#' @param trimShortClusters Should gene clusters with fewer than the minimum neighbor number be removed? T/F value, defaults to FALSE.
+#' @param hypoAnalysis Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to FALSE.
+#' @param sysTerm If running hypoAnalysis, what terminal are you using? String value ("wsl", "nix"), defaults to "nix".
 #' @param numThreads How many threads should processes use?  Number depends on your processor, defaults to 1 to be safe.
+#' @param neighborThreshold What percent of gene clusters should a protein family occur in to be of interest? Number, defaults to 0.05
+#' @param clustMethod What clustering method should be used? String value ("tidygraph", "pvclust"), defaults to "tidygraph".
 #' @param alphaVal What alpha value cutoff should be used for pvclust? Number from 0-1, defaults to 0.95
 #' @param bootStrap How many bootstrap rounds does pvclust get? Integer, defaults to 10.
 #' @param pidCutoff Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.
-#' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? T/F value.
 #' @param pepScreen Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE.
 #' @param pepMax Maximum size (in aa) for peptides in pepScreen. Number, defaults to 150.
 #' @param alnClust Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.
@@ -46,16 +46,16 @@ prepNeighbors <- function(imgGenes = imgGenes,
                           neighborsContext = neighborsContext,
                           geneName = geneName,
                           neighborNumber = neighborNumber,
-                          sysTerm = sysTerm,
                           efiRepnodes = FALSE,
-                          neighborThreshold = 0.025,
-                          hypoAnalysis = TRUE,
+                          trimShortClusters = FALSE,
+                          hypoAnalysis = FALSE,
+                          sysTerm = "nix",
                           clustMethod = "tidygraph",
                           numThreads = 1,
+                          neighborThreshold = 0.025,
                           alphaVal = 0.95,
                           bootStrap = 10,
                           pidCutoff = 35,
-                          trimShortClusters = TRUE,
                           pepScreen = FALSE,
                           pepMax = 150,
                           alnClust = FALSE,

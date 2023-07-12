@@ -22,7 +22,14 @@
 #'                          geneName="genE", 
 #'                          removeDupes=TRUE)
 #' }
-gbToIMG <- function(dataFolder=dataFolder, neighborNum = 10, goiListInput = goiListInput, geneName=geneName, removeDupes=TRUE, scaffoldGenBase =3000000000, genomeGenBase=4000000000, includeIPR = FALSE)  {
+gbToIMG <- function(dataFolder=dataFolder, 
+                    neighborNum = 10, 
+                    goiListInput = goiListInput, 
+                    geneName=geneName, 
+                    removeDupes=TRUE, 
+                    scaffoldGenBase =3000000000, 
+                    genomeGenBase=4000000000, 
+                    includeIPR = FALSE)  {
     ## getting the list of .gb files in the folder
     ## note: will accept .gbk, .gbf as file suffixes
     fileList <- list.files(path=dataFolder, pattern="*\\.gb", full.names=TRUE, recursive=FALSE)

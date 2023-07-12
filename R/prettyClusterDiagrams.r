@@ -11,8 +11,8 @@
 #' @param standAlone Should we assume the data has not been through the full pipeline? T/F, defaults to FALSE.
 #' @param markClusters Should cluster labels be included in the final figure? T/F, defaults to FALSE.
 #' @param autoColor If TRUE, generates palettes automatically. If FALSE, requires hex-formatted colors per gene in the last column of the geneFormat data. Defaults to TRUE.
-#' @param colorType What palette family should be used? String, defaults to "nord"
-#' @param paletteInput What specific palette within that family should be used? String, defaults to "aurora"
+#' @param colorType What palette family should be used? String, defaults to "viridis"
+#' @param paletteInput What specific palette within that family should be used? String, defaults to "plasma"
 #' @param showScaffold Should the scaffold be included in name labels? T/F, defaults to FALSE
 #' @param alignToCore Should the core gene be centered in the diagrams? T/F, defaults to TRUE
 #' @param labelGenes Should all genes be labeled in the diagrams? T/F, defaults to FALSE
@@ -39,8 +39,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                   imgNeighborsFile = imgNeighborsFile,
                                   annotationGuideFile = annotationGuideFile,
                                   geneName = geneName,
-                                  efiRepnodes = FALSE,
                                   neighborNumber = neighborNumber,
+                                  efiRepnodes = FALSE,
                                   annotateGenes = TRUE,
                                   standAlone = FALSE,
                                   markClusters = FALSE,
@@ -48,7 +48,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                   colorType = "viridis",
                                   paletteInput = "plasma",
                                   showScaffold = FALSE,
-                                  alignToCore=TRUE,
+                                  alignToCore = TRUE,
                                   labelGenes = FALSE,
                                   subclusterDiagrams = FALSE,
                                   everyScale = FALSE,
