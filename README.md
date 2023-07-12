@@ -19,6 +19,7 @@ I spend a lot of time working with bacterial gene clusters.  I wanted some sort 
 - Integrate into workflows using sequence similarity networks generated via the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).
 - Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest (a point of differentiation between this tool and [EFI-GNT](https://efi.igb.illinois.edu/efi-gnt/) - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
 - Interrogate similarity of genomic neighborhoods without relying on similarity to known gene clusters or gene cluster components (and tools like antiSMASH) (a point of differentiation between this tool and [BiG-SCAPE](https://github.com/medema-group/BiG-SCAPE), since gene clusters for novel types of natural products are missed by these sorts of tools
+- And interrogate similarity of genomic neighborhoods without relying solely on Pfam to define gene cluster content (and without stringent limits on data visualization) - [IMG-ABC](https://img.jgi.doe.gov/cgi-bin/abc/main.cgi) has recently started offering prettyClusters-like heatmaps and neighborhood networks, but you're limited to <100 BGCs in terms of visualization and you can only search for clusters using Pfams as hooks.
 
 I haven't encountered anything that quite handles all of those things in one go, so...
 
@@ -50,6 +51,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ## Development
 ### Recent updates
+- Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.
 - Minor bugfixes (20230208) to `prepNeighbors` and `incorpIprScan`
 - Some additions to the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list (20230109).
 - Small `prepNeighbors` bugfix (20221004) for people who are running without trimming truncated gene clusters!
@@ -63,18 +65,19 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - `prepNeighbors` got some updates (20211214) that correct handling of smaller gene neighborhoods.
 - `gbToIMG` got some big fixes (20211129) that improve stability when it encounters problems (a GenBank file with no gene of interest, an AntiSmash-formatted GenBank file, a GenBank file with no annotations, etc.) and that improve output annotations, including both the metadata format and the content (particularly organism and scaffold info.)
 ### Up next
-- Maybe a way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?
+- Looking into setting up a GUI - possibly via Shiny - with an eye towards eventual online deployment.
+- A way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?
+- A way to handle datasets where there is no one gene of interest to "anchor" the cluster (i.e. a cluster has 2+ of a set of types of genes)
 - Some updates to the suggested workflow when starting with user-annotated genomes (improved scripts and annotation recommendations.)
 - Also in `prepNeighbors`, generation of HMMs for hypothetical protein families identified in `prepNeighbors` and `identifySubgroups` (and with it the ability to turn on and off MSA and HMM generation in both tools.)
 - Probably `averageCluster` and `compareCluster` as described below.
 ### Planned additions
 #### Writeup as a paper?
 - I may try to write this up as a paper (despite the shame of publicizing my hideous code).  This toolset has been useful in enough projects that it might be nice to have something legit to cite?
-#### New modules
+#### New modules & major tweaks
 - Maybe another sort of per-cluster diagram - one with a "typical" genome neighborhood, illustrating order and abundance of neighbors?  Still working on how to automate this well.  Will probably be `averageCluster`.
 - Similarly, possibly a third sort of per-cluster diagram with highlighting of %ID between homologs - more along the lines of [clinker](https://github.com/gamcil/clinker), but without the GenBank input.  Or like [gggenomes](https://github.com/thackl/gggenomes), but protein-only.  (Possibly employing one of those tools if I can figure out a way to easily do so!)  Likely to be `compareCluster`.
 - For use when working with really large families, `repnodePreTrim`- using the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/) before even generating neighborhoods, as a way of getting a more manageable dataset.  
-- A vignette?  Might be redundant given [the wiki](https://github.com/g-e-kenney/prettyClusters/wiki).  
 #### Smaller tweaks
 - User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`.
