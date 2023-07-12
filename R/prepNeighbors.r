@@ -18,7 +18,8 @@
 #' @param bootStrap How many bootstrap rounds does pvclust get? Integer, defaults to 10.
 #' @param pidCutoff Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.
 #' @param trimShortClusters Should gene clusters with fewer than the minimum gene number be visualized? T/F value.
-#' @param pepScreen Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE
+#' @param pepScreen Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE.
+#' @param pepMax Maximum size (in aa) for peptides in pepScreen. Number, defaults to 150.
 #' @param alnClust Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.
 #' @param hmmClust Should HMM models be made for a given hypothetical protein cluster? T/F, defaults to FALSE.
 #' @return List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)
@@ -56,6 +57,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
                           pidCutoff = 35,
                           trimShortClusters = TRUE,
                           pepScreen = FALSE,
+                          pepMax = 150,
                           alnClust = FALSE,
                           hmmClust = FALSE)  {
                                         # starting stuff
@@ -195,6 +197,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                                  clustMethod = clustMethod,
                                                  pidCutoff = pidCutoff,
                                                  screenPep = TRUE,
+                                                 pepMax = pepMax,
                                                  alnClust = alnClust,
                                                  hmmClust = hmmClust)
     }

@@ -11,7 +11,8 @@
 #' @param bootStrap The bootstrap number used for pvclust
 #' @param sysTerm The type of terminal (wsl vs linux/unix/macos) from which blastp and other commands will be run
 #' @param numThreads The number of processor threads to be devoted to certain steps
-#' @param screenPep Should we use peptide-friendly defaults in this run? 
+#' @param screenPep Should we use peptide-friendly defaults in this run?
+#' @param pepMax What's the maximum length to use for the "peptide" defaults?
 #' @param alnClust Should we make MAFFT alignments of all clusters?
 #' @param hmmClust Should we make HMM models of all clusters?
 #' @return Updated metadata for neighboring genes (additional files generated en route)
@@ -44,6 +45,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                                  sysTerm = sysTerm,
                                  numThreads = numThreads,
                                  screenPep = screenPep,
+                                 pepMax = pepMax,
                                  alnClust = alnClust,
                                  hmmClust = hmmClust) { 
                                         # first step: flag hypothetical proteins  in the neighbordata file
@@ -166,7 +168,9 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     ## but there's no good way to sort vague from specific interpro families by number (?)
     ## IF we are doing peptide screening, we are assuming that annotations might be extra-crappy
     if (screenPep == TRUE) {
-        hypoTemp <- imgNeighborsData %>% dplyr::filter(.data$Amino.Acid.Sequence.Length..aa. <= 150)
+        ## everything under pepMax in length is going into consideration for hypoFam classification
+        ## annotated or not
+        hypoTemp <- imgNeighborsData %>% dplyr::filter(.data$Amino.Acid.Sequence.Length..aa. <= pepMax)
         hypoIndex <- hypoTemp$gene_oid
         rm(hypoTemp)
     } else if (screenPep == FALSE) {     
