@@ -16,6 +16,7 @@ neighborHypothetical(
   sysTerm = sysTerm,
   numThreads = numThreads,
   screenPep = screenPep,
+  pepMax = pepMax,
   alnClust = alnClust,
   hmmClust = hmmClust
 )
@@ -42,6 +43,8 @@ neighborHypothetical(
 \item{numThreads}{The number of processor threads to be devoted to certain steps}
 
 \item{screenPep}{Should we use peptide-friendly defaults in this run?}
+
+\item{pepMax}{What's the maximum length to use for the "peptide" defaults?}
 
 \item{alnClust}{Should we make MAFFT alignments of all clusters?}
 

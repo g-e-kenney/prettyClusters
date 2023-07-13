@@ -11,8 +11,8 @@ analyzeNeighbors(
   neighborThreshold = 0.025,
   geneName = geneName,
   useInterPro = FALSE,
-  useHypo = TRUE,
-  autoClust = TRUE,
+  useHypo = FALSE,
+  autoClust = FALSE,
   clustMethod = "tidygraph",
   alphaVal = 0.95,
   bootStrap = 10,
@@ -32,9 +32,9 @@ analyzeNeighbors(
 
 \item{useInterPro}{Should InterPro families be used in neighborhood analyses? Boolean, defaults to FALSE}
 
-\item{useHypo}{Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to TRUE}
+\item{useHypo}{Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to FALSE}
 
-\item{autoClust}{Should clusters be automatically identified? Boolean, defaults to TRUE.}
+\item{autoClust}{Should clusters be automatically identified? Boolean, defaults to FALSE.}
 
 \item{clustMethod}{What method should be used to identify these clusters? String ("tidygraph" or "pvclust")}
 

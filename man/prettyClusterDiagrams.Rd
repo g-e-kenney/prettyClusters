@@ -9,8 +9,8 @@ prettyClusterDiagrams(
   imgNeighborsFile = imgNeighborsFile,
   annotationGuideFile = annotationGuideFile,
   geneName = geneName,
-  efiRepnodes = FALSE,
   neighborNumber = neighborNumber,
+  efiRepnodes = FALSE,
   annotateGenes = TRUE,
   standAlone = FALSE,
   markClusters = FALSE,
@@ -34,9 +34,9 @@ prettyClusterDiagrams(
 
 \item{geneName}{What is the name of your gene? Gene name as string ("genE")}
 
-\item{efiRepnodes}{Are values here post-EFI-EST? T/F value, defaults to FALSE}
-
 \item{neighborNumber}{How many genes are expected on either side of the gene of interest? Integer (e.g. 10)}
+
+\item{efiRepnodes}{Are values here post-EFI-EST? T/F value, defaults to FALSE}
 
 \item{annotateGenes}{Should the genes be auto-annotated using the geneFormat file? T/F, defaults to TRUE.}
 
@@ -46,9 +46,9 @@ prettyClusterDiagrams(
 
 \item{autoColor}{If TRUE, generates palettes automatically. If FALSE, requires hex-formatted colors per gene in the last column of the geneFormat data. Defaults to TRUE.}
 
-\item{colorType}{What palette family should be used? String, defaults to "nord"}
+\item{colorType}{What palette family should be used? String, defaults to "viridis"}
 
-\item{paletteInput}{What specific palette within that family should be used? String, defaults to "aurora"}
+\item{paletteInput}{What specific palette within that family should be used? String, defaults to "plasma"}
 
 \item{showScaffold}{Should the scaffold be included in name labels? T/F, defaults to FALSE}
 

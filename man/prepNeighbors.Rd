@@ -12,17 +12,18 @@ prepNeighbors(
   neighborsContext = neighborsContext,
   geneName = geneName,
   neighborNumber = neighborNumber,
-  sysTerm = sysTerm,
   efiRepnodes = FALSE,
-  neighborThreshold = 0.025,
-  hypoAnalysis = TRUE,
+  trimShortClusters = FALSE,
+  hypoAnalysis = FALSE,
+  sysTerm = "nix",
   clustMethod = "tidygraph",
   numThreads = 1,
+  neighborThreshold = 0.025,
   alphaVal = 0.95,
   bootStrap = 10,
   pidCutoff = 35,
-  trimShortClusters = TRUE,
   pepScreen = FALSE,
+  pepMax = 150,
   alnClust = FALSE,
   hmmClust = FALSE
 )
@@ -42,17 +43,19 @@ prepNeighbors(
 
 \item{neighborNumber}{How many neighbors do you want to look at on each side of the gene? Integer.}
 
-\item{sysTerm}{What terminal are you using? String value ("wsl", "nix"), no default.}
-
 \item{efiRepnodes}{Does the input dataset consist of EFI repnodes?  T/F, defaults to FALSE.}
 
-\item{neighborThreshold}{What percent of gene clusters should a protein family occur in to be of interest? Number, defaults to 0.05}
+\item{trimShortClusters}{Should gene clusters with fewer than the minimum neighbor number be removed? T/F value, defaults to FALSE.}
 
-\item{hypoAnalysis}{Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to TRUE.}
+\item{hypoAnalysis}{Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to FALSE.}
+
+\item{sysTerm}{If running hypoAnalysis, what terminal are you using? String value ("wsl", "nix"), defaults to "nix".}
 
 \item{clustMethod}{What clustering method should be used? String value ("tidygraph", "pvclust"), defaults to "tidygraph".}
 
 \item{numThreads}{How many threads should processes use?  Number depends on your processor, defaults to 1 to be safe.}
+
+\item{neighborThreshold}{What percent of gene clusters should a protein family occur in to be of interest? Number, defaults to 0.05}
 
 \item{alphaVal}{What alpha value cutoff should be used for pvclust? Number from 0-1, defaults to 0.95}
 
@@ -60,9 +63,9 @@ prepNeighbors(
 
 \item{pidCutoff}{Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.}
 
-\item{trimShortClusters}{Should gene clusters with fewer than the minimum gene number be visualized? T/F value.}
+\item{pepScreen}{Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE.}
 
-\item{pepScreen}{Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE}
+\item{pepMax}{Maximum size (in aa) for peptides in pepScreen. Number, defaults to 150.}
 
 \item{alnClust}{Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.}
 
