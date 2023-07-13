@@ -5,10 +5,10 @@ A set of tools analyze and make non-hideous publication-friendly diagrams of gen
 - Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
-- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20230711) and a to-do list
+- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20230712) and a to-do list
 
 ## Important note
-This is very much a work in progress, and I'm a biochemist doing terrible things to code: there will be bugs. I'll do what I can to address them, and if you've come up with a fix, I'm happy to try to incorporate it!  Also, I want to emphasize that this package is utterly reliant on some excellent R packages (particularly [gggenes](https://github.com/wilkox/gggenes) and [tidygraph](https://github.com/thomasp85/tidygraph)).
+This is very much a work in progress, and I'm a chemical biologist who has wandered over to the dark side: there will be bugs. I'll do what I can to address them, and if you've come up with a fix, I'm happy to try to incorporate it!  Also, I want to emphasize that this package is utterly reliant on some excellent R packages (particularly [gggenes](https://github.com/wilkox/gggenes) and [tidygraph](https://github.com/thomasp85/tidygraph)).
 
 ## Why?
 I spend a lot of time working with bacterial gene clusters.  I wanted some sort of tool that could:
@@ -19,7 +19,7 @@ I spend a lot of time working with bacterial gene clusters.  I wanted some sort 
 - Integrate into workflows using sequence similarity networks generated via the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).
 - Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest (a point of differentiation between this tool and [EFI-GNT](https://efi.igb.illinois.edu/efi-gnt/) - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
 - Interrogate similarity of genomic neighborhoods without relying on similarity to known gene clusters or gene cluster components (and tools like antiSMASH) (a point of differentiation between this tool and [BiG-SCAPE](https://github.com/medema-group/BiG-SCAPE), since gene clusters for novel types of natural products are missed by these sorts of tools
-- And interrogate similarity of genomic neighborhoods without relying solely on Pfam to define gene cluster content (and without stringent limits on data visualization) - [IMG-ABC](https://img.jgi.doe.gov/cgi-bin/abc/main.cgi) has recently started offering prettyClusters-like heatmaps and neighborhood networks, but you're limited to <100 BGCs in terms of visualization and you can only search for clusters using Pfams as hooks.
+- And interrogate similarity of genomic neighborhoods without relying solely on Pfam to define gene cluster content (and without stringent limits on data visualization) - [IMG-ABC](https://img.jgi.doe.gov/cgi-bin/abc/main.cgi) has recently started offering prettyClusters-like heatmaps and neighborhood networks, but you're limited to a fairly small number of BGCs in terms of visualization and you can only search for clusters using Pfams as hooks (which, as a connoisseur of hypothetical proteins and porly annotated peptides, I find limiting.)
 
 I haven't encountered anything that quite handles all of those things in one go, so...
 
@@ -46,11 +46,34 @@ The Wiki entries contain a more detailed description of the use of specific func
 
 ### `prettyClusters` output
 Illustrating the output of some of the components (or, in the case of the cluster diagrams themselves, just under 10% of the output):
-<img src="https://github.com/g-e-kenney/prettyClusters/raw/master/data/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
+<img src="https://github.com/g-e-kenney/prettyClusters/raw/master/inst/20210106_pretty-cluster-general-01.png " width="100%" alt="genome neighborhood diagram output">
 Notably, sequence similarity and genome neighborhood similarity are not always tightly coupled.  The analyses in `prettyClusters` make it possible to investigate a protein family along both axes.
 
+### Citing `prettyClusters`
+Until I get a proper paper out, you can use `citation()` to generate a basic citation for the version of `prettyclusters` that you are currently using.
+```
+> citation("prettyClusters")
+
+In order to cite the package ‘prettyClusters’ in publications, please use:
+
+  Kenney G (2023). _prettyClusters: Exploring and Classifying Genomic
+  Neighborhoods Using IMG-Like Data_. R package version 0.0.2.
+
+Ein BibTeX-Eintrag für LaTeX-Benutzer ist
+A BibTeX-formatted citation for LaTeX users is:
+  @Manual{,
+    title = {prettyClusters: Exploring and Classifying Genomic Neighborhoods Using IMG-Like Data},
+    author = {G. Kenney},
+    year = {2023},
+    note = {R package version 0.0.2},
+  }
+```
+
 ## Development
+### Current Version
+- Version 0.2.0
 ### Recent updates
+- Version increment to 0.2.0 (20230712), reflecting accumulated small changes and hotfixes.
 - Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.  Also added a whole bunch of wiki updates for clarity (including updated default runs & clarification of default vs. required input).
 - Minor bugfixes (20230208) to `prepNeighbors` and `incorpIprScan`
 - Some additions to the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list (20230109).
@@ -65,19 +88,18 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - `prepNeighbors` got some updates (20211214) that correct handling of smaller gene neighborhoods.
 - `gbToIMG` got some big fixes (20211129) that improve stability when it encounters problems (a GenBank file with no gene of interest, an AntiSmash-formatted GenBank file, a GenBank file with no annotations, etc.) and that improve output annotations, including both the metadata format and the content (particularly organism and scaffold info.)
 ### Up next
-- Looking into setting up a GUI - possibly via Shiny - with an eye towards eventual online deployment.
-- A way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?
-- A way to handle datasets where there is no one gene of interest to "anchor" the cluster (i.e. a cluster has 2+ of a set of types of genes)
+- Looking into setting up a GUI with an eye towards online deployment.  The activation energy for getting a new user up and running on R is unfortunately real!
+- A way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?  Annotated elements like tRNAs are more straightforward; user-supplied coordinates and pseudo-genes (analogous to approaches used for unannotated peptides) might be the way to go.
+- A way to handle datasets where there is no one gene of interest to "anchor" the cluster (i.e. a cluster has 2+ of a larger set of gene families within a constrained genomic region, or within the genome.)  Basically loosening some of the `analyzeNeighbors` requirements.
 - Some updates to the suggested workflow when starting with user-annotated genomes (improved scripts and annotation recommendations.)
 - Also in `prepNeighbors`, generation of HMMs for hypothetical protein families identified in `prepNeighbors` and `identifySubgroups` (and with it the ability to turn on and off MSA and HMM generation in both tools.)
-- Probably `averageCluster` and `compareCluster` as described below.
-### Planned additions
-#### Writeup as a paper?
+### Longer term plans
+#### Write up as a paper? 
 - I may try to write this up as a paper (despite the shame of publicizing my hideous code).  This toolset has been useful in enough projects that it might be nice to have something legit to cite?
 #### New modules & major tweaks
-- Maybe another sort of per-cluster diagram - one with a "typical" genome neighborhood, illustrating order and abundance of neighbors?  Still working on how to automate this well.  Will probably be `averageCluster`.
+- May try to auto-generate a "typical" genome neighborhood, illustrating order and abundance of neighbors in a given gene cluster family?  Still working on how to automate this well.  Will probably be `averageCluster`.
 - Similarly, possibly a third sort of per-cluster diagram with highlighting of %ID between homologs - more along the lines of [clinker](https://github.com/gamcil/clinker), but without the GenBank input.  Or like [gggenomes](https://github.com/thackl/gggenomes), but protein-only.  (Possibly employing one of those tools if I can figure out a way to easily do so!)  Likely to be `compareCluster`.
-- For use when working with really large families, `repnodePreTrim`- using the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/) before even generating neighborhoods, as a way of getting a more manageable dataset.  
+- For use when working with really large families, `repnodePreTrim`- using the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/) before even generating neighborhoods, as a way of getting a more manageable dataset.  "If you need more than 128 GB of RAM to open the SSN, you may find this helpful..."
 #### Smaller tweaks
 - User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`.
@@ -88,5 +110,6 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 - Auto-annotation in `prettyClusterDiagrams` may miss genes if their initial family categorization (or ORF-finding, particularly for small genes like RiPP precursors) was poor!  This is doubly the case for GenBank-derived files (use of `incorpIprScan` can improve annotation, but not ORF-finding).  If this is a big problem for your genome neighborhoods, you can consider manually updating problem genes (adding metadata lines and amino acid sequences, which I know is terrible) or re-annotating your sequences ([reannotated data](https://github.com/g-e-kenney/prettyClusters/wiki/Preparing-data-from-non-IMG-sources-for-prettyClusters#re-annotating-nucleic-acid-sequences) can be reintegrated into a `prettyClusters` workflow.)
 - Generation of hypothetical protein and genome neighborhood clusters is approximate and sensitive to user-supplied cutoffs, to distance/clustering methods, to overrepresentation of closely related gene clusters, and to the conservation of genes outside of the gene cluster limits. There are limited ways around these problems, and they come with their own compromises.  (Overrepresentation at least can be dealt with using representative sequences chosen via [EFI-EST](https://efi.igb.illinois.edu/efi-est/) (repnodes) or [CD-HIT](https://github.com/weizhongli/cdhit).)
 - Forward- and reverse-facing genes are on the same vertical level in `prettyClusterDiagrams`. I personally find it visually clearer to have forward genes above the line and reverse genes below, but will need to probably do a bunch more digging into [gggenes](https://github.com/wilkox/gggenes) and [ggplot2](https://github.com/tidyverse/ggplot2) to figure out if/how I can make it happen.
-- Distance between genes of interest and their neighbors is not taken into account.  I have done a few initial analyses using weighted distances rather than binary present/absent values; it is not clear they've added much more info than the binary value-based analyses, and they're more complicated to run.  Could revisit?
+- Distance between genes of interest and their neighbors is not taken into account.  I have done some analyses using weighted distances rather than binary present/absent values; it is not clear they've added much more info than the binary value-based analyses, and they're more complicated to run.  Could revisit?
+- Similarly, number of genes from a given family is not taken into account. Some families are much more specific while others are more like superfamilies, and weighting abundance of a given family by copy number alone can thus be misleading.  Could revisit if it 
 - Use of non-WSL `mafft` and `blast` installs on Windows isn't built-in at the moment; it's a low priority, given how easy WSL is to get up and running.
