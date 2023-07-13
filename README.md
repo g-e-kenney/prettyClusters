@@ -57,7 +57,7 @@ Until I get a proper paper out, you can use `citation()` to generate a basic cit
 In order to cite the package ‘prettyClusters’ in publications, please use:
 
   Kenney G (2023). _prettyClusters: Exploring and Classifying Genomic
-  Neighborhoods Using IMG-Like Data_. R package version 0.0.2.
+  Neighborhoods Using IMG-Like Data_. R package version 0.2.0.
 
 Ein BibTeX-Eintrag für LaTeX-Benutzer ist
 A BibTeX-formatted citation for LaTeX users is:
@@ -65,15 +65,15 @@ A BibTeX-formatted citation for LaTeX users is:
     title = {prettyClusters: Exploring and Classifying Genomic Neighborhoods Using IMG-Like Data},
     author = {G. Kenney},
     year = {2023},
-    note = {R package version 0.0.2},
+    note = {R package version 0.2.0},
   }
 ```
 
 ## Development
 ### Current Version
-- Version 0.2.0
+- Version 0.2.0.0  See the [release notes](https://github.com/g-e-kenney/prettyClusters/blob/master/NEWS.md).
 ### Recent updates
-- Version increment to 0.2.0 (20230712), reflecting accumulated small changes and hotfixes.
+- Version increment to 0.2.0.0 (20230712), reflecting accumulated small changes and hotfixes.
 - Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.  Also added a whole bunch of wiki updates for clarity (including updated default runs & clarification of default vs. required input).
 - Minor bugfixes (20230208) to `prepNeighbors` and `incorpIprScan`
 - Some additions to the [troubleshooting](https://github.com/g-e-kenney/prettyClusters/wiki/Troubleshooting-common-issues) list (20230109).
