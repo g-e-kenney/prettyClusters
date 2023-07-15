@@ -5,7 +5,7 @@ A set of tools analyze and make non-hideous publication-friendly diagrams of gen
 - Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
-- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20230712) and a to-do list
+- [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20230714) and a to-do list
 
 ## Important note
 This is very much a work in progress, and I'm a chemical biologist who has wandered over to the dark side: there will be bugs. I'll do what I can to address them, and if you've come up with a fix, I'm happy to try to incorporate it!  Also, I want to emphasize that this package is utterly reliant on some excellent R packages (particularly [gggenes](https://github.com/wilkox/gggenes) and [tidygraph](https://github.com/thomasp85/tidygraph)).
@@ -71,8 +71,9 @@ A BibTeX-formatted citation for LaTeX users is:
 
 ## Development
 ### Current Version
-- Version 0.2.0.0  See the [release notes](https://github.com/g-e-kenney/prettyClusters/blob/master/NEWS.md).
+- Version 0.2.1.0  See the [release notes](https://github.com/g-e-kenney/prettyClusters/blob/master/NEWS.md).
 ### Recent updates
+- Quick patch to 0.2.1 (20230714), because I got around to updating packages and it turns out the spring CRAN release for [gggenes](https://github.com/wilkox/gggenes) is pickier about designating gene directions. 
 - Version increment to 0.2.0.0 (20230712), reflecting accumulated small changes and hotfixes.
 - Small tweak (20230711) to `prepNeighbors` and its subfunction `neighborHypothetical`- you can now assign all proteins below a given size a hypothetical family regardless of annotation. Increase the aa cutoff with caution on large datasets, since this uses an all-by-all blast.  Also added a whole bunch of wiki updates for clarity (including updated default runs & clarification of default vs. required input).
 - Minor bugfixes (20230208) to `prepNeighbors` and `incorpIprScan`
