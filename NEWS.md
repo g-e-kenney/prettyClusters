@@ -1,4 +1,5 @@
-# prettyClusters (development version)
+# prettyClusters 0.2.1.0
+* Patch to address more stringent handling of gene direction in the recent CRAN release of gggenes.  Got behind on my package updates...
 
 # prettyClusters 0.2.0.0
 * Stable enough that I feel comfortable telling other people to try it!  (But still in development.)
