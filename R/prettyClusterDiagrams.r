@@ -19,6 +19,7 @@
 #' @param subclusterDiagrams Should additional figures be made for each group of gene clusters? T/F, defaults to FALSE. 
 #' @param everyScale Should every single gene cluster have a scale added? T/F, defaults to FALSE.
 #' @param makeScale Should a 1 kb-delineated scale be included in the figures? T/F, defaults to TRUE.
+#' @param noPNG Should only vector images be generated?  T/F, defaults to TRUE.
 #' @return Gene diagrams as .png and .pdf files.
 #' @export
 #' @importFrom rlang .data
@@ -52,7 +53,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                   labelGenes = FALSE,
                                   subclusterDiagrams = FALSE,
                                   everyScale = FALSE,
-                                  makeScale = TRUE) { 
+                                  makeScale = TRUE,
+				  noPNG = TRUE) { 
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     if (efiRepnodes == TRUE) {
         coreGeneName <- geneName
@@ -194,7 +196,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     geneSets$InterPro[geneSets$InterPro==""]<-"none"
     geneSets$IMGfam[geneSets$IMGfam==""]<-"none"
     geneSets$Hypofam[geneSets$Hypofam==""]<-"none"
-    geneSets$direction <- ifelse(geneSets$strand == "+", 1, -1)
+    geneSets$direction <- ifelse(geneSets$strand == "+", 1, 0)
     ## dealing with NAs
     geneSets$Pfam <- geneSets$Pfam %>% tidyr::replace_na("none")
     geneSets$Tigrfam <- geneSets$Tigrfam %>% tidyr::replace_na("none")
@@ -671,7 +673,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                 ## so even pseudogenes shouldn't screw this up
                 ## case:  gene is missing???
                 if (length(core)==0) {next}
-                ## case: the gene appears twice as a GOI (shouldn't happen, though it could occur twice in a neighborhood
+                ## case: length(core)==1 - we're good, one copy
+                ## case: length(core)>=2 - the gene appears twice as a GOI (shouldn't happen, though it could occur twice in a neighborhood
                 ## we can combine this with case: one gene copy
                 ## because for the purposes of fixing directions, we can deal easily as long as both copies point the same way
                 ## and just choose the first if not
@@ -682,13 +685,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                         } else {
                             dirGeneSets <- rbind(dirGeneSets, aligningGenes)
                         }                    
-                    } else if (all(aligningGenes$direction[core]==-1 || aligningGenes$direction[core[1]] == -1)) {
+                    } else if (all(aligningGenes$direction[core]==0 || aligningGenes$direction[core[1]] == 0)) {
                         last <- length(aligningGenes$end)
                         endgene <- aligningGenes$end[last]
                         newend <- abs(endgene - aligningGenes$start)
                         aligningGenes$start <- abs(endgene - aligningGenes$end)
                         aligningGenes$end <- newend
-                        aligningGenes$direction <- aligningGenes$direction * -1
+                        aligningGenes$direction <- as.integer(!aligningGenes$direction)
                         if (exists(x="dirGeneSets") == FALSE) {
                             dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
                         } else {
@@ -717,13 +720,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                         } else {
                             dirGeneSets <- rbind(dirGeneSets, aligningGenes)
                         }                    
-                    } else if (all(aligningGenes$direction[core]==-1 || aligningGenes$direction[core[1]] == -1)) {
+                    } else if (all(aligningGenes$direction[core]==0 || aligningGenes$direction[core[1]] == 0)) {
                         last <- length(aligningGenes$end)
                         endgene <- aligningGenes$end[last]
                         newend <- abs(endgene - aligningGenes$start)
                         aligningGenes$start <- abs(endgene - aligningGenes$end)
                         aligningGenes$end <- newend
-                        aligningGenes$direction <- aligningGenes$direction * -1
+                        aligningGenes$direction <- as.integer(!aligningGenes$direction)
                         if (exists(x="dirGeneSets") == FALSE) {
                             dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
                         } else {
@@ -1206,7 +1209,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                                                       fill = .data$gene,
                                                                       forward = .data$direction,
                                                                       label="gene_oid")) +
-                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm")) +
                 ggplot2::geom_blank(data=dummies, ggplot2::aes(forward = 1))
         } else  {
             clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start,
@@ -1215,7 +1218,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                                                       fill = .data$gene,
                                                                       forward = .data$direction,
                                                                       label="gene_oid")) +
-                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm"))
+                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm"))
         }
     }
     if (labelGenes == FALSE ) {
@@ -1225,7 +1228,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                                                       y = .data$bgc,
                                                                       fill = .data$gene,
                                                                       forward = .data$direction)) +
-                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm")) +
                 ggplot2::geom_blank(data=dummies, ggplot2::aes(forward = 1))
         } else  {
             clusterDiagram <- ggplot2::ggplot(processed, ggplot2::aes(xmin = .data$start,
@@ -1233,7 +1236,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                                                       y = .data$bgc,
                                                                       fill = .data$gene,
                                                                       forward = .data$direction)) +
-                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm"))       
+                gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm"))       
         }
     }
     ## adding details - colors, captions, etc.
@@ -1294,10 +1297,10 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     ## exports a .pdf and a .png version
     if (everyScale == TRUE) {
         ggplot2::ggsave(file=finalpdfname, plot=xPlusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
-        ggplot2::ggsave(file=finalpngname, plot=xPlusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE)
+        if (noPNG == FALSE) {ggplot2::ggsave(file=finalpngname, plot=xPlusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE, res=72)}
     }
     ggplot2::ggsave(file=finalpdfnameX, plot=xMinusDiagram, device="pdf", height=modheight, width=modwidth, limitsize=FALSE)
-    ggplot2::ggsave(file=finalpngnameX, plot=xMinusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE)
+    if (noPNG == FALSE) {ggplot2::ggsave(file=finalpngnameX, plot=xMinusDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE, res=72)}
     print("Diagrams for complete set of gene clusters generated.")
     ## this way you have a copy of the annotated dataset and can skip auto-annotation if desired 
     if (subclusterDiagrams == TRUE)   {
@@ -1367,12 +1370,12 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                                               ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, id = .data$gene), on = coreGeneName)
                 subclusterDiagram <- ggplot2::ggplot(processedCluster,
                                                      ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction)) +
-                    gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm")) +
+                    gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm")) +
                     ggplot2::geom_blank(data=subDummies, ggplot2::aes(forward = 1))
             } else  {
                 subclusterDiagram <- ggplot2::ggplot(processedCluster,
                                                      ggplot2::aes(xmin = .data$start, xmax = .data$end, y = .data$bgc, fill = .data$gene, forward = .data$direction)) +
-                    gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(3,"mm"), arrowhead_width=ggplot2::unit(1,"mm"))
+                    gggenes::geom_gene_arrow(arrowhead_height=ggplot2::unit(6,"mm"), arrow_body_height=ggplot2::unit(6,"mm"), arrowhead_width=ggplot2::unit(2,"mm"))
             }
             subclusterDiagram <- subclusterDiagram +
                 ggplot2::facet_wrap(~ .data$bgc, ncol = 1, scales = "free") +
@@ -1429,6 +1432,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                                ggplot2::guides(fill=ggplot2::guide_legend(ncol=2, bycol=TRUE)) 
                 }
             ggplot2::ggsave(file=clustFileNamePDF, plot=subclusterDiagram, device="pdf", height=subModHeight, width=modwidth, limitsize=FALSE)
+            if (noPNG == FALSE) {ggplot2::ggsave(file= clustFileNamePDF, plot= subclusterDiagram, device="png", height=modheight, width=modwidth, limitsize=FALSE, res=72)}
         }
         print("Diagrams for individual subgroups of gene clusters generated.")
     }   

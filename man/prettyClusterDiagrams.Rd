@@ -22,7 +22,8 @@ prettyClusterDiagrams(
   labelGenes = FALSE,
   subclusterDiagrams = FALSE,
   everyScale = FALSE,
-  makeScale = TRUE
+  makeScale = TRUE,
+  noPNG = TRUE
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ prettyClusterDiagrams(
 \item{everyScale}{Should every single gene cluster have a scale added? T/F, defaults to FALSE.}
 
 \item{makeScale}{Should a 1 kb-delineated scale be included in the figures? T/F, defaults to TRUE.}
+
+\item{noPNG}{Should only vector images be generated?  T/F, defaults to TRUE.}
 }
 \value{
 Gene diagrams as .png and .pdf files.
