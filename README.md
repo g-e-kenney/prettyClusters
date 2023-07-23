@@ -12,10 +12,9 @@ This is very much a work in progress, and I'm a chemical biologist who has wande
 
 ## Why?
 I spend a lot of time working with bacterial gene clusters.  I wanted some sort of tool that could:
-- Export diagrams of gene clusters as vector files for figures.
-- Export diagrams with multiple gene clusters in the same relative scale.
 - Import gene metadata from the JGI's [IMG database](https://img.jgi.doe.gov/index.html), which has many genomes, metagenomes, and so on that are absent from NCBI's NR database (and UniProt), or that are present but poorly annotated in databases like NCBI/WGS.  Also, the metadata is more detailed and less obnoxious than GenBank files.
-- Handle hypothetical and predicted proteins helpfully (i.e. by identifying new groups of hypothetical proteins that frequently appear in the genomic neighborhoods of interest).
+- Handle hypothetical and predicted proteins helpfully (i.e. by identifying new groups of hypothetical or sporadically annotated proteins that frequently appear in the genomic neighborhoods of interest).
+- Handle subfamilies helpfully (i.e. annotations for subtypes of huge families can be added automatically or manually and taken into account)
 - Integrate into workflows using sequence similarity networks generated via the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/).
 - Interrogate similarity of genomic neighborhoods without relying on the sequence similarity of genes of interest (a point of differentiation between this tool and [EFI-GNT](https://efi.igb.illinois.edu/efi-gnt/) - I did not want to have to make the assumption that sequence similarity and gene cluster similarity necessarily track, since that's not always a sound assumption.
 - Interrogate similarity of genomic neighborhoods without relying on similarity to known gene clusters or gene cluster components (and tools like antiSMASH) (a point of differentiation between this tool and [BiG-SCAPE](https://github.com/medema-group/BiG-SCAPE), since gene clusters for novel types of natural products are missed by these sorts of tools
@@ -89,20 +88,23 @@ A BibTeX-formatted citation for LaTeX users is:
 - `prepNeighbors` got some updates (20211214) that correct handling of smaller gene neighborhoods.
 - `gbToIMG` got some big fixes (20211129) that improve stability when it encounters problems (a GenBank file with no gene of interest, an AntiSmash-formatted GenBank file, a GenBank file with no annotations, etc.) and that improve output annotations, including both the metadata format and the content (particularly organism and scaffold info.)
 ### Up next
+- Some quick fixes to handle some JGI gene naming updates
+- User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 - Looking into setting up a GUI with an eye towards online deployment.  The activation energy for getting a new user up and running on R is unfortunately real!
-- A way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?  Annotated elements like tRNAs are more straightforward; user-supplied coordinates and pseudo-genes (analogous to approaches used for unannotated peptides) might be the way to go.
-- A way to handle datasets where there is no one gene of interest to "anchor" the cluster (i.e. a cluster has 2+ of a larger set of gene families within a constrained genomic region, or within the genome.)  Basically loosening some of the `analyzeNeighbors` requirements.
 - Some updates to the suggested workflow when starting with user-annotated genomes (improved scripts and annotation recommendations.)
 - Also in `prepNeighbors`, generation of HMMs for hypothetical protein families identified in `prepNeighbors` and `identifySubgroups` (and with it the ability to turn on and off MSA and HMM generation in both tools.)
+- User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
 ### Longer term plans
 #### Write up as a paper? 
 - I may try to write this up as a paper (despite the shame of publicizing my hideous code).  This toolset has been useful in enough projects that it might be nice to have something legit to cite?
 #### New modules & major tweaks
+- A way to handle non-gene things as neighborhood "anchors" - regulator binding sites, riboswitches, etc.?  Annotated elements like tRNAs are more straightforward; user-supplied coordinates and pseudo-genes (analogous to approaches used for unannotated peptides) might be the way to go.
+- A way to handle datasets where there is no one gene of interest to "anchor" the cluster (i.e. a cluster has 2+ of a larger set of gene families within a constrained genomic region, or within the genome.)  Basically loosening some of the `analyzeNeighbors` requirements.
 - May try to auto-generate a "typical" genome neighborhood, illustrating order and abundance of neighbors in a given gene cluster family?  Still working on how to automate this well.  Will probably be `averageCluster`.
 - Similarly, possibly a third sort of per-cluster diagram with highlighting of %ID between homologs - more along the lines of [clinker](https://github.com/gamcil/clinker), but without the GenBank input.  Or like [gggenomes](https://github.com/thackl/gggenomes), but protein-only.  (Possibly employing one of those tools if I can figure out a way to easily do so!)  Likely to be `compareCluster`.
 - For use when working with really large families, `repnodePreTrim`- using the [EFI-EST toolset](https://efi.igb.illinois.edu/efi-est/) before even generating neighborhoods, as a way of getting a more manageable dataset.  "If you need more than 128 GB of RAM to open the SSN, you may find this helpful..."
 #### Smaller tweaks
-- User-supplied HMMs for annotation of predefined custom protein (sub)families as a standalone subfunction.
+
 - Options to let the user specify distance and clustering methods in `prepNeighbors` and `analyzeNeighbors`.
 - Additional tools or instructions for import from UniProt metadata and from GFF/GFF-3 formatted files - haven't decided whether to keep guiding people towards GenBank as an input format (making `gbToIMG` the entry for non-IMG data), or whether to develop dedicated tools for one or two other common formats.  If so, this will likely be a separate function that can also replace `generateNeighbors`, and it will likely suffer from the same data heterogeneity (and lack of gene family annotations) that that `gbToIMG` does.  Supplementation with `incorpIprScan` is likely still going to be advisable.
 ### Known issues
