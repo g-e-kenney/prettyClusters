@@ -50,7 +50,7 @@ Notably, sequence similarity and genome neighborhood similarity are not always t
 
 ### Citing `prettyClusters`
 Until I get a proper paper out, you can use `citation()` to generate a basic citation for the version of `prettyclusters` that you are currently using.
-```
+```R
 > citation("prettyClusters")
 
 In order to cite the package ‘prettyClusters’ in publications, please use:
