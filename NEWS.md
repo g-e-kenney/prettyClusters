@@ -1,3 +1,6 @@
+# prettyClusters 0.2.2
+* gbToIMG patch: a few small errors fixed that'll improve handling of moderately mangled Genbank files, keep IDs from clashing with IMG IDs, and otherwise improve integration of Genbank data.
+
 # prettyClusters 0.2.1.0
 * Patch to address more stringent handling of gene direction in the recent CRAN release of gggenes.  Got behind on my package updates...
 
