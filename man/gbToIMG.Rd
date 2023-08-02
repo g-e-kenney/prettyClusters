@@ -10,8 +10,8 @@ gbToIMG(
   goiListInput = goiListInput,
   geneName = geneName,
   removeDupes = TRUE,
-  scaffoldGenBase = 3e+09,
-  genomeGenBase = 4e+09,
+  scaffoldGenBase = 3e+10,
+  genomeGenBase = 4e+10,
   includeIPR = FALSE
 )
 }

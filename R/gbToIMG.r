@@ -27,8 +27,8 @@ gbToIMG <- function(dataFolder=dataFolder,
                     goiListInput = goiListInput, 
                     geneName=geneName, 
                     removeDupes=TRUE, 
-                    scaffoldGenBase =3000000000, 
-                    genomeGenBase=4000000000, 
+                    scaffoldGenBase =30000000000, 
+                    genomeGenBase=40000000000, 
                     includeIPR = FALSE)  {
     ## getting the list of .gb files in the folder
     ## note: will accept .gbk, .gbf as file suffixes
@@ -116,8 +116,12 @@ gbToIMG <- function(dataFolder=dataFolder,
                 noHits <- FALSE
                 fauxIMG <- neighborSubset$locus_tag
             } else {
+                ## we didn't see a goi hit despite having locus_tags
                 noHits <- TRUE
             }
+        } else {
+            ## there wasn't a locus_tag column
+            noHits <- TRUE
         }
         if (noHits == TRUE && length(which(colnames(GenomicRanges::mcols(genesTemp))=="gene_id"))!=0)  {
             goiHits <- which(genesTemp$gene_id %in% goiList$locus_tag)
@@ -146,6 +150,7 @@ gbToIMG <- function(dataFolder=dataFolder,
             } else if (exists(x="neighborSubset")==FALSE) {
                 noHits <- TRUE
             }
+            ## implicitly if there are no gene_ids but we got here, noHits is still TRUE
         }
         if (noHits == TRUE && length(which(colnames(GenomicRanges::mcols(genesTemp))=="transcript_id"))!=0)  {
             goiHits <- which(genesTemp$transcript_id %in% goiList$locus_tag)
@@ -216,10 +221,10 @@ gbToIMG <- function(dataFolder=dataFolder,
         ## numbering is based on the neighborhood subset so it's not going to be consistent if you redo this with different size neighborhoods
         fauxIMG$gene_oid <-  as.numeric(rownames(fauxIMG)) + scaffoldGenID
         ## while we're here, let's quickly make the neighborsContext file
-        contextTable <-  fauxIMG$gene_oid
+        contextTable <-  as.character(fauxIMG$gene_oid)
         contextTable <- as.data.frame(contextTable)
         colnames(contextTable) <- c("gene_oid")
-        contextTable$source_scaffold_id <- scaffoldGenID
+        contextTable$source_scaffold_id <- as.character(scaffoldGenID)
         locGOI <- which(fauxIMG$Locus.Tag %in% goiList$locus_tag)
         contextTable$source_gene_oid <- ""
         if (length(locGOI) == 1)  {
@@ -241,7 +246,7 @@ gbToIMG <- function(dataFolder=dataFolder,
             fauxIMG$Gene.Product.Name <- ""
         }
         ## Genome ID
-        fauxIMG$Genome.ID <- genomeGenID
+        fauxIMG$Genome.ID <- as.character(genomeGenID)
         ## Genome Name - likely to actually be the accession because this file format is daft
         fauxIMG$Genome.Name <-  as.character(genbankr::sources(gbTemp)$organism)
         ## Gene Symbol - going through less-useless failure modes before returning empty values.  Starts with gene, then tries protein_id and gene_id.
@@ -292,7 +297,7 @@ gbToIMG <- function(dataFolder=dataFolder,
         fauxIMG$Is.Public <- ""
         fauxIMG$Sequencing.Status <- ""
         ## Scaffold ID
-        fauxIMG$Scaffold.ID <- scaffoldGenID
+        fauxIMG$Scaffold.ID <- as.character(scaffoldGenID)
         ## Scaffold External Accession - using the GenBank accession. Should always exist.
         fauxIMG$Scaffold.External.Accession <- as.character(GenomeInfoDb::genome(neighborSubset))
         ## Scaffold Name - using the provided name. Should always exist, but may be something dumb (e.g. ATCC number or strain number).
@@ -507,6 +512,9 @@ gbToIMG <- function(dataFolder=dataFolder,
     fauxNeighborData$Pfam <- as.character(fauxNeighborData$Pfam)
     fauxNeighborData$Tigrfam <- as.character(fauxNeighborData$Tigrfam)
     fauxNeighborData$InterPro <- as.character(fauxNeighborData$InterPro)
+    fauxNeighborData$gene_oid <- as.character(fauxNeighborData$gene_oid)
+    fauxNeighborData$Scaffold.ID <- as.character(fauxNeighborData$Scaffold.ID)
+    fauxNeighborData$Genome.ID <- as.character(fauxNeighborData$Genome.ID)
     ## let's make sure the column order of the metadata matches the IMG order
     if (includeIPR == FALSE) {
         colOrder = c("gene_oid",
