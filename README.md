@@ -2,9 +2,10 @@
 A set of tools analyze and make non-hideous publication-friendly diagrams of genomic neighborhoods in microbial genomes.
 
 ## Table of Contents
-- Important [introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
+- [Introductory note](https://github.com/g-e-kenney/prettyClusters/#important-note)
 - [Why](https://github.com/g-e-kenney/prettyClusters/#why) make `prettyClusters`?
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset) of `prettyClusters`, and how you use them
+- [Wiki](https://github.com/g-e-kenney/prettyClusters/wiki) for `prettyClusters` 
 - [Development](https://github.com/g-e-kenney/prettyClusters/#development) information, including updates (most recent: 20230714) and a to-do list
 
 ## Important note
