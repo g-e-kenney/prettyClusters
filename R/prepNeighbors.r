@@ -74,7 +74,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
     } else {
         geneName <- geneName
     }
-                                        # continue with existing data or upload new data
+    ## continue with existing data or upload new data
     ## NOTE:  this does not require InterPro info but the next bits will import it if it is there.
     imgCols <- list("gene_oid",
                     "Locus.Tag",
@@ -104,12 +104,15 @@ prepNeighbors <- function(imgGenes = imgGenes,
                     "Enzyme",
                     "KO",
                     "IMG.Term")
-                                        # decided it's easier just to explicitly re-import at this stage
+    ## given that gene_oids and so on are long numbers
+    ## we're just gonna kill scientific notation
+    options(scipen = 999)
+    ## decided it's easier just to explicitly re-import at this stage
     if (typeof(imgGenes) == "character" && typeof(neighborsContext) == "character") {
         ## by default, 
         imgGenesFull <- as.data.frame(read.csv(imgGenes, header=TRUE, sep="\t", stringsAsFactors=FALSE))
         imgGenesData <- imgGenesFull[names(imgGenesFull) %in% imgCols]
-        imgGenesData <- imgGenesData %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
+        imgGenesData <- imgGenesData %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), "")) 
         ## if interpro exists add it
         if (any(grepl("InterPro", colnames(imgGenesFull)))) {
             imgGenesData$InterPro <- imgGenesFull$InterPro

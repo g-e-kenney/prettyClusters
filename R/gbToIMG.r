@@ -34,6 +34,8 @@ gbToIMG <- function(dataFolder=dataFolder,
     ## note: will accept .gbk, .gbf as file suffixes
     fileList <- list.files(path=dataFolder, pattern="*\\.gb", full.names=TRUE, recursive=FALSE)
     scaffNum <- length(fileList)
+    ## just say no to scientific notation
+    options(scipen = 999)
     goiList <- read.csv(goiListInput, header=TRUE, sep = "\t",stringsAsFactors=FALSE)
     colnames(goiList) <- c("locus_tag")
     fileDate <- format(Sys.Date(),format="%Y%m%d")
@@ -493,7 +495,7 @@ gbToIMG <- function(dataFolder=dataFolder,
             fauxSeqIMG <- as.data.frame(fauxSeqIMG)
             colnames(fauxSeqIMG) <- c("sequence")
             fauxSeqIMG$gene_oid <- as.character(fauxIMG$gene_oid)
-            fauxSeqIMG <- fauxSeqIMG %>% dplyr::select(.data$gene_oid, dplyr::everything())
+            fauxSeqIMG <- fauxSeqIMG %>% dplyr::select("gene_oid", dplyr::everything())
             if (exists(x="fauxNeighborSeqs")==FALSE) {
                 fauxNeighborSeqs <- fauxSeqIMG
             } else {

@@ -78,6 +78,10 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     annotationGuide$Hypofam[which(is.na(annotationGuide$Hypofam))] <- ""
     annotationGuide$IMG.Term[which(is.na(annotationGuide$IMG.Term))] <- ""
     annotationGuide$Color[which(is.na(annotationGuide$Color))] <- ""
+    ## given that gene_oids and so on are long numbers
+    ## we're just gonna kill scientific notation
+    options(scipen = 999)
+    ## OK now let's import
     if(typeof(imgGenesFile) == "character") {
         imgGenes <-read.csv(imgGenesFile, header=TRUE, sep="\t", stringsAsFactors=FALSE )
     } else {
@@ -94,15 +98,15 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     inputColNames <- stringr::str_replace_all(inputColNames, c(" " = "." , "," = "" ))
     colnames(imgNeighbors) <- inputColNames
     geneSets <- imgNeighbors[names(imgNeighbors) %in% imgCols]
-    geneSets <- geneSets %>% dplyr::rename(locus_tag = .data$Locus.Tag)
-    geneSets <- geneSets %>% dplyr::rename(scaffold = .data$Scaffold.Name)
-    geneSets <- geneSets %>% dplyr::rename(scaffoldID = .data$Scaffold.ID)
-    geneSets <- geneSets %>% dplyr::rename(start = .data$Start.Coord)
-    geneSets <- geneSets %>% dplyr::rename(end = .data$End.Coord)
-    geneSets <- geneSets %>% dplyr::rename(strand = .data$Strand)
-    geneSets <- geneSets %>% dplyr::rename(gene = .data$Gene.Symbol)
-    geneSets <- geneSets %>% dplyr::rename(genome = .data$Genome.Name)
-    geneSets <- geneSets %>% dplyr::rename(genomeID = .data$Genome.ID)
+    geneSets <- geneSets %>% dplyr::rename(locus_tag = "Locus.Tag")
+    geneSets <- geneSets %>% dplyr::rename(scaffold = "Scaffold.Name")
+    geneSets <- geneSets %>% dplyr::rename(scaffoldID = "Scaffold.ID")
+    geneSets <- geneSets %>% dplyr::rename(start = "Start.Coord")
+    geneSets <- geneSets %>% dplyr::rename(end = "End.Coord")
+    geneSets <- geneSets %>% dplyr::rename(strand = "Strand")
+    geneSets <- geneSets %>% dplyr::rename(gene = "Gene.Symbol")
+    geneSets <- geneSets %>% dplyr::rename(genome = "Genome.Name")
+    geneSets <- geneSets %>% dplyr::rename(genomeID = "Genome.ID")
     geneSets <- data.table::as.data.table(geneSets, stringsAsFactors=FALSE)
     ## this is easier than dealing with different possible IMG-like metadata inputs
     if ("InterPro" %in% colnames(imgNeighbors)) {
@@ -217,6 +221,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     ## Deals with (known sets of) fused genes and multiple options per category
     ## With un-specified fused genes, you'll just end up with whichever annotation category comes later, ugh
     ## Also lets you specify matching some or all terms (the latter for subgroups)
+    ## This whol
     if (annotateGenes == TRUE) {
         ## this looks slightly different in the standalone version
         ## because we can't assume there's a source_gene_oid column
@@ -239,7 +244,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         reorderGenes2 <- namedGenes %>% dplyr::filter(!.data$Fusion == "yes")
         fusedGenes <- namedGenes %>% dplyr::filter(.data$Fusion == "yes")
         namedGenes <- rbind(reorderGenes2, fusedGenes)
-        namedGenes <- namedGenes %>% dplyr::rename(IMGfam = .data$IMG.Term)
+        namedGenes <- namedGenes %>% dplyr::rename(IMGfam = "IMG.Term")
         ## "" or NA becomes "none"
         ## then none will become a list element
         namedGenes$Pfam <- namedGenes$Pfam %>% tidyr::replace_na("none")
@@ -260,7 +265,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         for (i in 1:length(geneSets$gene)) {
             foundMe <- "no"
             foundIn <- "nowhere"
-            tempRealData <- geneSets[i,] %>% dplyr::select(.data$Pfam, .data$Tigrfam, .data$InterPro, .data$IMGfam, .data$Hypofam)
+            tempRealData <- geneSets[i,] %>% dplyr::select("Pfam", "Tigrfam", "InterPro", "IMGfam", "Hypofam")
             ## entirely hypothetical proteins are easy to flag - no annotations.
             if (all(tempRealData=="none") == TRUE) {
                 geneSets$gene[i] <- "hyp"
@@ -268,7 +273,8 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
             } else if (geneSets$gene[i] != "" && length(which(namedGenes$geneSymbol == geneSets$gene[i]))>0) {
                 ## if it's already annotated according to our key, let's move on
                 next
-            } else {    
+            } else {
+                ## it is neither hypothetical nor already annotated according to our key
                 for (j in 1:length(annotList)) {
                     tempVector1 <- vector()
                     tempVector2 <- vector()
@@ -446,14 +452,19 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     }
     ## similarly, sometimes genome names are duplicated
     ## usually when people "helpfully" reannotate and resubmit genomes or whatever
+    ## but also if you're drawing from multiple databases (e.g. IMG and NCBI)
+    ## or if you accidentally get, say, the WGS and the NR version of a genome
     ## this deals with duplicated genome names ane makes them v1, v2, etc.
     maxNeighbor <- neighborNumber*2+1
     goiSeek <- grep(coreGeneName,geneSets$gene)
     if (any(duplicated(geneSets$genome[goiSeek]))) {
+        ## let's get a list of all genomes that show up multiple times
         dupes <- which(duplicated(geneSets$genome[goiSeek]) == TRUE)
-        for (i in 1:length(dupes)) {
+        ## we only want to look for each duplicated name once
+        uniDupes <- unique(geneSets$genome[goiSeek][dupes])
+        for (i in 1:length(uniDupes)) {
             ## because genome names can have horrible characters for regex purposes...      
-            grepName <- geneSets$genome[goiSeek][dupes[i]]
+            grepName <- uniDupes[i]
             grepName <- gsub("\\\\", "\\\\\\", grepName)   
             grepName <- gsub("\\(", "\\\\(", grepName)
             grepName <- gsub("\\)", "\\\\)", grepName)
@@ -469,13 +480,17 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
             grepName <- gsub("\\}", "\\\\}", grepName)   
             grepName <- gsub("\\-", "\\\\-", grepName)        
             ## I don't think =, ;, :, or / should cause issues but here's a note in case they do
+            ## total list of genes that match that genome
             dupeList <- grep(grepName,geneSets$genome)
+            ## these all have the same genome name, but do they have the same genomeID?
             dupeGenomes <- unique(geneSets$genomeID[dupeList])
             if (length(dupeGenomes) == 1)  {
+                ## there is only one genome ID
                 ## i.e. there are multiple bgcs within a single genome, which will be dealt with later
                 next
             } else {
                 ## there are multiple genomes, so they get version numbers
+                ## if they themselves have multiple BGCs, those get labeled next
                 for (k in 1:length(dupeGenomes)) {
                     dupeGenomeLoc <- grep(dupeGenomes[k], geneSets$genomeID)
                     newGName <- geneSets$genome[dupeGenomeLoc[1]]
@@ -484,7 +499,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                 }
             }
         }
-        print("Resquenced genome name duplication addressed.")
+        print("Resequenced genome name duplication addressed.")
     }
     ## dealing with species that have multiple BGCs with your gene type of interest
     ## initially it looks for places where the max and min coords are < 50kb apart
@@ -498,27 +513,35 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
     multiBGC <- data.frame()
     multicoord <- list()
     for(k in 1:length(species)) {
+        ## let's only look at data from one unique genome at a time
         tempSpecies <- geneSets %>% dplyr::filter(.data$genomeID == species[k])
+        ## and figure out how many contigs/scaffolds there are
         specContigs <- unique(tempSpecies$scaffoldID)
         for (j in 1:length(specContigs))  {
+            ## looking only at info from one scaffold at a time
             tempContig <- tempSpecies %>% dplyr::filter(.data$scaffoldID == specContigs[j])
             ## using a rough "within 50kb" guideline to catch multiple gene clusters on the same scaffold
             if (max(tempContig$start) <= min(tempContig$start) + 50000 && k == 1 && j == 1) {
+                ## all genes on the scaffold are <50 kb apart and this is our first go-round
                 tempContig$bgc <- paste(tempContig$genome[1], " (bgc ",j,")",sep="")
                 multiBGC <- tempContig
                 next
             } else if  (max(tempContig$start) <= min(tempContig$start) + 50000 && ((j >= 2) || (k >= 2))) {
+                ## all genes on the scaffold are <50 kb apart and this is not our first go-round
+                ## this is the jth scaffold in this genome with at least one BGC
                 tempContig$bgc <- paste(tempContig$genome[1], " (bgc ",j,")",sep="")
                 multiBGC <- rbind(multiBGC, tempContig)
                 next
             } else {
-                ## ok so we failed our 50 kb, now what?
+                ## there are genes on the scaffold >50 kb apart
                 for (m in 1:length(tempContig$start)) {
+                    ## coordinates of the first gene on the scaffold
                     if (m == 1) {
                         tempCoord <- tempContig$start[m]
                     } else if (m != length(tempContig$start)) {
                         tempDiff <- tempContig$start[m] - tempContig$start[m-1]
                         ## this should catch huge-ass gene clusters
+                        ## we only decree a stopping point to a BGC if genes m and m-1 are 25kb apart
                         if (abs(tempDiff) > 25000) {
                             tempCoord <- append(tempCoord, tempContig$start[m-1])
                             tempCoord <- append(tempCoord, tempContig$start[m])
@@ -526,6 +549,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                             next
                         }
                     } else if (m == length(tempContig$start)) {
+                        ## this is last gene on the scaffold
                         tempCoord <- append(tempCoord, tempContig$start[m])
                     }
                 }
@@ -565,7 +589,7 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
         }
     }    
     uniBGCs <- unique(multiBGC$bgc)    
-    print("Gene cluster naming fixed in species with multiple clusters.")
+    print("Gene cluster naming fixed in species with multiple gene clusters.")
     ## this normalizes positioning. 
     ## we do not fundamentally care that much about absolute genome position as a default here
     ## nucleotide position number is arbitrary to begin with and meaningless when comparing across wildly different species
@@ -679,13 +703,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                 ## because for the purposes of fixing directions, we can deal easily as long as both copies point the same way
                 ## and just choose the first if not
                 if (length(core)>=1) {
-                    if (all(aligningGenes$direction[core]==1 || aligningGenes$direction[core[1]] == 1)) {
+                    if (all(all(aligningGenes$direction[core] == 1) || aligningGenes$direction[core[1]] == 1)) {
                         if (exists(x="dirGeneSets") == FALSE) {
                             dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
                         } else {
                             dirGeneSets <- rbind(dirGeneSets, aligningGenes)
                         }                    
-                    } else if (all(aligningGenes$direction[core]==0 || aligningGenes$direction[core[1]] == 0)) {
+                    } else if (all(all(aligningGenes$direction[core] == 0) || aligningGenes$direction[core[1]] == 0)) {
                         last <- length(aligningGenes$end)
                         endgene <- aligningGenes$end[last]
                         newend <- abs(endgene - aligningGenes$start)
@@ -714,13 +738,13 @@ prettyClusterDiagrams <- function(imgGenesFile = imgGenesFile,
                 ## which makes the "more than one core gene" thing more likely, annoyingly
                 if (length(core)==0) {next}
                 if (length(core)>=1) {
-                    if (all(aligningGenes$direction[core]==1 || aligningGenes$direction[core[1]] == 1)) {
+                    if (all(all(aligningGenes$direction[core]==1) || aligningGenes$direction[core[1]] == 1)) {
                         if (exists(x="dirGeneSets") == FALSE) {
                             dirGeneSets <- data.frame(aligningGenes, stringsAsFactors = FALSE)
                         } else {
                             dirGeneSets <- rbind(dirGeneSets, aligningGenes)
                         }                    
-                    } else if (all(aligningGenes$direction[core]==0 || aligningGenes$direction[core[1]] == 0)) {
+                    } else if (all(all(aligningGenes$direction[core]==0) || aligningGenes$direction[core[1]] == 0)) {
                         last <- length(aligningGenes$end)
                         endgene <- aligningGenes$end[last]
                         newend <- abs(endgene - aligningGenes$start)

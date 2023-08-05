@@ -1,6 +1,6 @@
 Package: prettyClusters
 Title: Exploring and Classifying Genomic Neighborhoods Using IMG-Like Data
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: 
     person(given = "G.",
            family = "Kenney",

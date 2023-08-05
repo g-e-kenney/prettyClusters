@@ -232,7 +232,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     query <- hypoSeqsFile
     blastColNames <- c("qseqid", "sseqid","pident","length","mismatch","gapopen","qstart","qend","sstart","send","evalue","bitscore")
     if (screenPep == TRUE) {
-        print("Beginning all-by-all blast of peptides under 150 aa.")
+        print("Beginning all-by-all blast of peptides (or all proteins).")
     } else {
         print("Beginning all-by-all blast of hypothetical proteins.")
     }

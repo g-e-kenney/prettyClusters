@@ -1,3 +1,6 @@
+# prettyClusters 0.2.3
+# * A quartet of small patches. Dealing with the deprecation of a bit of tidyselect syntax, handling an annoying scientific notation issue for gene/scaffold/genome IDs beyond a certain length, cleaning up handling of complex situations where multiple genomes with multiple gene clusters share the same genome name, and updating Pfam & InterPro family info.
+
 # prettyClusters 0.2.2
 * gbToIMG patch: a few small errors fixed that'll improve handling of moderately mangled Genbank files, keep IDs from clashing with IMG IDs, and otherwise improve integration of Genbank data.
 

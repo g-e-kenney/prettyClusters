@@ -27,6 +27,8 @@ generateNeighbors <- function(imgGenes = imgGenes, imgGeneSeqs = imgGeneSeqs, ne
     gene_oid <- list()
     source_gene_oid <- list()
     source_scaffold_id <- list()
+    ## we're just gonna kill scientific notation since it is... not OK for numeric IDs
+    options(scipen = 999)
     ## input is a standard IMG file for your genes of interest
     ## can be generated via blast or families or whatever
     inputGenes <- read.csv(imgGenes, header=TRUE, sep = "\t", stringsAsFactors = FALSE, quote="")

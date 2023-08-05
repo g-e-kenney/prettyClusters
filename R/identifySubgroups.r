@@ -54,7 +54,7 @@ identifySubgroups <- function(geneList = geneList,
         print("Missing a required term")
         return(0)
     }
-    ## first step
+    ## stage-setting
     fileDate <- format(Sys.Date(),format="%Y%m%d")
     fileName <- paste(fileDate,"_identifySubgroups_",geneName,"_",subgroupDesc,sep="")
     subSeqsFile <- paste(fileName, "_subgroupSeqs.fa",sep="")
@@ -149,6 +149,8 @@ identifySubgroups <- function(geneList = geneList,
             }
         }
     }
+    ## no to scientific notation
+    options(scipen = 999)
     ## file input, starting with the expected IMG columns
     imgCols <- list("gene_oid",
                     "source_gene_oid",
@@ -323,7 +325,7 @@ identifySubgroups <- function(geneList = geneList,
     ##  dealing with NA issues that're sometimes gonna happen - population should generally be small enough to be deletable
     tidyBlast <- na.omit(tidyBlast)
     ## making the dataset skinnier - only IDs, percentID, length, eval, and bitscore are maintained later
-    tidyBlast <- tidyBlast %>% dplyr::select(.data$qseqid, .data$sseqid, .data$length, .data$pident, .data$bitscore, .data$evalue)
+    tidyBlast <- tidyBlast %>% dplyr::select("qseqid", "sseqid", "length", "pident", "bitscore", "evalue")
     ## remove full-on dupes - whyyyyy blast why
     tidyBlast <- tidyBlast %>% dplyr::distinct()
     ## even in blastfmt 6, you sometimes get stupid-ass duplicates (multiple hits in one gene and so on)
@@ -351,11 +353,11 @@ identifySubgroups <- function(geneList = geneList,
     ## keeping only names and percent id or evalue now that we are done with length and bitscore, then reshaping it
     rm(yetTidierBlast)
     if (cutoffType == "identity")  {
-        tidyMinBlast <- tidyMonoBlast %>% dplyr::select(.data$qseqid, .data$sseqid, .data$pident)
+        tidyMinBlast <- tidyMonoBlast %>% dplyr::select("qseqid", "sseqid", "pident")
         tidyMinBlast <- as.data.frame(tidyMinBlast)
         tidyMinBlastTrimmed <- tidyMinBlast %>% dplyr::filter(.data$pident>=cutoffValue)
     } else if (cutoffType == "evalue") {
-        tidyMinBlast <- tidyMonoBlast %>% dplyr::select(.data$qseqid, .data$sseqid, .data$evalue)
+        tidyMinBlast <- tidyMonoBlast %>% dplyr::select("qseqid", "sseqid", "evalue")
         tidyMinBlastTrimmed <- tidyMinBlast %>% dplyr::filter(.data$evalue<=cutoffValue)
         tidyMinBlast <- as.data.frame(tidyMinBlast)
     } 
@@ -529,7 +531,7 @@ identifySubgroups <- function(geneList = geneList,
     ## add the subgroup cluster IDs to the neighbor metadata table, under the column name Hypofam.
     ##
     if (lightExport == TRUE) {
-        exportData <- imgNeighborsTrimmed %>% dplyr::select(.data$gene_oid, .data$Hypofam)
+        exportData <- imgNeighborsTrimmed %>% dplyr::select("gene_oid", "Hypofam")
     } else {     
         exportData <- imgNeighborsTrimmed
     }
