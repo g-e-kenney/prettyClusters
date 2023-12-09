@@ -76,22 +76,35 @@ incorpIprScan <- function(iprScanSource = iprScanSource, imgNeighborsSource = im
         havePfams <- which(imgNeighborsData$gene_oid %in% iprPfams$gene_oid)
         ## add Pfam data to the neighbor data table
         ## also IMG-format the pfams
-        for (i in 1:length(havePfams)) {
-            pfamIdx <- grep(imgNeighborsData$gene_oid[havePfams[i]],iprPfams$gene_oid)
-            imgNeighborsData$Pfam[havePfams[i]] <-  stringr::str_c(unlist(iprPfams$sig.accession[pfamIdx]), collapse=" ")
-            imgNeighborsData$Pfam[havePfams[i]] <- gsub("PF","pfam",imgNeighborsData$Pfam[havePfams[i]])
+        if (length(havePfams) == 0) {
+            print("no genes have Pfam annotations")
+        } else {
+            for (i in 1:length(havePfams)) {
+                pfamIdx <- grep(imgNeighborsData$gene_oid[havePfams[i]],iprPfams$gene_oid)
+                imgNeighborsData$Pfam[havePfams[i]] <-  stringr::str_c(unlist(iprPfams$sig.accession[pfamIdx]), collapse=" ")
+                imgNeighborsData$Pfam[havePfams[i]] <- gsub("PF","pfam",imgNeighborsData$Pfam[havePfams[i]])
+            }
         }
     }
     
     ## if we want to add tigrfam annotation
     if (addTigrfam == TRUE) {
-        tigrLocs <- which(iprScan$sig.analysis == "TIGRFAM")
-        iprTigrfams <-  iprScan[tigrLocs,]
+        ## interproscan now combines new NCBIfams + TIGRFAMs as one annotation type
+        tigrLocs <- which(iprScan$sig.analysis == "TIGRFAM" | iprScan$sig.analysis == "NCBIfam")
+        iprTigrfamsTemp <-  iprScan[tigrLocs,]
+        ## for now we're gonna sort out NCBIfams because their accessions are differently formatted
+        ## and they're not in IMG yet as far as I can tell
+        trueTigrs <- grep("TIGR",iprTigrfams$sig.accession)
+        iprTigrfams <- iprTigrfamsTemp[trueTigrs,]
         haveTigrfams <- which(imgNeighborsData$gene_oid %in% iprTigrfams$gene_oid)
         ## add Tigrfam data to the neighbor data table
-        for (i in 1:length(haveTigrfams)) {
-            tigrfamIdx <- grep(imgNeighborsData$gene_oid[haveTigrfams[i]],iprTigrfams$gene_oid)
-            imgNeighborsData$Tigrfam[haveTigrfams[i]] <-  stringr::str_c(unlist(iprTigrfams$sig.accession[tigrfamIdx]), collapse=" ")
+        if (length(haveTigrfams) == 0) {
+            print("no genes have TIGRFAM annotations")
+        } else {
+            for (i in 1:length(haveTigrfams)) {
+                tigrfamIdx <- grep(imgNeighborsData$gene_oid[haveTigrfams[i]],iprTigrfams$gene_oid)
+                imgNeighborsData$Tigrfam[haveTigrfams[i]] <-  stringr::str_c(unlist(iprTigrfams$sig.accession[tigrfamIdx]), collapse=" ")
+            }
         }
     }
     ## if we want to add InterPro annotation
@@ -100,9 +113,13 @@ incorpIprScan <- function(iprScanSource = iprScanSource, imgNeighborsSource = im
         iprIPRs <- iprScan[iprLocs,]
         haveIPRs <- which(imgNeighborsData$gene_oid %in% iprIPRs$gene_oid)
         ## add InterPro data to the neighbor data table
-        for (i in 1:length(haveIPRs)) {
-            iprIdx <- grep(imgNeighborsData$gene_oid[haveIPRs[i]],iprIPRs$gene_oid)
-            imgNeighborsData$InterPro[haveIPRs[i]] <-  stringr::str_c(unlist(iprIPRs$interpro.accession[iprIdx]), collapse=" ")
+        if (length(haveIPRs) == 0) {
+                print("no genes have InterPro annotations")
+            } else {
+            for (i in 1:length(haveIPRs)) {
+                iprIdx <- grep(imgNeighborsData$gene_oid[haveIPRs[i]],iprIPRs$gene_oid)
+                imgNeighborsData$Interpro[haveIPRs[i]] <- stringr::str_c(unlist(iprIPRs$interpro.accession[iprIdx]), collapse=" ")
+            }
         }
     }
     ## save

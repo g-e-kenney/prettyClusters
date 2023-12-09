@@ -238,6 +238,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     }
     ## when running under a wsl or unix/linux environment
     if (sysTerm == "wsl") {
+        ## note to self: check on the file space issue and see if it's not just macOS
         system2(command = "wsl",
                 args = c(makeblastdb,
                          "-dbtype", "prot",
@@ -262,11 +263,15 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
         colnames(blast_out) <- blastColNames
         tidyBlast <- tibble::as_tibble(blast_out)
     } else if ( sysTerm == "nix") {
+        ## Some update combination has made makeblastdb on macOS more unhappy about spaces in directory names
+        ## But the command works, despite a warning
+        ## "BLAST Database error: No alias or index file for protein database" (and then it provies the path up to the space)
+        ## Suppressing stderr is the hacky way to continue, BUT...
         system2(command = makeblastdb,
                 args = c("-dbtype", "prot",
                          "-in", input,
                          "-out", "temporary/dbblast/hypoSeqsDb"),
-                stdout=FALSE)
+                stdout=FALSE, stderr=FALSE)
         ## possibly implement stderr variant here too?  need to repeat more and see whether this is a more general issue.
         ## or see if the stdout file switch works better on wsl too...?
         system2(command = blastp, 
@@ -304,7 +309,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     ## even in blastfmt 6, you sometimes get stupid-ass duplicates (multiple hits in one gene and so on)
     ## here, we only pass on the unique qseqid-sseqid pairs with the highest bitscore (as a proxy for %ID/length combo)
     tidyBlast <- tidyBlast %>% dplyr::group_by(.data$qseqid, .data$sseqid) %>% dplyr::arrange(dplyr::desc(.data$bitscore), .by_group=TRUE)
-    yetTidierBlast <- dplyr::distinct_at(tidyBlast, dplyr::vars(.data$qseqid, .data$sseqid), .keep_all=TRUE)
+    yetTidierBlast <- dplyr::distinct_at(tidyBlast, dplyr::vars(qseqid, sseqid), .keep_all=TRUE)
     yetTidierBlast <- yetTidierBlast %>% dplyr::group_by(.data$qseqid, .data$sseqid) %>% dplyr::arrange(dplyr::desc(.data$bitscore), .by_group=TRUE)
     ## a somewhat stringent length requirement - on the one hand, this may miss a few fusion proteins.  
     ## On the other, this avoids, like, FeS or heme motifs binding a tiny region really well.  

@@ -7,3 +7,6 @@
 ^pkgdown$
 ^_pkgdown\.yml$
 ^\.github$
+familyListing.xlsx
+fullFam-updated.csv
+.gitignore

@@ -1,3 +1,10 @@
+# prettyClusters 0.2.4
+
+# # prettyClusters 0.2.4;
+Minipatches:
+* incorpIprScan now handles some updated InterProScan formatting (hello NCBIfam)
+* Unhelpful blastdb warning silenced in neighborHypothetical
+
 # prettyClusters 0.2.3
 A quartet of small patches:
 * Dealing with the deprecation of a bit of tidyselect syntax
