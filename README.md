@@ -9,13 +9,13 @@
 
 # prettyClusters
 
-A set of tools analyze and make publication-friendly diagrams of genome
-neighborhoods in microbial genomes.
+A set of tools to analyze and categorized genome neighborhoods in
+microbial genomes, and to generate publication-friendly diagrams.
 
 Particular focuses: investigation and classification of genome
-neighborhoods that do not encode well-studied types of natural product
-pathways, integration of hypothetical proteins into analyses, and
-compatibility with IMG datasets
+neighborhoods that do not resemble natural product pathways, integration
+of hypothetical proteins into analyses, and compatibility with IMG
+datasets.
 
 ## Table of Contents
 
