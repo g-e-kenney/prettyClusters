@@ -15,6 +15,7 @@
 #' @param pepMax What's the maximum length to use for the "peptide" defaults?
 #' @param alnClust Should we make MAFFT alignments of all clusters?
 #' @param hmmClust Should we make HMM models of all clusters?
+#' @param matchLength How much of the sequence do we need to safely hit in a BLAST result?
 #' @return Updated metadata for neighboring genes (additional files generated en route)
 #' @export
 #' @importFrom rlang .data
@@ -47,7 +48,8 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                                  screenPep = screenPep,
                                  pepMax = pepMax,
                                  alnClust = alnClust,
-                                 hmmClust = hmmClust) { 
+                                 hmmClust = hmmClust,
+                                 matchLength = matchLength) { 
                                         # first step: flag hypothetical proteins  in the neighbordata file
     ## have some variables and stuff
     fileDate <- format(Sys.Date(),format="%Y%m%d")
@@ -170,7 +172,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     if (screenPep == TRUE) {
         ## everything under pepMax in length is going into consideration for hypoFam classification
         ## annotated or not
-        hypoTemp <- imgNeighborsData %>% dplyr::filter(.data$Amino.Acid.Sequence.Length..aa. <= pepMax)
+        hypoTemp <- imgNeighborsData %>% dplyr::filter(as.numeric(.data$Amino.Acid.Sequence.Length..aa.) <= pepMax)
         hypoIndex <- hypoTemp$gene_oid
         rm(hypoTemp)
     } else if (screenPep == FALSE) {     
@@ -265,7 +267,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     } else if ( sysTerm == "nix") {
         ## Some update combination has made makeblastdb on macOS more unhappy about spaces in directory names
         ## But the command works, despite a warning
-        ## "BLAST Database error: No alias or index file for protein database" (and then it provies the path up to the space)
+        ## "BLAST Database error: No alias or index file for protein database" (and then it provides the path up to the space)
         ## Suppressing stderr is the hacky way to continue, BUT...
         system2(command = makeblastdb,
                 args = c("-dbtype", "prot",
@@ -316,7 +318,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
     ## Bitscore is OK for the relative calls, but not great for single matches with crappy length.
     ## anyway arbitrarily using 2/3s the seq length as a rule-out point for proteins
     ## and pegging it to the larger protein to prevent 30 aa peptides from nevertheless matching 3000 aa NRPS monsters
-    ## caveat: for peptides we'll be less stringent, since alternate start sites or divergent termini hurt unduly
+    ## caveat: for peptides it might sometimes make sense to decrease the required match length
     yetTidierBlast$qseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$qseqid)]))
     yetTidierBlast$sseqLength <- as.numeric(nchar(hypoSeqs[as.character(yetTidierBlast$sseqid)]))
     ## need to implement this better - is it fast enough with mutate?
@@ -324,11 +326,7 @@ neighborHypothetical <- function(imgGenesData = imgGenesData,
                                         # for (i in 1:length(yetTidierBlast$qseqLength)) {
                                         #   yetTidierBlast$maxSeqLength <- max(c(yetTidierBlast$qseqLength[i], yetTidierBlast$sseqLength[i]))
                                         # }
-    if (screenPep == TRUE) {
-        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.45*.data$maxSeqLength)   
-    } else {
-        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=.65*.data$maxSeqLength)   
-    }
+        tidyMonoBlast <- yetTidierBlast %>% dplyr::filter(.data$length>=matchLength*.data$maxSeqLength)   
     ## keeping only names and percent id now that we are done with length and bitscore, then reshaping it
     rm(yetTidierBlast)
     tidyMinBlast <- as.data.frame(tidyMonoBlast[,c(1:3)])

@@ -1,19 +1,19 @@
 Package: prettyClusters
 Title: Exploring and Classifying Genomic Neighborhoods Using IMG-Like Data
-Version: 0.2.4
+Version: 0.2.5
 Authors@R: 
     person(given = "G. E.",
            family = "Kenney",
-           role = c("aut", "cre"),
-           email = "gkenney@fas.harvard.edu",
+           role = c("aut", "cre", "cph"),
+           email = "gkenney@pitt.edu",
            comment = c(ORCID = "0000-0002-9579-3351"))
-Date: 2023-08-01
+Date: 2024-12-18
 Description: A set of functions generate predicted genomic neighbors, do some QC, identify hypothetical protein subgroups, cluster the genomic neighborhoods according to the similarity of the sets of protein families they contain, and output the data in the form of pretty gene cluster diagrams.  There are an excessive number of color options because these genome neighborhood diagrams are, in fact, supposed to be pretty.  Integration with analyses based on protein sequence similarity (via the EFI-EST toolset) is explicitly enabled.  Import of GenBank-formatted files and extended InterProScan annotation is also provisionally enabled.
-License: use_mit_license()
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
 Depends:
     R(>= 4.0.0)
 Imports:

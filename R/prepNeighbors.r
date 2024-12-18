@@ -10,7 +10,7 @@
 #' @param efiRepnodes Does the input dataset consist of EFI repnodes?  T/F, defaults to FALSE.
 #' @param neighborNumber How many neighbors do you want to look at on each side of the gene? Integer.
 #' @param trimShortClusters Should gene clusters with fewer than the minimum neighbor number be removed? T/F value, defaults to FALSE.
-#' @param hypoAnalysis Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to FALSE.
+#' @param hypoAnalysis Should hypothetical proteins be clustered and analyzed (requires BLAST)? T/F value, defaults to FALSE.
 #' @param sysTerm If running hypoAnalysis, what terminal are you using? String value ("wsl", "nix"), defaults to "nix".
 #' @param numThreads How many threads should processes use?  Number depends on your processor, defaults to 1 to be safe.
 #' @param neighborThreshold What percent of gene clusters should a protein family occur in to be of interest? Number, defaults to 0.05
@@ -20,6 +20,7 @@
 #' @param pidCutoff Below what percent ID should edges be deleted? Number from 1-100, defaults to 35.
 #' @param pepScreen Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE.
 #' @param pepMax Maximum size (in aa) for peptides in pepScreen. Number, defaults to 150.
+#' @param matchLength BLAST matches need to above this fraction of of the length of the smaller seq. Number from 0-1, defaults to .65.
 #' @param alnClust Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.
 #' @param hmmClust Should HMM models be made for a given hypothetical protein cluster? T/F, defaults to FALSE.
 #' @return List with trimmed metadata sets for both genes of interest and neighboring genes (additional files generated en route)
@@ -58,6 +59,7 @@ prepNeighbors <- function(imgGenes = imgGenes,
                           pidCutoff = 35,
                           pepScreen = FALSE,
                           pepMax = 150,
+                          matchLength = 0.65,
                           alnClust = FALSE,
                           hmmClust = FALSE)  {
                                         # starting stuff
@@ -185,7 +187,8 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                                  pidCutoff = pidCutoff,
                                                  screenPep = FALSE,
                                                  alnClust = alnClust,
-                                                 hmmClust = hmmClust)
+                                                 hmmClust = hmmClust,
+                                                 matchLength = matchLength)
     }
     ## output: imgNeighborsData (updated), hypoClusters.txt, hypoClusterX.fa (per cluster), hypoClusterXaln.fa (per cluster), hypoSettings.txt
     if (pepScreen == TRUE)  {
@@ -202,7 +205,8 @@ prepNeighbors <- function(imgGenes = imgGenes,
                                                  screenPep = TRUE,
                                                  pepMax = pepMax,
                                                  alnClust = alnClust,
-                                                 hmmClust = hmmClust)
+                                                 hmmClust = hmmClust,
+                                                 matchLength = matchLength)
     }
     ## output: imgNeighborsData (updated), pepClusters.txt, pepClusterX.fa (per cluster), pepClusterXaln.fa (per cluster), pepSettings.txt
     ## note: this will always trim scaffold mismatches

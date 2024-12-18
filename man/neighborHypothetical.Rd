@@ -18,7 +18,8 @@ neighborHypothetical(
   screenPep = screenPep,
   pepMax = pepMax,
   alnClust = alnClust,
-  hmmClust = hmmClust
+  hmmClust = hmmClust,
+  matchLength = matchLength
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ neighborHypothetical(
 \item{alnClust}{Should we make MAFFT alignments of all clusters?}
 
 \item{hmmClust}{Should we make HMM models of all clusters?}
+
+\item{matchLength}{How much of the sequence do we need to safely hit in a BLAST result?}
 }
 \value{
 Updated metadata for neighboring genes (additional files generated en route)

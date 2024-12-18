@@ -189,7 +189,7 @@ identifySubgroups <- function(geneList = geneList,
     ## some cleanup for the input files, JUST IN CASE
     ## even though they should be fine if coming out of prepNeighbors or repnodeTrim
     ## nevertheless, adds the two columns that may not be in standard IMG metadata files
-    imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ tidyr::replace_na(.x, ""))
+    imgNeighborsTemp <- imgNeighborsTemp %>% dplyr::mutate_all(~ tidyr::replace_na(as.character(.x), ""))
     imgNeighborsTrimmed <- imgNeighborsTemp[names(imgNeighborsTemp) %in% imgCols]
     ## if interpro and hypofam exist, add them
     ## might want to add a "select families" version of this later
@@ -547,7 +547,7 @@ identifySubgroups <- function(geneList = geneList,
         }
     }
     ## export the data sorted for easier integration?
-    write.table(exportData[order(exportData$gene_oid),], file=outFileName, row.names=FALSE, col.names = TRUE, sep="\t")
+    write.table(exportData[order(exportData$gene_oid),], file=outFileName, row.names=FALSE, col.names = TRUE, sep="\t", quote=FALSE)
     print("Subgroups of proteins have been clustered, and members of clusters have been aligned and annotated.")
     return(imgNeighborsTrimmed)
 }

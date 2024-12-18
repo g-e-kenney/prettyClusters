@@ -8,7 +8,7 @@
 #' @param geneName What is the name of your gene? Gene name as string ("genE")
 #' @param useInterPro Should InterPro families be used in neighborhood analyses? Boolean, defaults to FALSE
 #' @param useHypo Should hypothetical protein families from prepNeighbors be used in analyses?  Boolean, defaults to FALSE
-#' @param autoClust Should clusters be automatically identified? Boolean, defaults to FALSE.
+#' @param autoClust Should clusters be automatically identified? Boolean, defaults to TRUE
 #' @param clustMethod What method should be used to identify these clusters? String ("tidygraph" or "pvclust")
 #' @param alphaVal What alpha value cutoff should be used for pvclust?  Number, defaults to 0.95
 #' @param bootStrap How many bootstrap rounds for pvclust? Integer, defaults to 10
@@ -36,7 +36,7 @@ analyzeNeighbors <- function(imgGenes = imgGenes,
                              geneName = geneName,
                              useInterPro = FALSE,
                              useHypo = FALSE,
-                             autoClust = FALSE,
+                             autoClust = TRUE,
                              clustMethod = "tidygraph",
                              alphaVal = 0.95,
                              bootStrap= 10,

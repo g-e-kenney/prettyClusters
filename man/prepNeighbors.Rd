@@ -24,6 +24,7 @@ prepNeighbors(
   pidCutoff = 35,
   pepScreen = FALSE,
   pepMax = 150,
+  matchLength = 0.65,
   alnClust = FALSE,
   hmmClust = FALSE
 )
@@ -47,7 +48,7 @@ prepNeighbors(
 
 \item{trimShortClusters}{Should gene clusters with fewer than the minimum neighbor number be removed? T/F value, defaults to FALSE.}
 
-\item{hypoAnalysis}{Should hypothetical proteins be clustered and analyzeD? T/F value, defaults to FALSE.}
+\item{hypoAnalysis}{Should hypothetical proteins be clustered and analyzed (requires BLAST)? T/F value, defaults to FALSE.}
 
 \item{sysTerm}{If running hypoAnalysis, what terminal are you using? String value ("wsl", "nix"), defaults to "nix".}
 
@@ -66,6 +67,8 @@ prepNeighbors(
 \item{pepScreen}{Should subgroups of peptides be identified (annotated or not)?  T/F, defaults to FALSE.}
 
 \item{pepMax}{Maximum size (in aa) for peptides in pepScreen. Number, defaults to 150.}
+
+\item{matchLength}{BLAST matches need to above this fraction of of the length of the smaller seq. Number from 0-1, defaults to .65.}
 
 \item{alnClust}{Should MAFFT alignments be made of members of a hypothetical protein cluster? T/F, defaults to FALSE.}
 

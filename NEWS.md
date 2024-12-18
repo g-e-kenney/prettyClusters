@@ -1,9 +1,14 @@
-# prettyClusters 0.2.4
+# prettyClusters 0.2.5
+* Small issue with NA handling in prepNeighbors and identifySubgroups fixed
+* Issue with identifySubgroups metadata output fixed
+* Gene coloring in prettyClusterDiagrams better handles annotating a very small number of genes and some other edge cases
+* Now analzyeNeighbors defaults to auto-categorizing genome neighborhood types
+* Assigning a trial DOI for this one
 
-# # prettyClusters 0.2.4;
+# prettyClusters 0.2.4
 Minipatches:
 * incorpIprScan now handles some updated InterProScan formatting (hello NCBIfam)
-* Unhelpful blastdb warning silenced in neighborHypothetical
+* Unhelpful blastdb warning that doesn't affect function silenced in neighborHypothetical and identifySubgroups
 
 # prettyClusters 0.2.3
 A quartet of small patches:
@@ -15,11 +20,11 @@ A quartet of small patches:
 # prettyClusters 0.2.2
 * gbToIMG patch: a few small errors fixed that'll improve handling of moderately mangled Genbank files, keep IDs from clashing with IMG IDs, and otherwise improve integration of Genbank data.
 
-# prettyClusters 0.2.1.0
+# prettyClusters 0.2.1
 * Patch to address more stringent handling of gene direction in the recent CRAN release of gggenes.  Got behind on my package updates...
 
-# prettyClusters 0.2.0.0
-* Stable enough that I feel comfortable telling other people to try it!  (But still in development.)
+# prettyClusters 0.2.0
+* Stable enough that I feel comfortable telling other people to try it!  (But still in development, obvs.)
 
 ## Major changes
 * Version number increment reflecting the accumulation of small patches and updated documentation (upping my package game)
