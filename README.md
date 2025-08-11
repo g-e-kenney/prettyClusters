@@ -98,7 +98,7 @@ theuse of specific functions.
 - A [basic installation
   guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide)
   is the best starting point. Includes cross-platform installation
-  instructions for everything needed to make this package work.
+  instructions for everything needed to make this package work.  
 
 ### Use
 
@@ -211,6 +211,7 @@ citation("tidygraph")
 
 - Version 0.2.5 See the [release
   notes](https://github.com/g-e-kenney/prettyClusters/blob/master/NEWS.md).
+- Update expected August-September 2025 (replacing deprecated genbankr genome import and hopefully some more fun things.)
 
 ### Recent updates
 
