@@ -24,7 +24,7 @@ datasets.
 - [Components](https://github.com/g-e-kenney/prettyClusters/#the-prettyclusters-toolset)
   of `prettyClusters`, and how you use them
 - [Development](https://github.com/g-e-kenney/prettyClusters/#development)
-  information, including updates (most recent: 20241216) and a to-do
+  information, including updates (most recent: 20250813) and a to-do
   list
 
 ## Important notes
@@ -98,7 +98,7 @@ theuse of specific functions.
 - A [basic installation
   guide](https://github.com/g-e-kenney/prettyClusters/wiki/Installation-guide)
   is the best starting point. Includes cross-platform installation
-  instructions for everything needed to make this package work.  
+  instructions for everything needed to make this package work.
 
 ### Use
 
@@ -136,7 +136,7 @@ citation("prettyClusters")
 #> To cite package 'prettyClusters' in publications use:
 #> 
 #>   Kenney G (2024). _prettyClusters: Exploring and Classifying Genomic
-#>   Neighborhoods Using IMG-Like Data_. R package version 0.2.5.
+#>   Neighborhoods Using IMG-Like Data_. R package version 0.3.0.
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
@@ -144,7 +144,7 @@ citation("prettyClusters")
 #>     title = {prettyClusters: Exploring and Classifying Genomic Neighborhoods Using IMG-Like Data},
 #>     author = {G. E. Kenney},
 #>     year = {2024},
-#>     note = {R package version 0.2.5},
+#>     note = {R package version 0.3.0},
 #>   }
 ```
 
@@ -205,16 +205,41 @@ citation("tidygraph")
 #>   }
 ```
 
+[gggenomes](https://github.com/thackl/gggenomes)
+
+``` r
+citation("gggenomes")
+#> To cite package 'gggenomes' in publications use:
+#> 
+#>   Hackl T, Ankenbrand M, van Adrichem B (2024). _gggenomes: A Grammar
+#>   of Graphics for Comparative Genomics_. R package version 1.0.1,
+#>   <https://CRAN.R-project.org/package=gggenomes>.
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Manual{,
+#>     title = {gggenomes: A Grammar of Graphics for Comparative Genomics},
+#>     author = {Thomas Hackl and Markus J. Ankenbrand and Bart {van Adrichem}},
+#>     year = {2024},
+#>     note = {R package version 1.0.1},
+#>     url = {https://CRAN.R-project.org/package=gggenomes},
+#>   }
+```
+
 ## Development
 
 ### Current Version
 
-- Version 0.2.5 See the [release
+- Version 0.3.0 See the [release
   notes](https://github.com/g-e-kenney/prettyClusters/blob/master/NEWS.md).
-- Update expected August-September 2025 (replacing deprecated genbankr genome import and hopefully some more fun things.)
 
 ### Recent updates
 
+- Switched GenBank import systems to handle `genbankr` deprecation.
+  Check changes to
+  [function](https://github.com/g-e-kenney/prettyClusters/wiki/Function:-gbToIMG)
+  and the
+  [workflow](https://github.com/g-e-kenney/prettyClusters/wiki/Running-prettyClusters-with-GenBank-files).
 - Improved handling of coloring edge cases in `prettyClusterDiagrams`
 - Minor tweaks in peptide handling and NA handling in `prepNeighbors`
   and `identifySubgroups` (and in metadata/graph export for the latter)
@@ -223,6 +248,8 @@ citation("tidygraph")
   `prepNeighbors` and `identifySubgroups`
 
 ### Longer term plans
+
+Under consideration, but no guarantees about order or timeframe.
 
 #### New modules & major tweaks
 
@@ -247,8 +274,9 @@ citation("tidygraph")
   highlighting of %ID between homologs - more along the lines of
   [clinker](https://github.com/gamcil/clinker), but without the GenBank
   input. Or like [gggenomes](https://github.com/thackl/gggenomes), but
-  protein-only. (Possibly employing one of those tools if I can figure
-  out a way to easily do so!) Likely to be `compareCluster`.
+  protein rather than nucleotide similarity. (Possibly employing one of
+  those tools if I can figure out a way to easily do so!) Likely to be
+  `compareCluster`.
 
 #### Smaller tweaks
 
@@ -263,6 +291,7 @@ citation("tidygraph")
   turn on and off MSA and HMM generation in both tools.)
 - User-supplied HMMs for annotation of predefined custom protein
   (sub)families as a standalone subfunction.
+- Switch to MMseqs2 for clustering
 - Options to let the user specify distance and clustering methods in
   `prepNeighbors` and `analyzeNeighbors`. (Perhaps you prefer Jaccard to
   Euclidean distance, for example?)

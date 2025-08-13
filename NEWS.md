@@ -1,3 +1,9 @@
+# prettyClusters 0.3.0
+Boring but helpful dependency updates:
+* GenBank import (gbToIMG) now uses gggenomes, since genbankr is no longer in recent versions of Bioconductor.  This means some changes to the workflow (most importantly, the requirement that you extract amino acid sequences from the GenBank file in advance, though I'll look into less-annoying ways to do this) - check the wiki!
+* This actually also means that antiSMASH-annotated GenBank files are now handled acceptably.
+
+
 # prettyClusters 0.2.5
 * Small issue with NA handling in prepNeighbors and identifySubgroups fixed
 * Issue with identifySubgroups metadata output fixed

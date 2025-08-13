@@ -10,9 +10,10 @@ gbToIMG(
   goiListInput = goiListInput,
   geneName = geneName,
   removeDupes = TRUE,
-  scaffoldGenBase = 3e+10,
-  genomeGenBase = 4e+10,
-  includeIPR = FALSE
+  scaffoldGenBase = 30000000000,
+  genomeGenBase = 40000000000,
+  includeIPR = FALSE,
+  seqExtract = TRUE
 )
 }
 \arguments{
@@ -31,19 +32,20 @@ gbToIMG(
 \item{genomeGenBase}{Starting faux genome ID number. Integer, defaults to 4000000000.}
 
 \item{includeIPR}{Dictates whether or not InterPro annotations should be included. Boolean, defaults to FALSE.}
+
+\item{seqExtract}{Dictates whether a new .faa file for protein sequences will be prepared from an import sharing the genome name. Boolean, defaults to TRUE.}
 }
 \value{
 List containing IMG-style metadata for genes of interest, their neighbors, and a generateNeighbors-like neighborsContext file
 }
 \description{
-This function takes GenBank files as input and outputs fake IMG-style metadata files for genes of interest and for their neighbors, along with sequences etc.  Replaces generateNeighbors for GenBank input.
+This function takes a folder of GenBank files as input and outputs fake IMG-style metadata files for genes of interest and for their neighbors, along with sequences etc.  Replaces generateNeighbors for GenBank input.
 }
 \examples{
 \dontrun{
 gbToIMGOutput <- gbToIMG(dataFolder="/data/here", 
                          neighborNum=5, 
                          goiListInput = "goiList.txt", 
-                         geneName="genE", 
-                         removeDupes=TRUE)
+                         geneName="genE")
 }
 }
