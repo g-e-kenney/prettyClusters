@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 # prettyClusters
 
-A set of tools to analyze and categorized genome neighborhoods in microbial genomes, and to generate publication-friendly diagrams.
+A set of tools to analyze and categorized genome neighborhoods in microbial genomes, and to generate publication-friendly diagrams. 
 
 Particular focuses: investigation and classification of genome neighborhoods that do not resemble natural product pathways, integration of hypothetical proteins into analyses, and compatibility with IMG datasets.
 

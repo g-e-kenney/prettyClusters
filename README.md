@@ -3,7 +3,7 @@
 <!-- badges: start -->
 
 [![DOI](https://zenodo.org/badge/326540314.svg)](https://zenodo.org/badge/latestdoi/326540314)
-[![](https://img.shields.io/badge/devel%20version-0.2.5-blue.svg)](https://github.com/g-e-kenney/prettyClusters)
+[![](https://img.shields.io/badge/devel%20version-0.3.0-blue.svg)](https://github.com/g-e-kenney/prettyClusters)
 [![](https://img.shields.io/github/last-commit/g-e-kenney/prettyClusters.svg)](https://github.com/g-e-kenney/prettyClusters/commits/master)
 <!-- badges: end -->
 
